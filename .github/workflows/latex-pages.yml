@@ -18,10 +18,25 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # main only accepts changes through pull requests, and GITHUB_TOKEN
+      # cannot bypass that ruleset. The PDF commit is pushed with a token for
+      # a GitHub App that is on the ruleset's bypass list instead. Only minted
+      # when that commit will happen: pull requests (and forks) have no access
+      # to the app's secrets.
+      - name: Mint GitHub App token
+        id: app-token
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.APP_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          permission-contents: write
       - name: Checkout repo
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
+          # checkout persists this token for the later git push
+          token: ${{ steps.app-token.outputs.token || github.token }}
       - name: Restore PDF cache
         uses: actions/cache@v5
         with:
@@ -165,9 +180,14 @@ jobs:
           rsync -av --delete build-pdf/ pdfs/
       - name: Commit PDFs to repo
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # Commit as the app's bot account so the history shows who pushed
+          APP_USER_ID=$(gh api "/users/${APP_SLUG}[bot]" --jq .id)
+          git config user.name "${APP_SLUG}[bot]"
+          git config user.email "${APP_USER_ID}+${APP_SLUG}[bot]@users.noreply.github.com"
           git add pdfs .pdf-deps.json
           if git diff --cached --quiet; then
             echo "No PDF changes to commit"
