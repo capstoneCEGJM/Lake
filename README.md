@@ -14,4 +14,4 @@ src - Source code
 test - Test cases
 etc.
 
-The documentation for this project is updated on the project's [GitHub page](https://smiths.github.io/capTemplate/). <!-- update for your project!  -->
+The documentation for this project is updated on the project's [GitHub page](https://capstonecegjm.github.io/Lake/).
