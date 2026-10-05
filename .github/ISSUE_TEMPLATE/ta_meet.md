@@ -13,11 +13,11 @@ assignees: ''
 
 **Attendance**
 
-- [ ] team member1
-- [ ] team member2
-- [ ] team member3
-- [ ] team member4
-- [ ] team member5
+- [ ] Colin Chambachan
+- [ ] Ethan Walsh
+- [ ] Jinwoo Hong
+- [ ] Gary Qin
+- [ ] Matthew Nesbitt
 
 **Questions to Ask**
 
