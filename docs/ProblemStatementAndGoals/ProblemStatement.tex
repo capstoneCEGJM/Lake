@@ -26,6 +26,7 @@ September 28, 2026 & Ethan Walsh & Sections 1, 2, 4 and 5 (Problem
   Statement, Goals, Custom Documents, Generative AI Use Disclosure)\\
 September 28, 2026 & Jinwoo Hong & Section 3 (Stretch Goals)\\
 September 28, 2026 & Gary Qin & Reflection appendix\\
+October 4, 2026 & Ethan Walsh & Refinement of Inputs/Outputs and addition of impact statement to end of Problem Statement\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -41,23 +42,28 @@ and insufficient data privacy protections. Although some users have opted for
 open-source models on local devices, these models are often limited in quality 
 due to hardware restrictions. Users currently cannot access the benefits of 
 both approaches: low-cost, high-quality, private artificial intelligence. 
-Addressing this gap would create more democratized access to large language models.
+Addressing this gap would create more democratized access to large language models. 
+
+This project aims to build a system to partition and distribute a given artificial intelligence model across a local network of devices, enabling 
+improved performance and model capacity while operating on private, self-owned infrastructure.
 
 \subsection{Inputs and Outputs}
 
 Inputs:
 
 \begin{itemize}
-    \item A large language model
-    \item A user's local device(s)
-    \item User inputs to the interface (clicks)
+    \item User inputs to the interface (clicks and button presses)
     \item User's prompt to the distributed model
+    \item Artificial Intelligence Model (large language model using transformer architecture)
 \end{itemize}
+
+Note that at this stage of the project, the model is considered an input since the project is focused on splitting up the model. The user chooses the model and the system will partition it depending on the device pool. \\[0.5ex]
 
 Outputs:
 \begin{itemize}
-    \item User Interface (more specifically, output from the model)
-    \item Output from a model that was parallelized across >1 device
+    \item User Interface 
+    \item Model response(s) to user prompt
+    \item Partitioned model sections (split up based on device pool)
 \end{itemize}
 
 \subsection{Stakeholders}
