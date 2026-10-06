@@ -85,14 +85,28 @@ Software must be compatible with various operating systems to be compatible on c
 
 \section{Goals}
 
-\subsection{Improved Local Performance Outcomes:}
-The system's model will achieve better performance than if the equivalent model is only run on one device. The aim of this goal is to generally improve local AI outcomes and performance so that the product can become a viable alternative to commercial LLMs for simple tasks. ''Better'' will be measured in a variety of metrics including:
+\subsection{Improved Local Performance Outcomes}
+The system's model will achieve better performance than if the equivalent model is only run on one
+device. The aim of this goal is to generally improve local AI outcomes and performance so that the
+product can become a viable alternative to commercial LLMs for simple tasks. ''Better'' will be
+measured in a variety of metrics:
 \begin{itemize}
-    \item Response time
-    \item Throughput (tokens per second)
-    \item Model benchmarking
-    \item Model size that can be accommodated (number of parameters and quantization)
+	\item Primary Metrics:
+		\begin{itemize}
+			\item Model size that can be accommodated (number of parameters and quantization)
+		\end{itemize}
+	\item Secondary Metrics:
+		\begin{itemize}
+			\item Response time
+			\item Throughput (tokens per second)
+			\item Model benchmarking
+		\end{itemize}
 \end{itemize}
+
+\vspace{3mm}
+
+This goal will be considered complete if the primary metric is substantially improved. Improving the
+secondary metrics will be considered as additional bonus.
 
 \subsection{Model Parallelization}
 This goal is the motivating question that brought about this project: can a model be parallelized across multiple local devices and run successfully by producing coherent output? This goal is defined as the system parallelizing an artificial intelligence model (more specifically, a large language model based on the transformer architecture) across more than one local device. Currently, this goal will be considered met when the system is able to split up the layers of a model across the pool of available devices.
