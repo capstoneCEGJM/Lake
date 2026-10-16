@@ -56,7 +56,7 @@ Date2 & Name(s) & Description of changes\\
 This document is the hazard analysis for \progname{}. \progname{} splits a
 large language model (LLM) into blocks of layers and runs each block on a
 different device on a local network, so that the devices can run a model
-together that none of them could run alone. A coordinator assigns
+together that none of them could run alone. The leader node's coordinator assigns
 blocks of layers to the devices and accepts prompts from the user. Each
 follower node runs its block and passes the result on to the next
 device.
@@ -124,8 +124,8 @@ The hazards in this document can lead to the losses below.
 \midrule
 L1 & Loss of privacy or security & Prompts, responses or data passed between
   devices are seen by a person or device that is not meant to see them, or an
-  untrusted device or malicious model file gives an attacker access to data or
-  code on the user's devices.\\
+  untrusted device gives an attacker access to data or code on the user's
+  devices.\\
 L2 & Loss of output integrity & The user receives a wrong or incoherent
   response because of \progname{}, for example from data corrupted between
   devices or a wrong assignment of layers, without knowing that it is
