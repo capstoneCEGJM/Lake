@@ -93,6 +93,20 @@ documentation, and/or test cases.}
 \wss{Newly discovered requirements.  These should also be added to the SRS.  (A
 rationale design process how and why to fake it.)}
 
+\begin{itemize}
+    \item \textbf{SR0-1} -- The system shall identify and discard stale device health data from determining device availability by configuring a time-to-live for valid data. 
+    \item \textbf{SR0-2} -- The system shall only route inference requests to nodes that currently have a confirmed model layer partition.
+    \item \textbf{SR1-1} -- The system shall assign at least two nodes for model layer partitioning during distributed inference.
+    \item \textbf{SR1-2} -- The system shall ensure all model layers are assigned to a node, and that each device configured to run model layers receive a non-zero model layer partition assignment.
+    \item \textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a configured safety margin.
+    \item \textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered and the model layers are unable to be repartitioned, the system must report to the API that the request has failed.
+    \item \textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests.
+    \item \textbf{SR3-2} -- The system shall log failed tensor decodings and report a failure to the coordinator so the inference request can recover.
+    \item \textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy.
+    \item \textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria is not met, and require a successful health check before marking the same node as available.
+    \item \textbf{SR4-3} -- The system shall utilize a configured or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance.
+\end{itemize}
+
 \section{Roadmap}
 
 \wss{Which safety requirements will be implemented as part of the capstone timeline?
