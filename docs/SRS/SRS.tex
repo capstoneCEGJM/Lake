@@ -157,18 +157,8 @@ Added Appendix (User Interview) & Records the questions put to a potential user 
 % ===========================================================================
 \tocsection{Glossary}
 \label{sec:glossary}
-
-\plt{Define every domain term and acronym used in this document, in
-alphabetical order. Define a term once, here, and use it consistently
-everywhere else. Where a term has a good external definition, link to it and
-cite the source.}
-
-\plt{Tip from the source template: define a \texttt{\textbackslash hypertarget}
-for each glossary entry and a macro such as \texttt{\textbackslash newcommand\{\textbackslash Term\}\{\textbackslash hyperlink\{glossary-term\}\{Term\}\}}
-so each use of the term in the body links back to its definition.}
-
+% TODO: Make alphabetical order
 \begin{itemize}
-    \item \textbf{Term} -- Definition.
     \item \textbf{Acronym (Expansion)} -- Definition.
     \item \textbf{LLM (large language model)} -- An artificial intelligence model that is trained on a large dataset of text and is used to generate text.
     \item \textbf{Inference} -- The process of using an LLM to generate text.
@@ -860,19 +850,12 @@ comparing a split run against a single-device run.
 % ===========================================================================
 \pegschapter{E}{Environment}
 
-\plt{The Environment chapter describes the world the system operates in and
-cannot change: physical constraints, other systems, rules of the domain. These
-hold whether or not the system is built.}
-
 \subsection{Glossary}\label{subsec:glossary}
 The glossary has been moved to the front of the document (see the
 \hyperref[sec:glossary]{Glossary} and the Changes from Original SRS Meyer
 Template).
 
 \subsection{Environment Components}\label{subsec:environment-components}
-\plt{Elements of the environment that may affect or be affected by the system
-and the project, including other systems the system must interface with,
-hardware it runs on, and the people who operate it.}
 
 \begin{itemize}
     \item \textbf{Inference users (a.k.a users)} -- Individuals who interact with the Lake network to serve inference requests.
@@ -886,9 +869,6 @@ hardware it runs on, and the people who operate it.}
 \end{itemize}
 
 \subsection{Constraints}\label{subsec:constraints}
-\plt{Obligations and limits imposed on the system by the environment:
-regulations, physical limits, resource limits, deadlines. These are not
-design choices; the system must live with them.}
 
 \begin{itemize}
     \item \textbf{Device hardware} -- Each node should have a sufficient CPU, GPU, memory, and storage such that its assigned model layers, KV cache, and other Lake software components can fit and run within the device, such that distributed inference has both a higher token throughput and lower latency than an equivalent single-device inferenece.
@@ -899,9 +879,6 @@ design choices; the system must live with them.}
 \end{itemize}
 
 \subsection{Assumptions}\label{subsec:assumptions}
-\plt{Properties of the environment that the system relies on but cannot
-enforce. Each assumption is a risk if it turns out false; cross-reference the
-Hazard Analysis where relevant.}
 
 \begin{itemize}
     \item \textbf{Device owners authorize their nodes for use} -- Device owners have authorized their device to be used in the Lake network as a node for serving inference.
@@ -912,8 +889,6 @@ Hazard Analysis where relevant.}
 \end{itemize}
 
 \subsection{Effects}\label{subsec:effects}
-\plt{The ways the system changes its environment once deployed: effects on
-users, on other systems, on resources.}
 
 \begin{itemize}
     \item \textbf{Resource usage} -- Device owner's CPU/GPU, memory, and disk usage will increase while the device is part of the Lake network, potentially making the device too resource constrainted to multi-task or perform other activities. When not in use, any cached data or the stored layers can continue to utilize disk space.
@@ -924,8 +899,6 @@ users, on other systems, on resources.}
 \end{itemize}
 
 \subsection{Invariants}\label{subsec:invariants}
-\plt{Properties of the environment that must remain true throughout the
-system's operation, and that the system must preserve.}
 
 \begin{itemize}
     \item The provided model must remain unchanged. Loading the model and partioning its layers must not mutate the underlying model weights.
@@ -936,9 +909,6 @@ system's operation, and that the system must preserve.}
 \end{itemize}
 
 \subsection{Standards and Legal/Regulatory Factors}\label{subsec:standards}
-\plt{Coding, documentation, interface or safety standards the project will
-follow, and legal or regulatory factors such as licensing, intellectual
-property, and data privacy. Cite each standard.}
 
 \noindent\textbf{Standards:}
 \begin{itemize}
@@ -954,11 +924,6 @@ property, and data privacy. Cite each standard.}
 
 \subsection*{Environmental Requirements}
 \addcontentsline{toc}{subsection}{Environmental Requirements}
-
-\plt{Requirements that follow directly from this chapter: installability on
-the target platforms, resource limits, invariant enforcement, standards
-compliance, legal compliance. Label each one so it can be referenced from S.7
-and S.8.}
 
 \begin{table}[H]
     \centering
@@ -1634,13 +1599,7 @@ $\mathit{dev}(P)$.
 % ===========================================================================
 \pegschapter{P}{Project}
 
-\plt{The Project chapter covers how the system will be built: people,
-imposed choices, schedule, deliverables, risks, and how requirements will be
-managed over the project's life.}
-
 \subsection{Roles and Personnel}\label{subsec:roles}
-\plt{Each team member and their role, plus the supervisor and TA. Keep this
-consistent with the Development Plan.}
 
 \begin{itemize}
     \item \textbf{Liaison (Ethan Walsh)} -- Coordinate communication between the team and other project stakeholders and faculty.
@@ -1652,9 +1611,6 @@ consistent with the Development Plan.}
 \end{itemize}
 
 \subsection{Imposed Technical Choices}\label{subsec:technical-choices}
-\plt{Technologies that are fixed before design begins and why: languages,
-frameworks, hardware, platforms mandated by the client, supervisor, or
-environment. Choices the team is still free to make do not belong here.}
 
 \begin{itemize}
     \item \textbf{API specification} -- Lake will follow the OpenAI API specification for its request and response formats. This is chosen due to the widespread adoption of this API specification and the flexibility it provides when connecting to existing external clients.
@@ -1662,9 +1618,6 @@ environment. Choices the team is still free to make do not belong here.}
 \end{itemize}
 
 \subsection{Schedule and Milestones}\label{subsec:schedule}
-\plt{The major milestones and their dates. Course deliverables are a starting
-point; add project-specific milestones such as prototypes or integration
-points.}
 
 \begin{table}[H]
   \centering
