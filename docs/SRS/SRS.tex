@@ -27,6 +27,7 @@
 \usepackage{pdflscape}
 \usepackage{caption}
 \usepackage[round]{natbib}
+\usepackage{geometry}
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -518,41 +519,111 @@ points.}
   \label{tab:project-milestones}
 \end{table}
 
-\subsection{Tasks and Deliverables}\label{subsec:tasks}
-\plt{The work breakdown: each task, what it produces, and which milestone it
-feeds. Tasks should be small enough to assign to one or two people.}
 
-\begin{table}[H]
+\subsection{Tasks and Deliverables}\label{subsec:tasks}
+
+\newpage
+\newgeometry{top=0.5in,left=0.5in}
+\begin{table}[htbp]
 \centering
-\begin{tabular}{|p{3cm}|p{5.5cm}|p{3cm}|p{2.5cm}|}
+\begin{tabular}{|p{3cm}|p{5cm}|p{3cm}|p{2cm}|}
 \hline
 \textbf{Task} & \textbf{Description / Steps} & \textbf{Deliverable} & \textbf{Due Date} \\ \hline
-Task & Description & Deliverable & Date \\ \hline
+
+Initial single-device prototype & Implement a model split up across two processes on a single device, communicating via inter-process communication. & V\&V Plan Revision & Nov. 2 \\ \hline
+
+Expansion across two devices & Implement wired communication and model splitting (50\% and 50\%) across two devices, communicating via gRPC. & Design Document Revision &  Nov. 16 \\ \hline
+
+Expansion across n devices \& Partitioning algorithm & Implement model splitting for n devices through model partitioning that is aware of each device's performance and hardware limitations. & POC Demo & Nov. 23 \\ \hline
+
+Dynamic allocation & Implement algorithm to dynamically allocate model layers throughout a session. & Design Document Revision 1 & Jan. 18 \\ \hline
+
+Test model allocation and dynamic add/drop & Test that system can handle devices being added or dropped from the network and that model split changes to maintain efficiency as network changes. & Design Document Revision 1 & Jan. 18 \\ \hline
+
+User Interface Design \& Network Display & Add user interface on top of API interface, listing statistics on model split and performance for each device. & Rev 0 Demo & Feb. 1 \\ \hline
+
+Integration \& Communication Testing & Completion of integration testing to ensure sessions work and can handle various node failures. & Final Demo & Mar. 15 \\ \hline
+
+User \& System Testing & Pass off the system to new users to ensure they intuitively understand how to control the system and are aware of its benefits. & Final Demo & Mar. 15 \\ \hline
+
+Final Delivery & Final tweaks to appearance, performance, and demonstration ahead of the Capstone EXPO. & Final Documentation & Mar. 31 \\ \hline
+
 \end{tabular}
 \caption{Tasks and Deliverables}
 \label{tab:tasks-deliverables}
 \end{table}
 
-\subsection{Required Technology Elements}\label{subsec:required-tech}
-\plt{Everything the project needs to obtain or build before the system can be
-delivered: libraries, hardware, datasets, services, licences, compute. Note
-anything not yet secured.}
+\FloatBarrier
+\restoregeometry
+\newpage
+
+Tasks that will be a part of each of the following entries include:
 
 \begin{itemize}
-    \item \textbf{Element} -- Purpose and status.
+    \item \textbf{Unit Testing:} It is expected that each function and method will be tested in an isolated fashion. This is to ensure that each component works as intended and integration testing
+    only reveals issues that originate from component to component interactions.
+    \item \textbf{Documentation \& Clean Code:} It is expected that each pull request or addition of new code will come with the relevant documentation and proper syntax. This is to alleviate cleanup work
+    that is often left for the end of the project.
+\end{itemize}
+
+\subsection{Required Technology Elements}\label{subsec:required-tech}
+
+\begin{itemize}
+    \item \textbf{Primary Programming Language} - The primary programming languages for the 
+    system will be Python and Rust. Python is chosen due to its common use for artificial intelligence applications
+    and rich library ecosystem. It will be used for the coordinator node. Rust is chosen due to its high performance and type safety, along with it being a common choice for
+    working directly with tensors. Rust will be used on the follower nodes. User interface will be created using TypeScript due to it being an industry standard type safe language
+    for user interfaces.
+    \item \textbf{Communication Framework} - gRPC is a remote procedure call framework
+    developed by Google. It allows a client to call a method directly on a server and prioritizes speed and performance.
+    \item \textbf{Inference Engine} - llama.cpp is an open-source LLM inference engine. It allows users to run large language models locally on consumer hardware. It was selected due
+    to its ubiquity in the open-source AI field.
+    \item \textbf{Machine Learning / Tensor Library} - ggml is a standard open-source library for machine learning inference on consumer hardware. Its focus on simplicity and broad
+    backend support (across mutliple kernels and platforms) is why the team selected it.
+    \item \textbf{Model File Format} - gguf is directly compatible with llama.cpp and ggml, so will be used as the format for transporting model layers from one device to another.
+    \item \textbf{Frontend Framework} Next.js with TypeScript and Vite as the build tool. This is what the team is familiar with and aligns with the earlier choice for TypeScript as the 
+    frontend language.
+    \item \textbf{Hardware} Multiple $(>=2)$ laptop or personal computer devices that can be connected via Thunderbolt to run local inference tests.
+    \item \textbf{Version Control} Git, along with GitHub for source code management.
+    \item \textbf{Continuous Integration} GitHub Actions for build pipelines and testing.
+    \item \textbf{Testing API and Interface} OpenAI API Interface will be used for testing the system without using the user interface (or prior to building the user interface). 
 \end{itemize}
 
 \subsection{Risk and Mitigation Analysis}\label{subsec:risk}
-\plt{Project risks (schedule, technical, people, external dependencies), each
-with its likelihood, impact, and mitigation. System hazards belong in the
-Hazard Analysis, not here.}
 
 \begin{itemize}
-    \item \textbf{Risk: Name}
+    \item \textbf{Risk: Lack of Performance Improvement when parallelizing a model}
     \begin{itemize}
-        \item Description:
-        \item Mitigation:
+        \item Description: This project focuses on the potential improvements of parallelizing
+        a model across a pool of devices. If in testing it is determined that splitting up a model
+        is not yielding considerably better results in terms of speed or model benchmarks, the system
+        may lose users.
+        \item Mitigation: Place additional focus on prioritizing privacy of data and size of model that can be split
+        up across a pool. This shifts the project's selling points from speed to privacy and quality and still achieves
+        the original project goal.
     \end{itemize}
+    \item \textbf{Risk: Chosen Communication Technology (gRPC) fails to meet project needs}
+    \begin{itemize}
+        \item Description: In the case gRPC does not meet project needs, the team's original strategy for inter-device communication will fail.
+        \item Mitigation: Perform initial research and record alternative options. Also research the core technology behind these libraries so that the team can
+        make adaptations to fit a library to the project.
+    \end{itemize}
+    \item \textbf{Risk: User Interface is Unclear}
+    \begin{itemize}
+        \item Description: The user is unable to tell which devices are being used, or feedback about the device network
+        is unclear to the user.
+        \item Mitigation: Ensure that user testing and observation is completed by the team prior to the final delivery. This
+        should be done by people unfamiliar with the product to ensure that controls and feedback are intuitive and easy to learn.
+    \end{itemize}
+    \item \textbf{Risk: External Deliverables and Constraints Impacting Timeliness and Quality of Project Work}
+    \begin{itemize}
+        \item Description: Due to various other commitments including work, other courses, and extra-curriculars, team members
+        \item Mitigation: At the first meeting for a deliverable, the team will allocate tasks and assign issues to each member so workload is clear.
+        As the team progresses through the deliverable, they may adjust the workload as needed, however should aim for an even split over the course of the project.
+        The team will also establish an extended review meeting to conduct prior to deliverable hand-off to ensure it aligns with the rubric, the requirements,
+        and their own quality standard.
+    \end{itemize}
+    
 \end{itemize}
 
 \subsection{Requirements Process and Report}\label{subsec:requirements-process}
