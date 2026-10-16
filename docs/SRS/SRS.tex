@@ -513,7 +513,7 @@ $m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s weights
 and its KV cache for \textit{CONTEXT\_MAX} tokens. \\
 \hline
 $M_d$ & $\mathbb{N}$ (bytes) & GPU-accessible memory free on node $d$ when it
-joins the cluster, minus the runtime overhead reserved by FR.S.2.1. \\
+joins the cluster, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR.S.2.1}. \\
 \hline
 \end{tabularx}
 \end{table}
@@ -553,7 +553,7 @@ only if:
 consecutive, non-empty blocks of units in execution order. (V5) says each
 node has room for its partition. The Model Partitioner must return a member
 of $\mathcal{V}(D)$ whenever $\mathcal{V}(D) \ne \emptyset$, and must report
-failure otherwise (FR.S.2.2).
+failure otherwise (\hyperref[FR.S.2.2]{FR.S.2.2}).
 
 \begin{lemma}[Exact cover]\label{lem:cover}
 If $P \in \mathcal{V}(D)$, every unit $\ell \in L$ belongs to exactly one
@@ -585,7 +585,7 @@ $Q = \{\mathsf{U}, \mathsf{A}, \mathsf{I}, \mathsf{G}, \mathsf{R},
   \item $\mathsf{G}$ (Generating): a request is being served on $P$.
   \item $\mathsf{R}$ (Recovering): a node in $\mathit{dev}(P)$ left during a
     request. The request is stopped while $P'$ is loaded, then retried
-    (FR.S.1.13).
+    (\hyperref[FR.S.1.13]{FR.S.1.13}).
   \item $\mathsf{X}$ (Insufficient): $\mathcal{V}(D) = \emptyset$, so the
     cluster cannot hold the model.
 \end{itemize}
@@ -602,10 +602,11 @@ $\Sigma = \{\mathit{load}, \mathit{unload}, \mathit{req}, \mathit{fin},
   \item $\mathit{join}(d)$: a device the user selected confirms
     participation and is added to the cluster.
   \item $\mathit{leave}(d)$: follower $d$ leaves, or is detected as failing
-    (FR.S.1.10).
+    (\hyperref[FR.S.1.10]{FR.S.1.10}).
 \end{itemize}
-The machine models follower nodes only. If the leader node fails, the
-session ends (FR.S.1.24), which has the same effect as $\mathit{unload}$.
+The machine models follower nodes only. If the leader node is detected as
+failed (\hyperref[FR.S.1.24]{FR.S.1.24}), the followers shut down and the session ends
+(\hyperref[FR.S.1.25]{FR.S.1.25}), which has the same effect as $\mathit{unload}$.
 
 \paragraph{Guards.}
 Let $D'$ be the cluster after the event: $D \cup \{d\}$ for
@@ -632,7 +633,7 @@ handled as follows:
     $\mathsf{R}$, and $\mathit{join}(d)$ in $\mathsf{G}$ or $\mathsf{R}$, are
     queued and fire in arrival order once $\mathsf{I}$ is entered. The
     machine therefore serves one request at a time, and concurrent requests
-    (FR.S.1.14) are not modelled.
+    (\hyperref[FR.S.1.14]{FR.S.1.14}) are not modelled.
   \item Any other combination leaves the state unchanged.
 \end{itemize}
 
