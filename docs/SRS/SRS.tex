@@ -483,10 +483,10 @@ in S.2 should map to at least one criterion here.}
 \subsection{Formalizations}\label{subsec:formalizations}
 
 Two parts of \progname{} are formalized. S.9.2 defines what counts as a
-valid way to split a model across the device pool, which every other
+valid partitioning scheme for the model across the cluster, which every other
 requirement depends on. S.9.3 specifies, as a finite state machine, how the
-system responds when devices join and leave. This is the precise form of the
-Dynamic Allocation goal.
+system responds when nodes join and leave the cluster. This is the precise
+form of the Dynamic Allocation goal.
 
 \subsubsection{Notation}\label{subsubsec:formal-notation}
 
@@ -506,37 +506,38 @@ $N$ & $\mathbb{N}$, $N \ge 1$ & Number of partition units in the model
 \hline
 $L$ & $L = 1..N$ & The set of partition units. \\
 \hline
-$D$ & finite set & The devices currently in the pool. \\
+$D$ & finite set & The nodes currently in the cluster: devices the user has
+selected (FR.S.5.2) and that have confirmed participation (FR.S.1.21). \\
 \hline
 $m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s weights
 and its KV cache for \textit{CONTEXT\_MAX} tokens. \\
 \hline
-$M_d$ & $\mathbb{N}$ (bytes) & Free memory that device $d$ reports when it
-joins the pool. \\
+$M_d$ & $\mathbb{N}$ (bytes) & GPU-accessible memory free on node $d$ when it
+joins the cluster, minus the runtime overhead reserved by FR.S.2.1. \\
 \hline
 \end{tabularx}
 \end{table}
 
 \noindent The formalization assumes that $M_d$ does not change while $d$ is
-in the pool, and that $\mathit{join}(d)$ only occurs for $d \notin D$ and
+in the cluster, and that $\mathit{join}(d)$ only occurs for $d \notin D$ and
 $\mathit{leave}(d)$ only for $d \in D$.
 
-\subsubsection{Valid Partitions}\label{subsubsec:formal-partitions}
+\subsubsection{Valid Partitioning Schemes}\label{subsubsec:formal-partitions}
 
-\begin{definition}[Partition]\label{def:partition}
-A \emph{partition} is a finite sequence of stages
+\begin{definition}[Partitioning scheme]\label{def:partition}
+A \emph{partitioning scheme} is a finite sequence of partitions
 \begin{equation*}
   P = \langle (d_1, a_1, b_1), \dots, (d_k, a_k, b_k) \rangle,
   \qquad k \ge 1,
 \end{equation*}
-where $d_i$ is a device and $a_i, b_i \in \mathbb{Z}$. Stage $i$ runs units
-$a_i..b_i$ on device $d_i$ and passes its output to stage $i+1$. The devices
-of $P$ are $\mathit{dev}(P) = \{d_1, \dots, d_k\}$.
+where $d_i$ is a node and $a_i, b_i \in \mathbb{Z}$. Partition $i$ consists
+of units $a_i..b_i$, runs on node $d_i$, and passes its output to partition
+$i+1$. The nodes of $P$ are $\mathit{dev}(P) = \{d_1, \dots, d_k\}$.
 \end{definition}
 
-\begin{definition}[Valid partition]\label{def:valid}
-$P$ is \emph{valid} over pool $D$, written $P \in \mathcal{V}(D)$, if and only
-if:
+\begin{definition}[Valid partitioning scheme]\label{def:valid}
+$P$ is \emph{valid} over cluster $D$, written $P \in \mathcal{V}(D)$, if and
+only if:
 \begin{enumerate}
   \item[(V1)] $\mathit{dev}(P) \subseteq D$ and $d_i \ne d_j$ for all
     $1 \le i < j \le k$;
@@ -548,55 +549,68 @@ if:
 \end{enumerate}
 \end{definition}
 
-(V1) gives each device at most one stage. (V2)--(V4) make the stages
+(V1) gives each node at most one partition. (V2)--(V4) make the partitions
 consecutive, non-empty blocks of units in execution order. (V5) says each
-device has room for its units. The partitioner must return a member of
-$\mathcal{V}(D)$ whenever $\mathcal{V}(D) \ne \emptyset$, and must report
-that the pool has insufficient resources otherwise.
+node has room for its partition. The Model Partitioner must return a member
+of $\mathcal{V}(D)$ whenever $\mathcal{V}(D) \ne \emptyset$, and must report
+failure otherwise (FR.S.2.2).
 
 \begin{lemma}[Exact cover]\label{lem:cover}
 If $P \in \mathcal{V}(D)$, every unit $\ell \in L$ belongs to exactly one
-stage. That is, the sets $a_i..b_i$ for $i \in 1..k$ are non-empty, pairwise
-disjoint, and their union is $L$.
+partition. That is, the sets $a_i..b_i$ for $i \in 1..k$ are non-empty,
+pairwise disjoint, and their union is $L$.
 \end{lemma}
 \begin{proof}
 Let $b_0 = 0$. By (V2) and (V4), $a_i = b_{i-1} + 1$ for all $i \in 1..k$,
-so stage $i$ runs units $(b_{i-1}+1)..b_i$. By (V3) these sets are non-empty,
-so $0 = b_0 < b_1 < \dots < b_k = N$. Each $\ell \in L$ therefore satisfies
-$b_{i-1} < \ell \le b_i$ for exactly one $i$, so it belongs to exactly one
-stage.
+so partition $i$ consists of units $(b_{i-1}+1)..b_i$. By (V3) these sets are
+non-empty, so $0 = b_0 < b_1 < \dots < b_k = N$. Each $\ell \in L$ therefore
+satisfies $b_{i-1} < \ell \le b_i$ for exactly one $i$, so it belongs to
+exactly one partition.
 \end{proof}
 
 \subsubsection{Allocation State Machine}\label{subsubsec:formal-fsm}
 
-The system's response to devices joining and leaving is a finite state
-machine $(Q, \Sigma, \delta, q_0)$ whose transitions are guarded by predicates
-over the pool $D$ and the active partition $P$.
+The system's response to nodes joining and leaving the cluster is a finite
+state machine $(Q, \Sigma, \delta, q_0)$ whose transitions are guarded by
+predicates over the cluster $D$ and the active partitioning scheme $P$.
 
 \paragraph{States.}
 $Q = \{\mathsf{U}, \mathsf{A}, \mathsf{I}, \mathsf{G}, \mathsf{R},
 \mathsf{X}\}$ with $q_0 = \mathsf{U}$:
 \begin{itemize}
   \item $\mathsf{U}$ (Unloaded): no model is loaded.
-  \item $\mathsf{A}$ (Allocating): a target partition $P'$ is being loaded,
-    and no request is in progress.
-  \item $\mathsf{I}$ (Idle): the model is loaded on partition $P$.
+  \item $\mathsf{A}$ (Allocating): a target scheme $P'$ is being loaded, and
+    no request is in progress.
+  \item $\mathsf{I}$ (Idle): the model is loaded on scheme $P$.
   \item $\mathsf{G}$ (Generating): a request is being served on $P$.
-  \item $\mathsf{R}$ (Recovering): a device in $\mathit{dev}(P)$ left during
-    a request. The request is suspended while $P'$ is loaded.
+  \item $\mathsf{R}$ (Recovering): a node in $\mathit{dev}(P)$ left during a
+    request. The request is stopped while $P'$ is loaded, then retried
+    (FR.S.1.13).
   \item $\mathsf{X}$ (Insufficient): $\mathcal{V}(D) = \emptyset$, so the
-    pool cannot host the model.
+    cluster cannot hold the model.
 \end{itemize}
 
 \paragraph{Events.}
 $\Sigma = \{\mathit{load}, \mathit{unload}, \mathit{req}, \mathit{fin},
-\mathit{done}\} \cup \{\mathit{join}(d), \mathit{leave}(d)\}$: the user
-loads or unloads a model, a request is submitted or finishes, the system
-finishes loading $P'$, or a device $d$ joins or leaves.
+\mathit{done}\} \cup \{\mathit{join}(d), \mathit{leave}(d)\}$:
+\begin{itemize}
+  \item $\mathit{load}$ and $\mathit{unload}$: the user creates a cluster
+    with a model, or shuts it down.
+  \item $\mathit{req}$ and $\mathit{fin}$: a request is submitted, or
+    finishes.
+  \item $\mathit{done}$: the system finishes loading $P'$.
+  \item $\mathit{join}(d)$: a device the user selected confirms
+    participation and is added to the cluster.
+  \item $\mathit{leave}(d)$: follower $d$ leaves, or is detected as failing
+    (FR.S.1.10).
+\end{itemize}
+The machine models follower nodes only. If the leader node fails, the
+session ends (FR.S.1.24), which has the same effect as $\mathit{unload}$.
 
 \paragraph{Guards.}
-Let $D'$ be the pool after the event: $D \cup \{d\}$ for $\mathit{join}(d)$,
-$D \setminus \{d\}$ for $\mathit{leave}(d)$, and $D$ otherwise. Then
+Let $D'$ be the cluster after the event: $D \cup \{d\}$ for
+$\mathit{join}(d)$, $D \setminus \{d\}$ for $\mathit{leave}(d)$, and $D$
+otherwise. Then
 \begin{equation*}
   \varphi \;\equiv\; \mathcal{V}(D') \ne \emptyset
   \qquad\text{and}\qquad
@@ -616,7 +630,9 @@ handled as follows:
   \item $\mathit{req}$ is rejected with an error in $\mathsf{U}$ and
     $\mathsf{X}$. $\mathit{req}$ in $\mathsf{A}$, $\mathsf{G}$ or
     $\mathsf{R}$, and $\mathit{join}(d)$ in $\mathsf{G}$ or $\mathsf{R}$, are
-    queued and fire in arrival order once $\mathsf{I}$ is entered.
+    queued and fire in arrival order once $\mathsf{I}$ is entered. The
+    machine therefore serves one request at a time, and concurrent requests
+    (FR.S.1.14) are not modelled.
   \item Any other combination leaves the state unchanged.
 \end{itemize}
 
@@ -631,22 +647,22 @@ handled as follows:
 \textbf{Effect} \\
 \hline
 1 & $\mathsf{U}$ & $\mathit{load}$ $[\varphi]$ & $\mathsf{A}$ & Start loading $P'$. \\
-2 & $\mathsf{U}$ & $\mathit{load}$ $[\neg\varphi]$ & $\mathsf{X}$ & Report insufficient resources. \\
+2 & $\mathsf{U}$ & $\mathit{load}$ $[\neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
 \hline
 3 & $\mathsf{A}$ & $\mathit{done}$ & $\mathsf{I}$ & $P := P'$. \\
 4 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\varphi]$ & $\mathsf{A}$ & Reselect $P'$ and restart loading. \\
-5 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Report insufficient resources. \\
+5 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
 \hline
 6 & $\mathsf{I}$ & $\mathit{req}$ & $\mathsf{G}$ & Start generating. \\
-7 & $\mathsf{I}$ & $\mathit{join}(d)$ & $\mathsf{A}$ & Rebalance over $D'$. \\
-8 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{A}$ & Reallocate over $D'$. \\
-9 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Report insufficient resources. \\
+7 & $\mathsf{I}$ & $\mathit{join}(d)$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
+8 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
+9 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
 \hline
 10 & $\mathsf{G}$ & $\mathit{fin}$ & $\mathsf{I}$ & Return the response. \\
-11 & $\mathsf{G}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{R}$ & Suspend the request. \\
+11 & $\mathsf{G}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{R}$ & Stop the request. \\
 12 & $\mathsf{G}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Abort the request with an error. \\
 \hline
-13 & $\mathsf{R}$ & $\mathit{done}$ & $\mathsf{G}$ & $P := P'$, resume the request. \\
+13 & $\mathsf{R}$ & $\mathit{done}$ & $\mathsf{G}$ & $P := P'$, retry the request. \\
 14 & $\mathsf{R}$ & $\mathit{leave}(d)$ $[\varphi]$ & $\mathsf{R}$ & Reselect $P'$ and restart loading. \\
 15 & $\mathsf{R}$ & $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Abort the request with an error. \\
 \hline
@@ -655,14 +671,14 @@ handled as follows:
 \end{tabularx}
 \end{table}
 Row 7 needs no guard. Conditions (V1)--(V5) refer to $D$ only through
-$\mathit{dev}(P) \subseteq D$, so a partition valid over $D$ stays valid over
-$D \cup \{d\}$. For the same reason, removing a device outside
+$\mathit{dev}(P) \subseteq D$, so a scheme valid over $D$ stays valid over
+$D \cup \{d\}$. For the same reason, removing a node outside
 $\mathit{dev}(P)$ keeps $P$ valid.
 
 \paragraph{Invariant.} In states $\mathsf{I}$ and $\mathsf{G}$,
 $P \in \mathcal{V}(D)$. $P$ is only assigned in rows 3 and 13, from a $P'$
-that is reselected after every pool change. The only pool change that keeps
-the machine in $\mathsf{I}$ or $\mathsf{G}$ removes a device outside
+that is reselected after every change to the cluster. The only change that
+keeps the machine in $\mathsf{I}$ or $\mathsf{G}$ removes a node outside
 $\mathit{dev}(P)$.
 
 % ===========================================================================
