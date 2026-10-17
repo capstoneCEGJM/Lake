@@ -878,7 +878,7 @@ Template).
     \item \textbf{Device hardware} -- Each node should have a sufficient CPU, GPU, memory, and storage such that its assigned model layers, KV cache, and other Lake software components can fit and run within the device, such that distributed inference has both a higher token throughput and lower latency than an equivalent single-device inferenece.
     \item \textbf{Network communication} -- Network communication, whether wired or wireless should have a sufficiently high bandwitch and low latency such that distributed inference has a token throughput and lower latency than an equivalent single-device inference.
     \item \textbf{Platform compatibility} -- Nodes within the Lake network must operate on Windows, macOS, and Linux, (as well as Android and iOS as stretch goals) as hardware acceleration and inference platforms are limited by the available drivers on this operating systems.
-    \item \textbf{API compatibility} -- Lake must implement a standardized OpenAI API spec such that existing external clients can easily utilize Lake.
+    \item \textbf{API compatibility} -- Lake must implement a standardized OpenAI API spec such that existing external clients can easily utilize Lake, \citep{OpenAIAPI}, as specified in Section S.3.
     \item \textbf{Model architecture} -- Only supported LLM architectures that Lake's model layer partioning supports can be used.
 \end{itemize}
 
@@ -917,12 +917,12 @@ Template).
 \noindent\textbf{Standards:}
 \begin{itemize}
     \item \textbf{API compatibility} -- Lake's inference API will follow the OpenAI API endpoints for requests and response formats, as specified in S.3.
-    \item \textbf{Coding conventions} -- Black code style and Ruff lint checks will be used for Python components. Rustfmt and Clippy will be used for Rust components Prettier and ESLint will be used for Typescript components.
+    \item \textbf{Coding conventions} -- Black code style and Ruff lint checks will be used for Python components \citep{Black,Ruff}. Rustfmt and Clippy will be used for Rust components \citep{Rustfmt,Clippy}. Prettier and ESLint will be used for Typescript components \citep{Prettier,ESLint}.
 \end{itemize}
 
 \noindent\textbf{Legal and Regulatory Factors:}
 \begin{itemize}
-    \item \textbf{Software licensing} -- Lake is available under the GNU GPL v3.0 license. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
+    \item \textbf{Software licensing} -- Lake is available under the GNU GPL v3.0 license \citep{GPU2007}. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
     \item \textbf{Model licensing} -- Pretrained LLMs used for inference are subject to its respective licenses. Lake must be compliant with these licenses for its use and distribution.
 \end{itemize}
 
@@ -1608,7 +1608,10 @@ $\mathit{dev}(P)$.
 \begin{itemize}
     \item \textbf{Liaison (Ethan Walsh)} -- Coordinate communication between the team and other project stakeholders and faculty.
     \item \textbf{Repository administrator (Matthew Nesbitt)} -- Manage repository and organizational configurations.
-    \item \textbf{Performance lead (TBD)} -- Leads the performance benchmarking and optimization of the system.
+    \item \textbf{Architecture lead (Ethan Walsh)} -- Leads the architecture design of the system.
+    \item \textbf{Coordinator lead (Gary Qin)} -- Leads the coordinator and IPC design of the system.
+    \item \textbf{Performance lead (Matthew Nesbitt)} -- Leads the performance benchmarking and optimization of the system.
+    \item \textbf{Machine learning leads (Jinwoo Hong, Colin Chambachan)} -- Leads the ML systems of Lake.
     \item \textbf{Meeting chair (Rotating weekly amongst team members)} -- Leads weekly team meetings.
     \item \textbf{QA lead (Rotating weekly amongst team members)} -- Performs quality assurance and dogfooding of the system.
     \item \textbf{Teaching assistant (Rebecca Di Filippo)} -- Provides technical guidance and feedbackthroughout the project.
@@ -1628,7 +1631,6 @@ $\mathit{dev}(P)$.
   \begin{tabular}{|l|l|}
   \hline
   \textbf{Milestone} & \textbf{Due Date} \\ \hline
-  Milestone & Date \\ \hline
   Team formation and project selection & Sep 18, 2026 \\ \hline
   Problem statement, PoC plan, development plan, team charter & Sep 28, 2026 \\ \hline
   SRS and Hazard Analysis Rev 0 & Oct 19, 2026 \\ \hline
