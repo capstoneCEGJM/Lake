@@ -2,6 +2,8 @@
 
 \usepackage{booktabs}
 \usepackage{tabularx}
+\usepackage{float}
+\usepackage{longtable}
 \usepackage{hyperref}
 
 \hypersetup{
@@ -36,9 +38,7 @@
 \toprule
 \textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
-Date1 & Name(s) & Description of changes\\
-Date2 & Name(s) & Description of changes\\
-... & ... & ...\\
+October 17, 2026 & Colin Chambachan & Roadmap, Generative AI Use Disclosure, and Reflection appendix\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -46,6 +46,10 @@ Date2 & Name(s) & Description of changes\\
 ~\newpage
 
 \tableofcontents
+
+\listoftables
+
+\listoffigures
 
 ~\newpage
 
@@ -71,6 +75,7 @@ each individual piece of hardware.  If your software will have a database, or an
 important library, these are also potential components.}
 
 \section{Critical Assumptions}
+\label{SecAssumptions}
 
 \wss{These assumptions that are made about the software or system.  You should
 minimize the number of assumptions that remove potential hazards.  For instance,
@@ -78,6 +83,7 @@ you could assume a part will never fail, but it is generally better to include
 this potential failure mode.}
 
 \section{Failure Mode and Effect Analysis}
+\label{SecFMEA}
 
 \wss{Include your FMEA table here. This is the most important part of this document.}
 \wss{The safety requirements in the table do not have to have the prefix SR.
@@ -89,60 +95,170 @@ entered in the table, including strategies involving providing additional
 documentation, and/or test cases.}
 
 \section{Safety and Security Requirements}
+\label{SecSafetyReqs}
 
 \wss{Newly discovered requirements.  These should also be added to the SRS.  (A
 rationale design process how and why to fake it.)}
 
 \section{Roadmap}
+\label{SecRoadmap}
 
-\wss{Which safety requirements will be implemented as part of the capstone timeline?
-Which requirements will be implemented in the future?}
+Every safety and security requirement in Section~\ref{SecSafetyReqs} is tied
+to a hazard in the FMEA, and each is scheduled below against the project
+milestones from the Development Plan. The order follows one rule: a
+requirement is implemented in the same phase as the capability whose failure
+it guards. Without that capability the hazard cannot occur, and with it the
+hazard is live, so the guard cannot wait for a later phase. Requirements
+that guard a capability outside the capstone scope are deferred, and the
+reason is given.
+
+\subsection{Within the capstone timeline}
+
+Table~\ref{TblRoadmap} gives the phase, the target date, and the reason for
+each requirement. The dates are the internal deadlines for each milestone.
+
+\begin{longtable}{lp{2.1cm}p{1.9cm}>{\raggedright\arraybackslash}p{8.6cm}}
+\caption{Safety and security requirements scheduled against project milestones}
+\label{TblRoadmap}\\
+\toprule
+\textbf{Req.} & \textbf{Phase} & \textbf{Target} & \textbf{Why this phase}\\
+\midrule
+\endfirsthead
+\multicolumn{4}{l}{\small\textit{Table \thetable{} continued}}\\
+\toprule
+\textbf{Req.} & \textbf{Phase} & \textbf{Target} & \textbf{Why this phase}\\
+\midrule
+\endhead
+SR1-1 & Proof of concept & Nov 23, 2026 & The PoC is a model split across two
+  processes, then two devices. A split that puts everything on one node is
+  not a PoC at all, so the check is part of the first partitioner.\\
+SR1-2 & Proof of concept & Nov 23, 2026 & Same reason: every layer assigned,
+  every node given a non-empty block, is the definition of a correct
+  split and is tested from the first run.\\
+SR1-3 & Proof of concept & Nov 23, 2026 & The PoC splits a model by hand
+  across two devices and the first way it fails is a block larger than the
+  device's memory. The memory check goes in with the first loader.\\
+\midrule
+SR0-2 & Revision 0 & Feb 1, 2027 & Dynamic allocation lands in January.
+  Once blocks can move between nodes, the coordinator can route a request
+  to a node whose block is not yet confirmed, so this guard ships with
+  reallocation.\\
+SR0-1 & Revision 0 & Feb 1, 2027 & Health data only matters once nodes can
+  join and leave mid-session. The time-to-live on health reports is built
+  with the health-check loop that reallocation depends on.\\
+SR4-2 & Revision 0 & Feb 1, 2027 & Marking a node unavailable until it
+  passes a health check is the other half of the same loop.\\
+SR4-1 & Revision 0 & Feb 1, 2027 & Timeouts between nodes are how a
+  departed node is detected. Without them reallocation never triggers.\\
+SR2-1 & Revision 0 & Feb 1, 2027 & Bounded retry after a follower fails is
+  the user-facing behaviour of reallocation, and it is what the Rev~0 demo
+  shows.\\
+\midrule
+SR3-1 & Final demonstration & Mar 15, 2027 & Integrity checks on tensors
+  between nodes belong to the integration and communication testing task,
+  which runs after reallocation is stable. Until then a corrupted tensor
+  surfaces as a failed request, which SR2-1 already handles.\\
+SR3-2 & Final demonstration & Mar 15, 2027 & Logging failed decodings is
+  added with SR3-1, since it is the record that SR3-1's checks fired.\\
+SR4-3 & Final demonstration & Mar 15, 2027 & A latency baseline needs
+  enough measured runs to set a tolerance. The per-token profiler feeds it,
+  and the user interface that shows the warning is a Rev~0 deliverable, so
+  the alert is wired up during final integration.\\
+\bottomrule
+\end{longtable}
+
+The thresholds in these requirements (the memory safety margin in SR1-3,
+the time-to-live in SR0-1, the timeouts in SR4-1, and the latency tolerance
+in SR4-3) are set to conservative values first and tuned from measurements
+on the team's own machines before each demonstration. The values and how
+they are verified are recorded in the V\&V Plan.
+
+\subsection{After the capstone}
+
+The following are known hazards or mitigations that the capstone timeline
+does not cover. Each is listed with the condition under which it would move
+into scope.
+
+\begin{itemize}
+  \item \textbf{Encryption between nodes and device authentication.} The
+    critical assumption in Section~\ref{SecAssumptions} is that the local
+    network is private and trusted, which is also the Problem Statement's
+    stretch goal. A potential user we interviewed for the SRS, who runs an
+    on-premises assistant on export-controlled data, named encrypted
+    traffic and company-managed machines as conditions for deploying
+    anything like Lake. If the stretch goal is taken on, the assumption is
+    removed and the hazards it currently excludes (an untrusted device on
+    the network reading or injecting tensors) get FMEA rows and
+    requirements of their own.
+  \item \textbf{Backing off when a device owner is working.} Loss L4 covers
+    a device that becomes unusable because of Lake. The current
+    requirements limit memory use (SR1-3) but do not pause or throttle
+    inference when the owner is active. The interviewee's first condition
+    for pooling office machines was that Lake back off the moment the
+    owner starts working. This becomes a requirement once Lake is run on
+    machines that are not dedicated to it, which is after the capstone.
+  \item \textbf{No telemetry, and auditability.} The same interview asked
+    that Lake send nothing outside the cluster, including usage or crash
+    reports, and that its behaviour be auditable. The SRS privacy
+    requirement (NFR-G4-2-1) states that no request data leaves the cluster
+    and that Lake sends no telemetry; it is verified by a network capture
+    during a session. Auditability has no requirement yet and is deferred
+    with the encryption and authentication work above, since it matters for
+    the same organisational users.
+\end{itemize}
 
 \newpage{}
 
 \section{Appendix --- Generative AI Use Disclosure}
 
-\wss{ChatGPT (version 5) was used to brainstorm ideas for the template for this disclose section.}
-
 \subsection{AI Tools Used}
 
-\wss{Give the name of the AI tool(s) used and the version.}
+Anthropic Claude (Sonnet 5.5, Opus 5.5, and Fable 5.1 through Claude Code),
+OpenAI GPT (GPT-6 Sol), and Google Gemini (3.8 Flash, falling back to
+3.5 Flash Lite, through the repository's automated rubric-review action) were used in conjunction with
+team member discussions while writing this document.
 
 \subsection{How and Where Used}
 
-\wss{Explain what the tool(s) were used for.  Examples include: brainstorming,
-explaining a technical concept, reviewing the document, generating or modifying
-text, generating or modifying diagrams, identifying errors or omissions or
-inconsistencies.}
+Claude and GPT were used to brainstorm and review sections with the team,
+for the \LaTeX{} formatting of the FMEA table in Section~\ref{SecFMEA} (a
+landscape table with fixed column widths that spans several pages), and for
+a general pass over the document for spelling and grammar. The hazards,
+causes, effects, and recommended actions in the table were written by the
+team.
 
-\wss{For each of the uses, identify which parts of the document were affected.}
+Claude was used to ideate the Roadmap (Section~\ref{SecRoadmap}), this
+disclosure, and the reflection appendix from the team's own FMEA, safety
+requirements, Development Plan schedule, and the SRS user interview, and to
+check that the hazard and requirement identifiers used in the roadmap match
+those in Sections~\ref{SecFMEA} and \ref{SecSafetyReqs}. It did not identify
+hazards or write safety requirements.
 
-\wss{You do not need to report every interaction, but you should disclose the 
-uses that materially contributed to your work}
+The Gemini rubric review provides advisory comments on each pull request;
+the team reads them and decides what, if anything, to change.
 
 \subsection{Verification of AI-Generated Content}
 
-\wss{\begin{itemize}
-    \item Describe how the team checked AI-generated or AI-assisted material
-    before including it in the document.
-    \item In particular, verify factual claims, technical assertions,
-    requirements, calculations, references, and other information for which an
-    AI system may produce incorrect or fabricated results.
-    \item \textbf{The team is responsible for the accuracy, completeness,
-consistency, and appropriateness of the submitted document, regardless of
-whether material was generated by a human or an AI system.}
-\end{itemize}}
+Proposed changes to the document are reviewed through pull requests, and the
+branch rules require at least two approvals from team members before
+merging. The roadmap's requirement identifiers were checked against
+Section~\ref{SecSafetyReqs}, its hazard identifiers against the FMEA, and
+its dates against the schedule in the Development Plan and the SRS project
+chapter. The reflection draft was edited by the team so that every statement
+about what we did is one a team member confirms, and the FMEA table was
+compared against the author's hazard list to confirm that the formatting
+step changed no content. The team is responsible for the accuracy,
+completeness, consistency, and appropriateness of this document, regardless
+of whether material was generated by a person or an AI tool.
 
 \newpage{}
 
 \section{Appendix --- Reflection}
 
-\wss{Not required for CAS 741}
-
 \input{../Reflection.text}
 
 \begin{enumerate}
-    \item What went well while writing this deliverable? 
+    \item What went well while writing this deliverable?
     \item What pain points did you experience during this deliverable, and how
     did you resolve them?
     \item Which of your listed risks had your team thought of before this
@@ -152,6 +268,70 @@ whether material was generated by a human or an AI system.}
     \item Other than the risk of physical harm (some projects may not have any
     appreciable risks of this form), list at least 2 other types of risk in
     software products. Why are they important to consider?
+\end{enumerate}
+\noindent\rule{\linewidth}{0.4pt}
+
+\begin{enumerate}
+    \item Splitting the document by component worked. Matt had already
+    named the five components for the SRS, so the system boundary section
+    and the FMEA used the same names, and each hazard ID carries its
+    component number (H1 for the partitioner, H3 for Tensor I/O). That made
+    it easy to see which component had no hazards yet and go looking for
+    them, and it means the safety requirements trace to the SRS without a
+    separate mapping table. The losses table in the scope section also
+    helped: once the four losses were written down, deciding whether
+    something was a hazard became a matter of asking which loss it led to.
+
+    \item The main pain point was that the Hazard Analysis and the SRS were
+    written in the same two weeks by different people, and they depend on
+    each other in both directions. The FMEA's recommended actions become
+    the SRS safety requirements, but the FMEA also needed the SRS component
+    list and the critical assumptions to exist first. We handled it by
+    writing the SRS component section first and reusing its names and
+    numbering here, and by opening one pull request per section so that a
+    section could be reviewed as soon as it existed rather than waiting for
+    the whole document. The second pain point was the FMEA table itself: a
+    seven-column table that has to break across landscape pages is awkward
+    in LaTeX. Ethan used an AI tool for the table formatting only, which is
+    recorded in the disclosure.
+
+    \item Two of the risks were on paper before this deliverable. The
+    Development Plan's proof of concept section names network overhead
+    making the split slower than a single device (H4-3), and the Problem
+    Statement's dynamic allocation goal is built around devices dropping
+    out of the pool mid-session (H2-1). A block larger than a device's
+    memory (H1-3) was implicit in how the Development Plan describes the
+    partitioner, but had not been written down as a failure. The rest came
+    out of the FMEA. Walking the
+    coordinator's responsibilities one at a time produced H0-1 and H0-2,
+    stale health data and a missed partition notification, which we had
+    not thought of because we had been picturing the happy path where every
+    message arrives. The partitioner rows H1-1 and H1-2 came from asking
+    what a correct partition even is, which forced us to write down that
+    every layer is assigned exactly once and every node gets a non-empty
+    block; that definition is now also the formalization in the SRS. The
+    Tensor I/O rows H3-1 and H3-2 came from the question of what happens
+    when a message arrives but is wrong rather than missing, which is a
+    different failure from H4-1 and needs a different check. Finally, the
+    user interview for the SRS, which happened during this deliverable,
+    added two items to the roadmap that no one on the team had listed:
+    backing off when a device owner is working, and sending no telemetry.
+
+    \item Two other types of risk matter for Lake. The first is privacy and
+    security risk: a software product can leak data without anything
+    breaking. Lake's whole reason to exist is that prompts and documents
+    stay on the user's own machines, and losses L1 and L2 in the scope
+    section are about data being seen or altered, not about anything
+    crashing. If that guarantee fails quietly, the product is worse than
+    the cloud service it replaces, because the user believes they are
+    protected. The second is risk to the user's other work and property:
+    Lake runs on computers that people use for other things, and a process
+    that takes all the memory or the GPU can lose someone's unsaved work or
+    make a machine unusable, which is loss L4. This kind of risk is easy to
+    ignore because it does not show up in Lake's own tests, but it decides
+    whether anyone lets Lake onto their machine at all. Both types also
+    carry a reputational risk for the team: a tool that leaks data or
+    crashes laptops is not one anyone recommends.
 \end{enumerate}
 
 \end{document}
