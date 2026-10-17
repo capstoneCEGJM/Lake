@@ -73,8 +73,7 @@
 \textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
 2026-10-09 & Colin Chambachan & Switch from the Volere template to the Meyer template\\
-Date2 & Name(s) & Description of changes\\
-... & ... & ...\\
+2026-10-16 & Colin Chambachan & First draft of the Goals chapter (G.1--G.8)\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -94,10 +93,14 @@ Date2 & Name(s) & Description of changes\\
 % ===========================================================================
 \tocsection{Changes from Original SRS Meyer Template}
 
-\plt{Meyer's template is a book chapter, not a course template, so every team
-adapts it. Record each structural change you make and why, so a reader who
-knows the original can follow this document. The rows below describe the
-adaptations already present in this file; add to them as the document evolves.}
+This document follows the requirements template in Meyer's
+\emph{Handbook of Requirements and Business Analysis} \citep{Meyer2022},
+which organises a specification into four chapters: Goals (G), Environment
+(E), System (S), and Project (P). Meyer's template is a book chapter rather
+than a course template, so we have adapted it. Table~\ref{ChangesFromTemplate}
+records each structural change and the reason for it. The LaTeX structure is
+adapted from a Meyer-template specification written by a previous capstone
+team and shared with us by our teaching assistant.
 
 \begin{table}[H]
 \caption{Changes from Template} \label{ChangesFromTemplate}
@@ -149,89 +152,356 @@ so each use of the term in the body links back to its definition.}
 % ===========================================================================
 \pegschapter{G}{Goals}
 
-\plt{The Goals chapter is written for decision makers. It explains why the
-project exists, in the language of the business or domain, not of the
-software. It should be readable on its own.}
+This chapter explains why Lake exists and what it is for, in terms a reader
+outside the team can follow. How the system is built is left to the System
+chapter (Section~\ref{sec:srs-S}), and the world it runs in to the Environment
+chapter (Section~\ref{sec:srs-E}).
 
 \subsection{Context and Overall Objective}\label{subsec:context-and-overall-objective}
-\plt{One or two paragraphs: the domain the system lives in, the problem it
-addresses, and the overall objective in a sentence a sponsor would recognize.}
+
+Large language models (LLMs) have become an everyday tool, and almost everyone
+who uses one does so through a commercial provider's web interface or
+application programming interface (API). The alternative is to run an open
+model on your own machine, which keeps your data at home but limits you to
+whatever fits in one device's memory. Most households, offices, and labs
+already own several computers, and most of them sit idle most of the time.
+
+Lake runs a single pre-trained LLM across several consumer devices on one
+local network. The model is split by layer, each device holds and runs only
+its share, and the devices pass intermediate results between them so that
+together they answer a prompt as if the model were running on one machine.
+The objective is to let people run models that are too large for any one of
+their devices, privately and on hardware they already own, and to keep the
+model running as devices join and leave the network.
+
+Figure~\ref{fig:context-diagram} shows where Lake's boundary sits. Lake is the
+software on each participating device. The devices themselves, the network
+between them, the model file, and the tools a user sends prompts from are all
+outside the boundary.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{context_diagram.png}
+    \caption[Context diagram]{Context diagram. The shaded region is Lake. Solid arrows show
+    the direction data or commands flow; a two-headed arrow means both
+    directions. Dashed arrows show a resource Lake uses rather than data it
+    exchanges. The leader node is the device the user interacts with; follower
+    nodes hold the remaining parts of the model.}
+    \label{fig:context-diagram}
+\end{figure}
 
 \subsection{Current Situation}\label{subsec:current-situation}
-\plt{How things are done today without the system, and what is wrong or
-missing. Reference existing tools or processes the system will replace or
-complement.}
+
+Today there are two ways to use an LLM. The first is a hosted service from one
+of the major inference providers. These give the best model quality, but every
+prompt leaves the premises, the cost grows with use, and the user has no
+control over how their data is handled. For a clinic or a law office this is
+often not acceptable at all.
+
+The second is local inference with a tool such as llama.cpp
+\citep{LlamaCpp} or Ollama \citep{Ollama}. The model runs in one process on
+one machine, so the largest model a user can run is set by the memory of their
+single best device. A laptop that runs a small model well may run a mid-sized
+one slowly and a large one not at all, even when three other computers sit on
+the same desk.
+
+A few projects already spread a model over several machines: exo
+\citep{Exo}, prima.cpp \citep{PrimaCpp2025}, and the remote procedure call
+(RPC) backend of llama.cpp. They assign layers to devices once, when the model
+loads, and the assignment stays fixed for the session. If a device drops off
+the network the session fails, and a device added later goes unused until
+everything is restarted. Lake builds on the same idea but makes the assignment
+something the system can change while it is running.
+Table~\ref{tab:alternatives} summarises how Lake compares.
+
+\begin{table}[H]
+\centering
+\caption{Lake compared with the current options}
+\label{tab:alternatives}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.6cm}|X|X|X|X|}
+\hline
+ & \textbf{Hosted service} & \textbf{Single-device local} & \textbf{Existing distributed tools} & \textbf{Lake} \\
+\hline
+Data stays on the user's network & No & Yes & Yes & Yes \\
+\hline
+Cost per use & Per token & None & None & None \\
+\hline
+Largest model & Provider's choice & One device's memory & Pooled memory & Pooled memory \\
+\hline
+Survives a device leaving & N/A & N/A & No, session fails & Yes, layers reassigned \\
+\hline
+Uses a device that joins later & N/A & N/A & No, needs restart & Yes \\
+\hline
+Mixed operating systems in one pool & N/A & N/A & Partly & Windows, macOS, Linux \\
+\hline
+\end{tabularx}
+\end{table}
 
 \subsection{Expected Benefits}\label{subsec:expected-benefits}
-\plt{The improvements the system will bring over the current situation, from
-the point of view of the stakeholders. Where possible, make each benefit
-measurable so it can be checked later.}
+
+The benefits below follow the goals in the Problem Statement. Each is stated
+with the measure we will use to check it, and the requirements that deliver it
+are in Section~\ref{subsec:functionality}.
 
 \begin{itemize}
-    \item \textbf{Benefit} -- Description.
+    \item \emph{Larger models on existing hardware.} A user can run a model
+    that does not fit on any one of their devices. The measure is the largest
+    model (by parameter count, precision, and context window) that a cluster
+    can serve compared with the largest the single best device in that
+    cluster can serve alone. This is the primary goal; the Model Size
+    requirement in Section~\ref{subsec:functionality} states the target.
+    \item \emph{Privacy.} Prompts, responses, and the model's intermediate
+    data stay on the devices in the cluster and never go to an external
+    provider. The measure is that no request data leaves the cluster during a
+    session. What privacy does and does not cover in the first release is
+    stated in Section~\ref{subsec:limitations-and-exclusions}.
+    \item \emph{Lower cost.} There are no per-token or subscription fees, and
+    no new hardware is needed beyond what the user already owns.
+    \item \emph{Resilience to devices coming and going.} When a device leaves
+    or joins, Lake reassigns layers and keeps serving requests as long as the
+    remaining cluster has enough memory. The measures are whether requests
+    are served after a reassignment and how long the reassignment takes,
+    which Section~\ref{subsec:formalizations} defines precisely.
+    \item \emph{Mixed platforms in one cluster.} Windows, macOS, and Linux
+    machines can be combined, so a user is not limited to devices of one
+    type. The measure is a working cluster that mixes all three.
+    \item \emph{Works with the tools people already use.} Lake exposes the
+    same API format as the major hosted providers, so existing chat
+    interfaces and coding assistants can point at Lake instead of a cloud
+    service with no changes on their side.
+    \item \emph{Speed, where the split allows it.} Response time and
+    throughput (tokens per second) are secondary measures. A split model is
+    not expected to beat a single device on a model that already fits on
+    that device, since every token still passes through every layer in
+    order. The gain is in capacity, and in throughput when several requests
+    are served at once.
 \end{itemize}
 
 \subsection{Functionality Overview}\label{subsec:functionality-overview}
-\plt{A high-level list of what the system does. Each item should correspond to
-one or more components in S.1 and requirements in S.2, but stay at the level a
-non-technical reader can follow.}
+
+At a high level, Lake does six things. Each maps to one or more of the
+components in Section~\ref{subsec:components}: the Coordinator, the Model
+Partitioner, the Inference Engine, Tensor I/O, and the Web UI.
 
 \begin{itemize}
-    \item \textbf{Capability} -- Description.
+    \item \emph{Forming a cluster.} Lake runs on each device. From the web
+    user interface (UI) on one device, which becomes the leader node, the
+    user sees the other devices on the local network that are running Lake
+    and chooses which to include. Each chosen device asks its owner to
+    confirm before it joins, so no device takes part without consent.
+    \item \emph{Loading and partitioning a model.} The user picks a model in
+    GGUF format \citep{GGUF}, the file format used by llama.cpp. Lake
+    measures each node's memory, compute, and network performance, decides
+    which range of layers each node will hold, and has each node load only
+    that range from the file.
+    \item \emph{Running inference across the cluster.} A prompt enters at
+    the first node, the activations pass from node to node in layer order,
+    and generated tokens stream back to the user one at a time. Each node
+    keeps the key-value (KV) cache for its own layers, so nothing about the
+    conversation has to be re-sent between tokens.
+    \item \emph{Reallocating when the cluster changes.} When a node leaves,
+    fails, or joins, the leader re-partitions the model across the nodes
+    that remain and resumes serving, retrying any request that was in
+    progress. If the cluster no longer has enough memory for the model, the
+    user is told why rather than left with a hung session.
+    \item \emph{Measuring performance.} Lake records compute time on each
+    node and transfer time between nodes. These measurements drive the
+    partitioner and are shown in the web UI, which highlights the node or
+    link that is the bottleneck.
+    \item \emph{Serving prompts through a standard API.} The leader node
+    exposes an HTTP API in the OpenAI format \citep{OpenAIAPI}, so any
+    client that can talk to a hosted provider can talk to Lake.
 \end{itemize}
 
 \subsection{High-Level Usage Scenarios}\label{subsec:high-level-usage-scenarios}
-\plt{The main ways users will interact with the system, as short narratives
-(two or three sentences each). Detailed use cases belong in S.6. An activity
-diagram can be included here if it helps.}
+
+These are the main situations Lake is built for. Each is expanded into a full
+use case in Section~\ref{subsec:detailed-usage-scenarios}.
 
 \begin{itemize}
-    \item \textbf{Scenario 1: Name} -- Description.
+    \item \emph{Scenario 1: Forming a cluster.} A user starts Lake on three
+    of their computers, opens the web UI on one of them, selects the other
+    two from the list of devices found on the network, and confirms the
+    invitation on each. The web UI shows all three with their memory and
+    platform.
+    \item \emph{Scenario 2: Running a model that does not fit on one device.}
+    The user picks a model larger than any single device in the cluster. Lake
+    splits it, each node loads its share, and the user sends a prompt and
+    reads the streamed response.
+    \item \emph{Scenario 3: Using Lake from an existing tool.} A developer
+    points their coding assistant at Lake's API address instead of a cloud
+    provider. The assistant works as before, and the developer's code never
+    leaves their network.
+    \item \emph{Scenario 4: A device leaves mid-session.} A laptop in the
+    cluster is closed or loses its connection during a response. Lake
+    notices, reassigns that node's layers to the others, retries the
+    request, and the user gets their answer. If the cluster is now too small
+    for the model, the user is told why.
+    \item \emph{Scenario 5: A device joins mid-session.} Another machine is
+    added to the cluster. Lake re-partitions so the new node takes part, and
+    the user sees the new assignment and the change in speed.
+    \item \emph{Scenario 6: Finding the bottleneck.} Responses feel slow. The
+    user opens the web UI, which shows per-node compute time and per-link
+    transfer time and highlights the slow link, and decides whether to
+    swap a cable, remove a device, or add one.
 \end{itemize}
 
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=\textwidth]{activity_diagram.png}
-%     \caption{Activity diagram showing the high-level usage scenarios.}
-%     \label{fig:activity-diagram}
-% \end{figure}
-
 \subsection{Limitations and Exclusions}\label{subsec:limitations-and-exclusions}
-\plt{What the system will not do. State exclusions explicitly so nobody later
-assumes they were simply forgotten.}
+
+Lake is deliberately narrow. The following are out of scope. The stretch
+goals from the Problem Statement are listed as exclusions until the team
+decides to take them on. The likely and unlikely changes listed at the end of
+the System chapter record which of these may change.
 
 \begin{itemize}
-    \item \textbf{Exclusion} -- Description and rationale.
+    \item \emph{No training or fine-tuning.} Lake runs pre-trained
+    transformer models that ggml \citep{Ggml} supports. Lake does not train,
+    fine-tune, quantize, or otherwise modify a model, and does not change the
+    quality of its output.
+    \item \emph{Local network only.} All devices must be on the same local
+    network. Running inference across the internet is not supported, because
+    the latency between tokens would make the system unusable.
+    \item \emph{Trusted network and devices.} In the first release, traffic
+    between nodes is not encrypted and devices are not authenticated beyond
+    the owner's confirmation. Privacy therefore means that data never leaves
+    the user's own network, not that it is protected from other devices on
+    that network. Users must run Lake only on devices they trust and a
+    network they control. Encryption and authentication are a stretch goal.
+    \item \emph{Supported hardware.} Each device needs a GPU from Nvidia,
+    AMD, or Apple, because inference on a CPU alone is too slow to be useful
+    in a cluster. Smartphones are a stretch goal.
+    \item \emph{Wired connections first.} The first revision targets wired
+    Ethernet. Wireless operation is a stretch goal because its latency and
+    variability may make the split model too slow.
+    \item \emph{One request at a time.} Serving several users at once is a
+    stretch goal. The first release handles requests one after another; the
+    requirements in Section~\ref{subsec:functionality} that cover concurrent
+    requests apply only if that goal is taken on.
+    \item \emph{Not faster for models that already fit.} Lake does not speed
+    up a model that already runs well on one device. The benefit is running
+    models that would not otherwise fit.
+    \item \emph{No model hosting.} Lake does not download or distribute
+    model weights. Users supply a model file under that model's own license.
 \end{itemize}
 
 \subsection{Stakeholders and Requirements Sources}\label{subsec:stakeholders-and-requirements-sources}
-\plt{Stakeholders: every person or group affected by the system, including
-clients, users, supervisors, and the wider community. Requirements sources:
-the documents, people, standards, and existing systems the requirements were
-elicited from.}
+
+Lake has three kinds of hands-on user, described in
+Section~\ref{subsec:user-profiles}, and a wider set of stakeholders.
 
 \noindent\textbf{Stakeholders:}
 \begin{itemize}
-    \item \textbf{Stakeholder} -- Their interest in the system.
+    \item \emph{Local AI users} who already run models on their own
+    machines and want to run larger ones. They are the primary hands-on
+    users and the group the team itself belongs to.
+    \item \emph{Small organisations in regulated industries}, such as a
+    medical clinic that wants AI-assisted analysis of patient records but
+    cannot let the data leave the building. For them, privacy is a legal
+    obligation, not a preference.
+    \item \emph{Small AI labs and research groups} with modest budgets who
+    want to pool the machines they have instead of renting cloud GPUs.
+    \item \emph{Device owners}, who may not be the person running the
+    cluster. A family member's or colleague's laptop joining a cluster gives
+    up memory, compute, battery, and bandwidth while it takes part, so each
+    owner confirms participation and can see what their device is doing.
+    \item \emph{Society.} Lake lowers the cost of using capable models
+    privately, which broadens who can use them beyond those who can pay for
+    a hosted service or a high-end machine. Health data is the clearest
+    case, since the system lets a clinic keep patient records on site.
+    Lake also raises energy use on participating devices, and a model run
+    through Lake carries whatever biases and risks it had before, since Lake
+    does not alter it. The Hazard Analysis covers the safety side of these
+    factors.
+    \item \emph{The development team}, who are building Lake as a capstone
+    project and need it to be achievable within the course timeline.
+    \item \emph{The course instructor and teaching assistant}, who assess the
+    project against the course rubrics and give feedback on each
+    deliverable.
+    \item \emph{The open-source projects Lake builds on}, in particular ggml
+    and llama.cpp, whose licenses and interfaces shape what Lake can do, and
+    which Lake must not misrepresent.
 \end{itemize}
 
 \noindent\textbf{Requirements Sources:}
 \begin{itemize}
-    \item \textbf{Source} -- What it contributed.
+    \item The Problem Statement and Development Plan, which set the goals
+    and their metrics, the stretch goals, the hardware limits, and the
+    technology direction.
+    \item Peer reviews of the Problem Statement from Team~07 and from a
+    reviewer on another team, which led to a clearer statement of what
+    privacy covers in the first release and to a measurable definition of
+    dynamic allocation. Both are tracked as issues in the project repository.
+    \item Meetings with the teaching assistant, which recommended this
+    template and shaped how the requirements are organised.
+    \item The team's own experience as local AI users, which is the source of
+    the first user profile and of the scenarios in
+    Section~\ref{subsec:high-level-usage-scenarios}.
+    \item Existing distributed inference tools, exo \citep{Exo}, prima.cpp
+    \citep{PrimaCpp2025}, and the RPC backend of llama.cpp
+    \citep{LlamaCpp}, studied to learn what current systems do and where
+    they fall short.
+    \item The ggml and llama.cpp documentation and source
+    \citep{Ggml, LlamaCpp, GGUF}, which define which models and hardware can
+    be supported and how a model can be split.
+    \item The OpenAI API reference \citep{OpenAIAPI}, which defines the
+    request and response format Lake's API follows.
+    \item The Hazard Analysis, which contributes the safety and security
+    requirements and the critical assumptions.
+    \item The course templates, rubrics, and lectures, and Meyer's handbook
+    \citep{Meyer2022}, which this document's structure follows.
 \end{itemize}
 
 \subsection{User Profiles}\label{subsec:user-profiles}
-\plt{For each distinct group of hands-on users, describe their domain
-knowledge, goals, technical literacy, and which parts of the system matter most
-to them. These profiles justify usability and accessibility requirements later
-on.}
 
-\noindent\textbf{1. Profile Name}
+The Environment chapter distinguishes three roles: the inference user who
+sends prompts, the Lake operator who sets up and runs the cluster, and the
+device owner who contributes a machine. In practice these roles land on
+three kinds of people.
+
+\noindent\textbf{1. The home local-AI user} (operator, device owner, and
+inference user in one)
 \begin{itemize}
-    \item \textbf{Domain Knowledge:}
-    \item \textbf{Goals:}
-    \item \textbf{Technical Literacy:}
-    \item \textbf{Rationale:} Which requirements exist for this user.
+    \item \textbf{Domain Knowledge:} Already runs models with llama.cpp,
+    Ollama, or similar. Knows what quantization and context length mean and
+    has opinions about which models are good.
+    \item \textbf{Goals:} Run a bigger model than their best machine allows,
+    using the other computers in the house, without buying new hardware.
+    \item \textbf{Technical Literacy:} High. Comfortable with a command line,
+    installing software on several operating systems, and reading logs.
+    \item \textbf{Rationale:} Drives the requirements for straightforward
+    installation on each platform, GGUF model support, and clear reporting
+    of what each device loaded. Will tolerate rough edges if the system
+    works.
+\end{itemize}
+
+\noindent\textbf{2. The small-business operator} (operator; colleagues are
+the inference users)
+\begin{itemize}
+    \item \textbf{Domain Knowledge:} Knows their own field, not machine
+    learning. May be the one person who handles IT part-time.
+    \item \textbf{Goals:} Let colleagues use an LLM on sensitive data without
+    that data leaving the premises, and have it keep working day to day
+    without attention.
+    \item \textbf{Technical Literacy:} Moderate. Can install software and
+    follow instructions, but will not debug a failed session.
+    \item \textbf{Rationale:} Drives the requirements for the web UI, for
+    plain error messages when the cluster is too small, for recovering when
+    a device drops, and for the guarantee that no request data leaves the
+    cluster.
+\end{itemize}
+
+\noindent\textbf{3. The researcher} (inference user through the API; often
+also the operator)
+\begin{itemize}
+    \item \textbf{Domain Knowledge:} Understands transformer models and
+    inference, and wants to compare models or settings.
+    \item \textbf{Goals:} Pool the lab's machines to run large models, and
+    get repeatable measurements of speed and overhead.
+    \item \textbf{Technical Literacy:} High. Will use the API directly and
+    script against it.
+    \item \textbf{Rationale:} Drives the requirements for the OpenAI-format
+    API, the per-token performance measurements, and for comparing a split
+    run against a single-device run.
 \end{itemize}
 
 % ===========================================================================
