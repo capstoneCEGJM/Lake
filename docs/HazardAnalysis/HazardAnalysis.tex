@@ -85,10 +85,10 @@ this potential failure mode.}
 \begin{landscape}
 \section{Failure Mode and Effect Analysis}
 
-The following FMEA table summarizes potential failure modes for the Lake system based on each component.
+The following Failure Mode and Effect Analysis (FMEA) table summarizes potential failure modes for the Lake system based on each component.
 It also details potential causes and effects for each of the failures, along with a recommended action to mitigate
 the potential failure. Components are listed based on their appearance above in Section 3. Beyond this, there are also
-hazards listed for general communication failures that may take place in between nodes or components.
+hazards listed for general communication failures that may take place in between nodes or components, as well as privacy failures.
 
 \begin{longtable}{|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.05\textwidth}|p{0.1\textwidth}|}
 \hline
@@ -177,7 +177,7 @@ Inference Engine
 % ---------------------------------------------------------------- H4
 %
   % (General Communication: multirow label is in the third row below)
-  & Communication bewteen two nodes times out between devices or fails entirely.
+  & Communication between two nodes times out between devices or fails entirely.
   & Failure of system, loss of inference if midway through session
   & Failure of communication protocol between nodes at hardware level (Thunderbolt)
   & Monitor average communication times between nodes and alert user to check connections if it exceeds a threshold. Restart inference if communication is lost and remove failed node.
@@ -196,6 +196,23 @@ Inference Engine
   & Simplification of network. If inference is taking too long to complete based on historical system data, remove least capable devices on the network to reduce communication overhead.
   & S4-3
   & H4-3 \\ \hline
+%
+% ---------------------------------------------------------------- H5
+%
+  % (Privacy: multirow label is in the second row below)
+  & Untrusted node on the device network.
+  & Allows unintended access to the system and potential loss of data to bad actors. Reduces user trust in the system and may lead to loss of users.
+  & Lack of initial authorization of each node or operation of the system on an untrusted network where unknown devices can join. 
+  & Ensure that system is only operated on limited networks where all potential devices are known. Alternatively, the coordinator node must gain approval from the user before adding an unknown device to the network.
+  & SR5-1
+  & H5-1 \\ \cline{2-7}
+\multirow{-2}{\dimexpr0.2\textwidth\relax}{Privacy}
+  & Data leakage from a node leading to untrusted access or data leakage.
+  & Untrusted users who have access to any of the participating nodes can see and steal data. Reduces user trust in the system and could lead to degraded or failed performance.
+  & Lack of initial authentication and data protection measures in the system. 
+  & Ensure that any devices in the network are explicitly approved by the user, so any potential data on intermediary nodes will not be tampered with.
+  & SR5-2
+  & H5-2 \\ \hline
 \end{longtable}
 \end{landscape}
 \restoregeometry
