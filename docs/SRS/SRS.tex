@@ -240,12 +240,11 @@ Mixed operating systems in one pool & N/A & N/A & Partly & Windows, macOS, Linux
 
 \subsection{Expected Benefits}\label{subsec:expected-benefits}
 
-The benefits below follow the four goals in the Problem Statement.
-Figure~\ref{fig:goal-model} is a goal model in the notation used in the
-requirements course: actors are dashed ellipses, hard goals rounded boxes,
-soft goals clouds, plans hexagons, and resources rectangles. Lines with a
-bar are AND decompositions, and green or red arrows show a Lake goal helping
-or hurting a stakeholder's goal. Each benefit below states the measure we
+The benefits below follow the four goals in the Problem Statement, plus
+concurrent inference, which the team is moving from a stretch goal to a
+goal because serving several requests at once is one of the main advantages
+of splitting a model by layers.
+Figure~\ref{fig:goal-model} is a goal model thats reflects this. Each benefit below states the measure we
 will use to check it, and the requirements that deliver them are in
 Section~\ref{subsec:functionality}.
 
@@ -295,12 +294,21 @@ chat interfaces and coding assistants can point at Lake instead of a cloud
 service with no changes on their side. The measure is an unmodified
 third-party client completing a session against Lake.
 
+\subsubsection*{Several users at once}
+While one request's token is being computed on one node, another request's
+token can be computed on the next, so a cluster can serve several users
+without each one waiting for the others. The measure is the number of
+requests the cluster can serve at once before any single request slows by
+more than the tolerance set in the Scalability requirement in
+Section~\ref{subsec:functionality}, and how that number grows with the
+number of nodes.
+
 \subsubsection*{Speed, where the split allows it}
-Response time and throughput (tokens per second) are secondary measures. A
-split model is not expected to beat a single device on a model that already
-fits on that device, since every token still passes through every layer in
-order. The gain is in capacity, and in throughput when several requests are
-served at once. The practitioner we interviewed (see
+Response time and throughput (tokens per second) for a single request are
+secondary measures. A split model is not expected to beat a single device
+on a model that already fits on that device, since every token still passes
+through every layer in order. The gain is in capacity, and in throughput
+when several requests are served at once. The practitioner we interviewed (see
 Section~\ref{subsubsec:g7-sources}) expected the same: a split over an office
 network would likely be slower than one good GPU for live chat, but worth it
 for background work such as re-indexing documents, OCR, and overnight test
@@ -333,7 +341,8 @@ Section~\ref{subsec:functionality}.
     node to node in layer order, and generated tokens stream back to the user
     one at a time. Each node keeps the key-value (KV) cache for its own
     layers, so nothing about the conversation has to be re-sent between
-    tokens.
+    tokens. Several requests can be in flight at once, each at a different
+    node, and their state is kept apart.
     \item \label{FR-G4-1-4}\textbf{FR-G4-1-4 Reallocate when the cluster
     changes.} When a node leaves, fails, or joins, the leader re-partitions
     the model across the nodes that remain and resumes serving, retrying any
@@ -533,6 +542,17 @@ Section~\ref{subsec:detailed-usage-scenarios}.
         \item The operator decides whether to swap a cable, remove a
         computer, or add one.
     \end{itemize}
+
+    \item \label{UC8}\textbf{UC8 Serve several users at once}
+    \begin{itemize}
+        \item Two or more users send prompts to the same cluster at the same
+        time, from their own tools.
+        \item Each sees their own response stream back, and none sees
+        another's prompt or answer.
+        \item Each response arrives about as fast as it would have alone,
+        until the cluster is busy enough that the operator sees requests
+        queue in the cluster view.
+    \end{itemize}
 \end{enumerate}
 
 \subsection{Limitations and Exclusions}\label{subsec:limitations-and-exclusions}
@@ -562,10 +582,6 @@ the System chapter record which of these may change.
     \item \emph{Wired connections first.} The first revision targets wired
     Ethernet. Wireless operation is a stretch goal because its latency and
     variability may make the split model too slow.
-    \item \emph{One request at a time.} Serving several users at once is a
-    stretch goal. The first release handles requests one after another; the
-    requirements in Section~\ref{subsec:functionality} that cover concurrent
-    requests apply only if that goal is taken on.
     \item \emph{No leader failover yet.} If the leader node leaves, the
     cluster shuts down. The Coordinator runs on every node so that a later
     release can promote another node to leader, but the first release does

@@ -24,6 +24,7 @@ rectangle "Lake" as System {
   usecase "UC5 Keep working when\na device leaves" as UC5
   usecase "UC4 Use Lake from\nan existing tool" as UC4
   usecase "UC7 Find the bottleneck" as UC7
+  usecase "UC8 Serve several\nusers at once" as UC8
 }
 
 Operator -- UC1
@@ -35,10 +36,12 @@ UC2 -- Owner
 UC5 -- Owner
 UC3 -- User
 UC4 -- User
+UC8 -- User
 
 UC1 ..> UC2 : <<include>>
 UC6 ..> UC2 : <<include>>
 UC6 ..> UC3 : <<extend>>\n{device added}
 UC5 ..> UC3 : <<extend>>\n{device leaves}
 UC4 ..> UC3 : <<extend>>\n{via client tool}
+UC8 ..> UC3 : <<extend>>\n{several at once}
 @enduml
