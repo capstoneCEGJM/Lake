@@ -324,40 +324,45 @@ Section~\ref{subsec:functionality}.
 
 \subsubsection{Functional Requirements}\label{subsubsec:g4-functional}
 
+These are the high-level requirements, stated for the reader of the Goals
+chapter. Each ends with the detailed, verifiable requirements in
+Section~\ref{subsec:functionality} and the Environmental Requirements table
+that realise it, so a change in either place can be traced to the other.
+
 \begin{itemize}
     \item \label{FR-G4-1-1}\textbf{FR-G4-1-1 Form a cluster with consent.}
     Lake runs on each device. From the web user interface (UI) on one device,
     which becomes the leader node, the operator sees the other devices on the
     local network that are running Lake and chooses which to include. Each
     chosen device asks its owner to confirm before it joins, so no device
-    takes part without consent.
+    takes part without consent. \emph{Realised by} FR.S.1.4, FR.S.5.1, FR.S.5.2, FR.S.1.17, FR.S.1.18, FR.S.1.20, FR.S.1.21, FR.S.5.7, and NFR.S.12.
     \item \label{FR-G4-1-2}\textbf{FR-G4-1-2 Load and partition a model.}
     The operator picks a model in GGUF format \citep{GGUF}, the file format
     used by llama.cpp. Lake measures each node's memory, compute, and network
     performance, decides which range of layers each node will hold, and has
-    each node load only that range.
+    each node load only that range. \emph{Realised by} FR.S.5.3, FR.S.1.8, FR.S.2.1 to FR.S.2.4, FR.S.1.6, FR.S.1.19, and FR.S.3.1.
     \item \label{FR-G4-1-3}\textbf{FR-G4-1-3 Run inference across the
     cluster.} A prompt enters at the first node, the activations pass from
     node to node in layer order, and generated tokens stream back to the user
     one at a time. Each node keeps the key-value (KV) cache for its own
     layers, so nothing about the conversation has to be re-sent between
     tokens. Several requests can be in flight at once, each at a different
-    node, and their state is kept apart.
+    node, and their state is kept apart. \emph{Realised by} FR.S.3.2, FR.S.3.3, FR.S.4.1, FR.S.4.3, FR.S.4.4, and, for concurrent requests, FR.S.1.14, FR.S.3.5, FR.S.4.6, and NFR.S.5.
     \item \label{FR-G4-1-4}\textbf{FR-G4-1-4 Reallocate when the cluster
     changes.} When a node leaves, fails, or joins, the leader re-partitions
     the model across the nodes that remain and resumes serving, retrying any
     request that was in progress. If the cluster no longer has enough memory
-    for the model, the user is told why rather than left with a hung session.
+    for the model, the user is told why rather than left with a hung session. \emph{Realised by} FR.S.1.10 to FR.S.1.13, FR.S.1.22, FR.S.2.2, and FR.S.5.4.
     \item \label{FR-G4-1-5}\textbf{FR-G4-1-5 Measure performance.} Lake
     records compute time on each node and transfer time between nodes. These
     measurements drive the partitioner and are shown in the web UI, which
     highlights the node or link that is the bottleneck and compares the
     cluster against the single best machine in it, so the operator can see
-    whether pooling is paying off.
+    whether pooling is paying off. \emph{Realised by} FR.S.1.2, FR.S.1.3, FR.S.1.7, FR.S.1.23, FR.S.3.4, FR.S.4.5, FR.S.5.5, FR.S.5.6, and NFR.S.1.
     \item \label{FR-G4-1-6}\textbf{FR-G4-1-6 Serve prompts through a standard
     API.} The leader node exposes an HTTP API in the OpenAI format
     \citep{OpenAIAPI}, including streaming and tool calling, so any client
-    that can talk to a hosted provider can talk to Lake.
+    that can talk to a hosted provider can talk to Lake. \emph{Realised by} FR.S.1.9 and NFR.E.3.
 \end{itemize}
 
 The two requirements that carry the most value are
@@ -376,18 +381,18 @@ second there is nothing a user could not already get elsewhere.
     outside the cluster, none is kept after a request completes, and Lake
     sends no telemetry. This is the privacy benefit, and it is the reason an
     organisation handling export-controlled or medical data could use Lake at
-    all.
+    all. \emph{Realised by} NFR.S.10, NFR.S.11, NFR.S.12, and NFR.E.5; the telemetry clause is being added to Section~\ref{subsec:functionality}.
     \item \label{NFR-G4-2-2}\textbf{NFR-G4-2-2 Runs on Windows, macOS, and
     Linux.} Each is a supported platform for any node, and one cluster can
     mix all three. This is the cross-platform goal from the Problem
-    Statement.
+    Statement. \emph{Realised by} NFR.S.3, NFR.S.13 to NFR.S.15, and NFR.E.1.
     \item \label{NFR-G4-2-3}\textbf{NFR-G4-2-3 The split does not change the
     model.} A model run through Lake produces output of the same quality as
     the same model run on one machine, within a measured tolerance. Users
-    would not trust a system that made their model worse.
+    would not trust a system that made their model worse. \emph{Realised by} NFR.S.6, FR.S.2.3, and NFR.E.4.
     \item \label{NFR-G4-2-4}\textbf{NFR-G4-2-4 License compliance.} Lake
     respects the licenses of the software it builds on and of the models it
-    runs, as set out in Section~\ref{subsec:standards}.
+    runs, as set out in Section~\ref{subsec:standards}. \emph{Realised by} NFR.E.7 and NFR.E.8.
 \end{itemize}
 
 Privacy and fidelity matter most. A local inference tool that leaked data or
