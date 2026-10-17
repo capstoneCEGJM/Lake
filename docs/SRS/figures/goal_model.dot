@@ -7,7 +7,7 @@ digraph goals {
 
   // ---- actor boundaries (drawn first so everything else sits on top) ----
   node [shape=ellipse, style=dashed, color="#666666", fixedsize=true, labelloc=t, fontsize=12];
-  A_lake  [label="Lake (the system)",           pos="5.5,3.4!",  width=12.9, height=5.0];
+  A_lake  [label="Lake (the system)",           pos="5.6,3.4!",  width=13.3, height=5.0];
   A_user  [label="Local AI users",              pos="1.7,8.25!", width=3.4,  height=2.6];
   A_org   [label="Regulated small\norganisations", pos="4.8,8.25!", width=3.4, height=2.6];
   A_lab   [label="Researchers",                 pos="7.9,8.25!", width=3.4,  height=2.6];
@@ -16,29 +16,31 @@ digraph goals {
   // ---- hard goals: rounded boxes ----
   node [shape=box, style="rounded,filled", fillcolor="#e4f0e8", color="#333333", fixedsize=false, labelloc=c, fontsize=11];
   root   [label="Run capable LLMs privately on\nhardware people already own", pos="5.5,5.0!"];
-  g_par  [label="Model parallelization\n(Problem Statement 2.2)",   pos="1.4,4.0!"];
-  g_dyn  [label="Dynamic allocation\n(Problem Statement 2.4)",      pos="3.45,4.0!"];
-  g_xp   [label="Cross-platform operation\n(Problem Statement 2.3)", pos="5.5,4.0!"];
-  g_perf [label="Improved local performance\n(Problem Statement 2.1)", pos="7.55,4.0!"];
-  g_priv [label="Request data stays\nin the cluster",               pos="9.55,4.0!"];
+  g_par  [label="Model parallelization\n(PS 2.2)",   pos="0.75,4.0!", fontsize=10];
+  g_dyn  [label="Dynamic allocation\n(PS 2.4)",      pos="2.55,4.0!", fontsize=10];
+  g_xp   [label="Cross-platform\noperation (PS 2.3)", pos="4.35,4.0!", fontsize=10];
+  g_perf [label="Improved local\nperformance (PS 2.1)", pos="6.15,4.0!", fontsize=10];
+  g_conc [label="Concurrent\ninference", pos="7.95,4.0!", fontsize=10];
+  g_priv [label="Request data stays\nin the cluster",               pos="9.75,4.0!", fontsize=10];
   u_goal [label="Run a model larger than\nmy best machine allows",  pos="1.7,8.62!"];
   o_goal [label="Use an LLM on\nsensitive records",                 pos="4.8,8.58!"];
   r_goal [label="Run large models on\nthe lab's machines",          pos="7.9,8.62!"];
 
   // ---- plans: hexagons ----
-  node [shape=hexagon, style=filled, fillcolor="#f2f2f2", fixedsize=true, width=1.9, height=0.74, fontsize=10];
-  p_part    [label="Partition the model\nby layers",                 pos="1.3,2.6!"];
-  p_realloc [label="Reallocate layers when a\ndevice joins or leaves", pos="3.25,2.6!"];
-  p_os      [label="Support Windows, macOS\nand Linux nodes",         pos="5.2,2.6!"];
-  p_meas    [label="Measure per-token compute\nand transfer time",    pos="7.15,2.6!"];
-  p_local   [label="Keep all traffic on\nthe local network",          pos="9.05,2.6!"];
-  p_confirm [label="Ask each owner to\nconfirm before joining",       pos="10.7,2.6!"];
+  node [shape=hexagon, style=filled, fillcolor="#f2f2f2", fixedsize=true, width=1.68, height=0.74, fontsize=9.5];
+  p_part    [label="Partition the\nmodel by layers",                 pos="0.75,2.6!"];
+  p_realloc [label="Reallocate layers when\na device joins or leaves", pos="2.45,2.6!"];
+  p_os      [label="Support Windows,\nmacOS and Linux nodes",         pos="4.15,2.6!"];
+  p_meas    [label="Measure per-token\ncompute and transfer",    pos="5.85,2.6!"];
+  p_pipe    [label="Pipeline several\nrequests through the nodes", pos="7.55,2.6!"];
+  p_local   [label="Keep all traffic on\nthe local network",          pos="9.25,2.6!"];
+  p_confirm [label="Ask each owner to\nconfirm before joining",       pos="10.95,2.6!"];
   r_script  [label="Script against\nthe API",                         pos="8.75,7.62!", width=1.5, height=0.62];
 
   // ---- resources: rectangles ----
   node [shape=box, style=filled, fillcolor="#fbe9e7", fixedsize=false, fontsize=11];
-  r_gguf    [label="GGUF model file",               pos="4.3,1.4!"];
-  r_devices [label="Idle devices on the\nlocal network", pos="6.5,1.4!"];
+  r_gguf    [label="GGUF model file",               pos="4.0,1.4!"];
+  r_devices [label="Idle devices on the\nlocal network", pos="6.3,1.4!"];
 
   // ---- soft goals: clouds ----
   node [shape=none, style="", image="cloud.png", imagescale=true, fixedsize=true, width=1.6, height=0.8, fontsize=10.5];
@@ -53,12 +55,12 @@ digraph goals {
   // ---- "and" labels ----
   node [shape=plaintext, image="", fixedsize=false, fontsize=10, fontcolor="#333333"];
   and_root [label=<<i>and</i>>, pos="5.5,4.58!"];
-  and_priv [label=<<i>and</i>>, pos="9.55,3.55!"];
+  and_priv [label=<<i>and</i>>, pos="9.75,3.55!"];
 
   // ---- decomposition: line with a bar at the child ----
   edge [arrowhead=tee, arrowsize=1.1];
-  root -> g_par; root -> g_dyn; root -> g_xp; root -> g_perf; root -> g_priv;
-  g_par -> p_part; g_dyn -> p_realloc; g_xp -> p_os; g_perf -> p_meas;
+  root -> g_par; root -> g_dyn; root -> g_xp; root -> g_perf; root -> g_conc; root -> g_priv;
+  g_par -> p_part; g_dyn -> p_realloc; g_xp -> p_os; g_perf -> p_meas; g_conc -> p_pipe;
   g_priv -> p_local; g_priv -> p_confirm;
   r_goal -> r_script;
 
@@ -76,6 +78,7 @@ digraph goals {
   g_dyn  -> o_unatt;
   g_perf -> r_goal;
   g_perf -> r_rep;
+  g_conc -> o_goal;
   p_confirm -> d_ctrl;
   edge [color="#c0392b", labelfontcolor="#c0392b", headlabel="−"];
   g_perf -> d_usable;
