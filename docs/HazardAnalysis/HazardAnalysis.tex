@@ -108,14 +108,14 @@ Component
   % (Model Coordinator: multirow label is in the second row below)
   & Incorrect or outdated device health statistics are reported back to the user.
   & Coordinator sends requests to device that is unable to handle requests and inference fails.
-  & Health checks are too infrequent from the coordinator model or user interface displays older data than available.
-  & Scheduled health checks to each device and removal of data from user interface as soon as new data reaches coordinator.
+  & Health checks are too infrequent from the coordinator or user interface displays older data than available.
+  & Scheduled health checks to each device and removal of data from user interface as soon as new data reaches leader node.
   & SR0-1
   & H0-1 \\ \cline{2-7}
 \multirow{-2}{\dimexpr0.2\textwidth\relax}{Coordinator}
-  & Coordinator fails to notify follower node of partitioning change.
+  & Coordinator component in leader node fails to notify follower node of partitioning change.
   & Follower node sends data to other failed follower node and inference fails.
-  & Lack of proper and timely notification system and health checks from coordinator.
+  & Lack of proper and timely notification system and health checks from leader node.
   & Scheduled health checks to each device prior to each message to ensure inference is not lost on a failed node.
   & SR0-2
   & H0-2 \\ \hline
@@ -123,7 +123,7 @@ Component
 % ---------------------------------------------------------------- H1
 %
   % (Model Partition: multirow label is in the third row below)
-  & Single device (coordinator or a follower) is allocated 100\% of the model.
+  & Single device node is allocated 100\% of the model.
   & Fails the core purpose of Lake and overworks single device by avoiding parallelization.
   & Improper boundaries on model partition algorithm.
   & Boundaries to ensure each device is allocated $>$0\% of the model, and re-balancing checks made throughout a session to verify boundary is not violated.
@@ -138,7 +138,7 @@ Component
   & SR1-2
   & H1-2 \\ \cline{2-7}
 \multirow{-3}{\dimexpr0.2\textwidth\relax}{Model Partition}
-  & Device is allocated more of the model than its hardware can handle.
+  & Device is allocated a partition larger than it's available memory.
   & Device crashes and loss of network.
   & Improper consideration of device hardware requirements and lack of tolerances.
   & Ensure tolerances built into partition algorithm to keep models at (100-t)\% of device availability (t is specified threshold 
@@ -151,8 +151,8 @@ Component
 Inference Engine
   & Follower device fails or crashes during local inference.
   & Inference is lost and response cannot be returned to user.
-  & A myriad of local failures could cause the device to not complete the inference. This could be hardware constraints or other device proceses interfering.
-  & Coordinator device is able to prevent failures from being shown to user and send retry request(s) to produce proper output.
+  & A myriad of local failures could cause the device to not complete the inference. This could be hardware constraints or other device processes interfering.
+  & Leader device is able to prevent failures from being shown to user and send retry request(s) to produce proper output.
   & SR2-1
   & H2-1 \\ \hline
 %
@@ -162,13 +162,14 @@ Inference Engine
   & Node receives incoherent tensors and cannot produce output to user.
   & User does not receive a response to their prompt and cannot use the system.
   & Communication failure (lost or corrupted data) between two nodes.
-  & Place checks throughout the inference process for corrupted or lost tensors and restart inference from coordinator, temporarily removing the node where corruption/loss occurred from the network.
+  & Place checks throughout the inference process for corrupted or lost tensors and restart inference from leader, temporarily removing the node where corruption/loss occurred from the network. Additionally, checksums 
+  can be implemented to catch network corruption, with the system restarting if the checksums do not match.
   & SR3-1
   & H3-1 \\ \cline{2-7}
 \multirow{-2}{\dimexpr0.2\textwidth\relax}{Tensor I/O}
-  & Coordinator node fails to extract compressed tensors. 
+  & Leader node fails to extract compressed tensors. 
   & User does not receive a response to their prompt and cannot use the system.
-  & $i$ - Follower device fails to produce proper output or $ii$ - Coordinator cannot interpret output and run final inference to produce output.
+  & $i$ - Follower device fails to produce proper output or $ii$ - Leader cannot interpret output and run final inference to produce output.
   & Using the checks identified in H3-1, identify the node causing the failure and temporarily remove it from the network before restarting. If no problem is indicated from any follower node, restart
   inference and notify user of the issue.
   & SR3-2
@@ -178,15 +179,16 @@ Inference Engine
 %
   % (General Communication: multirow label is in the third row below)
   & Communication between two nodes times out between devices or fails entirely.
-  & Failure of system, loss of inference if midway through session
-  & Failure of communication protocol between nodes at hardware level (Thunderbolt)
-  & Monitor average communication times between nodes and alert user to check connections if it exceeds a threshold. Restart inference if communication is lost and remove failed node.
+  & Failure of system, loss of inference if midway through session.
+  & Failure of communication protocol between nodes at hardware level (Thunderbolt, Wi-Fi, Ethernet).
+  & Monitor average communication times between nodes and alert user to check connections if it exceeds a threshold. This can be measured through packet loss and throughput metrics. Restart inference if communication is lost and remove failed node.
   & SR4-1
   & H4-1 \\ \cline{2-7}
   & Device health status communication fails.
-  & Coordinator unaware if device fails, loss of system is possible if unknown device's performance is degraded.
-  & Failure on behalf of coordinator node to send outbound requests, or failure of follower nodes to receive and respond to requests.
-  & Monitor for devices not returning health checks, after multiple missed, remove device from inference network until health response is received by coordinator. In the case of coordinator failure, notify user that network may fail unexpectedly.
+  & Leader node unaware if device fails, loss of system is possible if unknown device's performance is degraded.
+  & Failure on behalf of leader node to send outbound requests, or failure of follower nodes to receive and respond to requests.
+  & Monitor for devices not returning health checks, after multiple missed, remove device from inference network until health response is received by leader. In the case of leader node failure, the system's follower nodes will interpret a 
+  lack of incoming health requests as leader failure and shut down since no further coordination can take place.
   & SR4-2
   & H4-2 \\ \cline{2-7}
 \multirow{-3}{\dimexpr0.2\textwidth\relax}{General Communication}
@@ -203,7 +205,7 @@ Inference Engine
   & Untrusted node on the device network.
   & Allows unintended access to the system and potential loss of data to bad actors. Reduces user trust in the system and may lead to loss of users.
   & Lack of initial authorization of each node or operation of the system on an untrusted network where unknown devices can join. 
-  & Ensure that system is only operated on limited networks where all potential devices are known. Alternatively, the coordinator node must gain approval from the user before adding an unknown device to the network.
+  & Ensure that system is only operated on limited networks where all potential devices are known. Alternatively, the leader node must gain approval from the user before adding an unknown device to the network.
   & SR5-1
   & H5-1 \\ \cline{2-7}
 \multirow{-2}{\dimexpr0.2\textwidth\relax}{Privacy}
