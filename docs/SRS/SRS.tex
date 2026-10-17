@@ -490,8 +490,8 @@ form of the Dynamic Allocation goal.
 
 \subsubsection{Notation}\label{subsubsec:formal-notation}
 
-For integers $a$ and $b$, $a..b = \{\, n \in \mathbb{Z} \mid a \le n \le b
-\,\}$, which is empty when $a > b$. $\mathbb{N} = \{0, 1, 2, \dots\}$.
+For integers $a$ and $b$, $a..b = \{\, n \in \mathbb{N} \mid a \le n \le b
+\,\}$, which is empty when $a > b$.
 
 \begin{table}[H]
 \centering
@@ -530,7 +530,7 @@ A \emph{partitioning scheme} is a finite sequence of partitions
   P = \langle (d_1, a_1, b_1), \dots, (d_k, a_k, b_k) \rangle,
   \qquad k \ge 1,
 \end{equation*}
-where $d_i$ is a node and $a_i, b_i \in \mathbb{Z}$. Partition $i$ consists
+where $d_i$ is a node and $a_i, b_i \in \mathbb{N}$. Partition $i$ consists
 of units $a_i..b_i$, runs on node $d_i$, and passes its output to partition
 $i+1$. The nodes of $P$ are $\mathit{dev}(P) = \{d_1, \dots, d_k\}$.
 \end{definition}
@@ -604,7 +604,7 @@ $\Sigma = \{\mathit{load}, \mathit{unload}, \mathit{req}, \mathit{fin},
   \item $\mathit{leave}(d)$: follower $d$ leaves, or is detected as failing
     (\hyperref[FR.S.1.10]{FR.S.1.10}).
 \end{itemize}
-The machine models follower nodes only. If the leader node is detected as
+This finite state machine only models the behaviour of follower nodes. If the leader node is detected as
 failed (\hyperref[FR.S.1.24]{FR.S.1.24}), the followers shut down and the session ends
 (\hyperref[FR.S.1.25]{FR.S.1.25}), which has the same effect as $\mathit{unload}$.
 
