@@ -876,7 +876,7 @@ Template).
 
 \begin{itemize}
     \item \textbf{Device hardware} -- Each node should have a sufficient CPU, GPU, memory, and storage such that its assigned model layers, KV cache, and other Lake software components can fit and run within the device, such that distributed inference has both a higher token throughput and lower latency than an equivalent single-device inferenece.
-    \item \textbf{Network communication} -- Network communication, whether wired or wireless should have a sufficiently high bandwitch and low latency such that distributed inference has a token throughput and lower latency than an equivalent single-device inference.
+    \item \textbf{Network communication} -- Network communication, whether wired or wireless, should have a sufficiently high bandwitch and low latency. Inter-node communication overhead may make distributed inference slower than single-device inference.
     \item \textbf{Platform compatibility} -- Nodes within the Lake network must operate on Windows, macOS, and Linux, (as well as Android and iOS as stretch goals) as hardware acceleration and inference platforms are limited by the available drivers on this operating systems.
     \item \textbf{API compatibility} -- Lake must implement a standardized OpenAI API spec such that existing external clients can easily utilize Lake, \citep{OpenAIAPI}, as specified in Section S.3.
     \item \textbf{Model architecture} -- Only supported LLM architectures that Lake's model layer partioning supports can be used.
@@ -890,6 +890,7 @@ Template).
     \item \textbf{Permitted model use} -- Lake operators are using permitted models for inference that adhere to the respective licensing.
     \item \textbf{Network reachability} -- Nodes within the Lake network must be able to communicate over a network connection.
     \item \textbf{Model suitability} -- Models that are suited for a given task are used when Lake is serving inference (e.g. a larger model for logic/coding-based tasks, a smaller model for conversational tasks).
+    \item \textbf{Trust local network} -- The local network connecting the participating nodes is a private and trusted network by the operator.
 \end{itemize}
 
 \subsection{Effects}\label{subsec:effects}
@@ -898,7 +899,7 @@ Template).
     \item \textbf{Resource usage} -- Device owner's CPU/GPU, memory, and disk usage will increase while the device is part of the Lake network, potentially making the device too resource constrainted to multi-task or perform other activities. When not in use, any cached data or the stored layers can continue to utilize disk space.
     \item \textbf{Energy usage} -- Devices will consume more power, increasing energy usage, heat generated, fan usage, and decreasing battery life if unplugged.
     \item \textbf{Network bandwith usage} -- The Lake network may utilize a large amount of a network's bandwith, inhibiting other devices or processes from accessing the network.
-    \item \textbf{Logged data} -- During inference, logs and other diagnostic information can be stored and persist on the node's disk.
+    \item \textbf{Logged data} -- During inference, logs and other diagnostic information can be stored and persist on the node's disk. Logs must exclude sensitive request data as specified in SR5-2.
     \item \textbf{Access to inference} -- Users can gain access to inference that they previoously would not be able to get within a single device or with a paid service.
 \end{itemize}
 
@@ -909,7 +910,7 @@ Template).
     \item Inference must be contained within the Lake network, and must not be sent to 3rd-party services.
     \item All nodes within the Lake network must be using compatible layer partitions that originate from the same model's layers.
     \item All nodes must serve inference in a way that the activations are performed in the identical order of how single-device inference is performed.
-    \item Intermediate data from one request must not be used for another seperate request.
+    \item Intermediate data from one request must not be used for another independent request.
 \end{itemize}
 
 \subsection{Standards and Legal/Regulatory Factors}\label{subsec:standards}
@@ -937,15 +938,15 @@ Template).
     \hline
     \textbf{Label} & \textbf{Requirement} \\
     \hline
-    \label{NFR.E.1}NFR.E.1 & The system shall be installable and usable on the supported platforms of Windows, macOS, and Linux, and Android/iOS as a stretch goal \\
+    \label{NFR.E.1}NFR.E.1 & The system shall be installable and usable on the supported platforms of Windows, macOS, and Linux, and Android/iOS as a stretch goal. Related to NFR.S.3 and NFR.S.13. \\
     \hline
-    \label{NFR.E.2}NFR.E.2 & The system shall perform model layer partioning to distribute model inference across various supported devices. \\
+    \label{NFR.E.2}NFR.E.2 & The system shall perform model layer partioning to distribute model inference across various supported devices. Related to SR-1 AND SR1-2.\\
     \hline
-    \label{NFR.E.3}NFR.E.3 & The system shall follow the OpenAI API specification for its request and response API service. \\
+    \label{NFR.E.3}NFR.E.3 & The system shall follow the OpenAI API specification for its request and response API service. Related to FR.S.1.9. \\
     \hline
     \label{NFR.E.4}NFR.E.4 & The system shall not modify the underlying model weights during model layer partitioning. \\
     \hline
-    \label{NFR.E.5}NFR.E.5 & The system shall contain all inference requests within the Lake network and not send any requests to 3rd-party services. \\
+    \label{NFR.E.5}NFR.E.5 & The system shall contain all inference requests within the Lake network and not send any requests to 3rd-party services. Related to NFR.S.11.\\
     \hline
     \label{NFR.E.6}NFR.E.6 & The system shall adhere to all codebase formatting and linting conventions. \\
     \hline
