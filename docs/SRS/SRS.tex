@@ -1699,18 +1699,21 @@ document will be kept in sync with the Hazard Analysis, V\&V Plan and design.}
 \tocsection{Safety and Security Requirements}
 \label{sec:safety-security}
 
-\plt{Port the requirements from the Safety and Security Requirements section
-of the Hazard Analysis so this document is the single list of requirements.
-Keep the labels identical in both documents.}
-
 \subsection*{Functional Safety Requirements}
 \begin{itemize}
-    \item \label{FR.Sa.1}\textbf{FR.Sa.1} The system shall \ldots
-\end{itemize}
-
-\subsection*{Non-Functional Safety Requirements}
-\begin{itemize}
-    \item \label{NFR.Sa.1}\textbf{NFR.Sa.1} The system shall \ldots
+    \item \label{SR0-1}\textbf{SR0-1} -- The system shall identify and discard stale device health data from determining device availability by configuring a time-to-live for valid data. 
+    \item \label{SR0-2}\textbf{SR0-2} -- The system shall only route inference requests to nodes that currently have a confirmed model layer partition.
+    \item \label{SR1-1}\textbf{SR1-1} -- The system shall assign at least two nodes for model layer partitioning during distributed inference.
+    \item \label{SR1-2}\textbf{SR1-2} -- The system shall ensure all model layers are assigned to a node, and that each device configured to run model layers receives a non-zero model layer partition assignment.
+    \item \label{SR1-3}\textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a configured safety margin. related SRS requirements: FR.S.2.1, FR.S.2.2.
+    \item \label{SR2-1}\textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered within the configured recovery limits, the system must report to the API that the request has failed. Related SRS requirements: FR.S.1.10, FR.S.1.11, FR.S.1.13.
+    \item \label{SR3-1}\textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests.
+    \item \label{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding merror metadata and report a failure to the coordinator so the inference request can recover, subject to SR5-2.
+    \item \label{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy.
+    \item \label{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria is not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown Related SRS requirements: FR.S.1.24 and FR.S.1.25.
+    \item \label{SR4-3}\textbf{SR4-3} -- The system shall utilize configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance.
+    \item \label{SR5-1}\textbf{SR5-1} -- The system shall require the user approval on theleader node to authorize a follower node, and user confirmation on the follower node to confirm the authorization before it can participate in the Lake network. Related SRS requirements: FR.S.1.17, FR.2.1.18, FR.S.1.20, FR.S.1.21, NFR.S.12.
+    \item \label{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, aor KV cache content in diagnostic logs. Related SRS requirements: NFR.S.10.
 \end{itemize}
 
 % ===========================================================================
