@@ -348,7 +348,7 @@ Inference Engine
     \item \label{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy.
     \item \label{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria is not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown Related SRS requirements: FR.S.1.24 and FR.S.1.25.
     \item \label{SR4-3}\textbf{SR4-3} -- The system shall utilize configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance.
-    \item \label{SR5-1}\textbf{SR5-1} -- The system shall require the user approval on the leader node to authorize a follower node, and user confirmation on the follower node to confirm the authorization before it can participate in the Lake network. Related SRS requirements: FR.S.1.17, FR.S.2.1.18, FR.S.1.20, FR.S.1.21, NFR.S.12.
+    \item \label{SR5-1}\textbf{SR5-1} -- The system shall require the user approval on the leader node to authorize a follower node, and user confirmation on the follower node to confirm the authorization before it can participate in the Lake network. Related SRS requirements: FR.S.1.17, FR.S.1.18, FR.S.1.20, FR.S.1.21, NFR.S.12.
     \item \label{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, and KV cache content in diagnostic logs. Related SRS requirements: NFR.S.10.
 \end{itemize}
 
