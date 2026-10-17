@@ -240,10 +240,10 @@ Mixed operating systems in one pool & N/A & N/A & Partly & Windows, macOS, Linux
 
 \subsection{Expected Benefits}\label{subsec:expected-benefits}
 
-The benefits below follow the four goals in the Problem Statement, plus
-concurrent inference, which the team is moving from a stretch goal to a
-goal because serving several requests at once is one of the main advantages
-of splitting a model by layers.
+The benefits below follow the goals in the Problem Statement: the four
+numbered goals and concurrent inference, which is a goal in its own right
+because serving several requests at once is one of the main advantages of
+splitting a model by layers.
 Figure~\ref{fig:goal-model} is a goal model thats reflects this. Each benefit below states the measure we
 will use to check it, and the requirements that deliver them are in
 Section~\ref{subsec:functionality}.
@@ -375,24 +375,40 @@ second there is nothing a user could not already get elsewhere.
 
 \subsubsection{Non-Functional Requirements}\label{subsubsec:g4-nonfunctional}
 
+These state how well Lake must do what Section~\ref{subsubsec:g4-functional}
+describes. Each is a quality the system must have, not a design choice, and
+each names the detailed requirement that gives it a measurable target.
+
 \begin{itemize}
     \item \label{NFR-G4-2-1}\textbf{NFR-G4-2-1 Request data stays in the
     cluster.} No prompt, response, or intermediate data is sent to any device
     outside the cluster, none is kept after a request completes, and Lake
     sends no telemetry. This is the privacy benefit, and it is the reason an
     organisation handling export-controlled or medical data could use Lake at
-    all. \emph{Realised by} NFR.S.10, NFR.S.11, NFR.S.12, and NFR.E.5; the telemetry clause is being added to Section~\ref{subsec:functionality}.
+    all. \emph{Realised by} NFR.S.10, NFR.S.11, NFR.S.12, and NFR.E.5.
     \item \label{NFR-G4-2-2}\textbf{NFR-G4-2-2 Runs on Windows, macOS, and
     Linux.} Each is a supported platform for any node, and one cluster can
     mix all three. This is the cross-platform goal from the Problem
     Statement. \emph{Realised by} NFR.S.3, NFR.S.13 to NFR.S.15, and NFR.E.1.
     \item \label{NFR-G4-2-3}\textbf{NFR-G4-2-3 The split does not change the
     model.} A model run through Lake produces output of the same quality as
-    the same model run on one machine, within a measured tolerance. Users
+    the same model run on one machine, within the tolerance set by NFR.S.6.
+    Users
     would not trust a system that made their model worse. \emph{Realised by} NFR.S.6, FR.S.2.3, and NFR.E.4.
     \item \label{NFR-G4-2-4}\textbf{NFR-G4-2-4 License compliance.} Lake
     respects the licenses of the software it builds on and of the models it
     runs, as set out in Section~\ref{subsec:standards}. \emph{Realised by} NFR.E.7 and NFR.E.8.
+    \item \label{NFR-G4-2-5}\textbf{NFR-G4-2-5 Installable without expert
+    help.} A user can install Lake on each supported platform from an
+    installer or a single package-manager command, without building from
+    source or editing configuration files. Both the home user and the
+    organisation in Section~\ref{subsec:user-profiles} said they would not
+    deploy a tool that needs more than that. \emph{Realised by} NFR.S.3.
+    \item \label{NFR-G4-2-6}\textbf{NFR-G4-2-6 Serves more users as nodes
+    are added.} The number of requests a cluster can serve at once without
+    any one of them slowing beyond a set tolerance grows with the number of
+    nodes. This is the measure behind the concurrent inference goal.
+    \emph{Realised by} NFR.S.5.
 \end{itemize}
 
 Privacy and fidelity matter most. A local inference tool that leaked data or
@@ -433,6 +449,10 @@ Section~\ref{subsec:stakeholders-and-requirements-sources}.
 \hyperref[NFR-G4-2-3]{NFR-G4-2-3} The split does not change the model & C & I & C & -- & R, A & I & I \\
 \hline
 \hyperref[NFR-G4-2-4]{NFR-G4-2-4} License compliance & I & C & I & I & R, A & C & I \\
+\hline
+\hyperref[NFR-G4-2-5]{NFR-G4-2-5} Installable without expert help & C & C & C & C & R, A & I & -- \\
+\hline
+\hyperref[NFR-G4-2-6]{NFR-G4-2-6} Serves more users as nodes are added & I & C & C & I & R, A & I & -- \\
 \hline
 \end{tabular}
 \end{table}
@@ -572,9 +592,6 @@ the System chapter record which of these may change.
     transformer models that ggml \citep{Ggml} supports. Lake does not train,
     fine-tune, quantize, or otherwise modify a model, and does not change the
     quality of its output.
-    \item \emph{Local network only.} All devices must be on the same local
-    network. Running inference across the internet is not supported, because
-    the latency between tokens would make the system unusable.
     \item \emph{Trusted network and devices.} In the first release, traffic
     between nodes is not encrypted and devices are not authenticated beyond
     the owner's confirmation. Privacy therefore means that data never leaves
@@ -587,10 +604,6 @@ the System chapter record which of these may change.
     \item \emph{Wired connections first.} The first revision targets wired
     Ethernet. Wireless operation is a stretch goal because its latency and
     variability may make the split model too slow.
-    \item \emph{No leader failover yet.} If the leader node leaves, the
-    cluster shuts down. The Coordinator runs on every node so that a later
-    release can promote another node to leader, but the first release does
-    not.
     \item \emph{Not faster for models that already fit.} Lake does not speed
     up a model that already runs well on one device. The benefit is running
     models that would not otherwise fit.
@@ -607,7 +620,7 @@ Lake or be affected by it. Direct stakeholders use or build the system;
 indirect ones are affected by it without touching it. The three direct user
 groups are developed into personas in Section~\ref{subsec:user-profiles}.
 
-\begin{longtable}{|p{2.6cm}|p{1.4cm}|>{\raggedright\arraybackslash}p{4.55cm}|>{\raggedright\arraybackslash}p{4.55cm}|}
+\begin{longtable}{|p{2.5cm}|p{1.3cm}|>{\raggedright\arraybackslash}p{4.05cm}|>{\raggedright\arraybackslash}p{4.05cm}|}
 \caption{Stakeholders}
 \label{tab:stakeholders} \\
 \hline
