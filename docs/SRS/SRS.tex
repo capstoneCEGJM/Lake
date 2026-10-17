@@ -524,9 +524,9 @@ network in advance.
     \item \textbf{2a.} The owner declines: the device is left out of the
     cluster and the operator is notified.
     \item \textbf{2b.} The owner does not respond: the request expires, the
-    device is left out, and the operator is notified.\caution{}
+    device is left out, and the operator is notified.
     \item \textbf{2c.} The owner is not at the device or the device is
-    asleep: the device is treated as unavailable and left out.\caution{}
+    asleep: the device is treated as unavailable and left out.
 \end{itemize}
 
 \noindent\textbf{Justification:} Consent is a stated requirement of the
@@ -555,7 +555,7 @@ stakeholder who may not be the person running the cluster.
 \begin{itemize}
     \item A cluster exists (\hyperref[UC1]{UC1}).
     \item The operator has a model file in a supported format
-    (GGUF)\caution{}.
+    (GGUF).
     \item The cluster has enough combined memory for the model.
 \end{itemize}
 
@@ -636,7 +636,7 @@ model that does not fit on any single device.
 \noindent\textbf{Postconditions (Failure Guarantees):}
 \begin{itemize}
     \item If the request cannot be served, the tool receives an error
-    response in the API's format rather than a hung connection.\caution{}
+    response in the API's format rather than a hung connection.
     \item No request data is sent outside the cluster.
 \end{itemize}
 
@@ -656,10 +656,10 @@ model that does not fit on any single device.
     \item \textbf{2a.} The address is wrong or the leader node is
     unreachable: the tool reports a connection error.
     \item \textbf{3a.} No model is loaded: Lake returns an error saying so
-    instead of waiting.\caution{}
+    instead of waiting.
     \item \textbf{3b.} The tool uses tool calling or another option Lake does
     not support: Lake returns an error naming the unsupported
-    option.\caution{}
+    option.
     \item \textbf{4a.} A node leaves during the request: see
     \hyperref[UC5]{UC5}.
 \end{itemize}
@@ -767,7 +767,7 @@ between Lake and existing local distributed inference providers.
     \item If the computer does not join, the cluster and the session continue
     unchanged.
     \item The user's requests are not lost or corrupted by the
-    attempt.\caution{}
+    attempt.
 \end{itemize}
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
@@ -785,12 +785,12 @@ between Lake and existing local distributed inference providers.
     \item \textbf{2a.} The owner declines or does not respond: the computer
     is not added and the session continues unchanged.
     \item \textbf{3a.} Reorganisation fails: Lake keeps the previous
-    arrangement, tells the operator, and the session continues.\caution{}
+    arrangement, tells the operator, and the session continues.
     \item \textbf{3b.} A prompt is in progress during reorganisation: Lake
     finishes it or re-runs it without the user resubmitting, and never
-    presents a partial answer as complete.\caution{}
+    presents a partial answer as complete.
     \item \textbf{5a.} The change in speed is not an improvement: the
-    operator can inspect the cluster view (\hyperref[UC7]{UC7}).\caution{}
+    operator can inspect the cluster view (\hyperref[UC7]{UC7}).
 \end{itemize}
 
 \noindent\textbf{Justification:} Taking advantage of new devices is a key differentiator
@@ -825,7 +825,7 @@ through dynamic allocation as a session progresses.
 \noindent\textbf{Postconditions (Failure Guarantees):}
 \begin{itemize}
     \item Viewing measurements does not interrupt or alter the running
-    session.\caution{}
+    session.
 \end{itemize}
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
@@ -841,7 +841,7 @@ through dynamic allocation as a session progresses.
 \noindent\textbf{Extensions:}
 \begin{itemize}
     \item \textbf{2a.} A node is not reporting measurements: the view marks
-    it as unavailable.\caution{}
+    it as unavailable.
     \item \textbf{4a.} The operator removes or adds a computer: see
     \hyperref[UC5]{UC5} or \hyperref[UC6]{UC6}.
 \end{itemize}
@@ -903,7 +903,7 @@ beneficial and potential areas for improvement.
     queue in the cluster view.
     \item \textbf{3a.} A node leaves while several requests are in progress:
     see \hyperref[UC5]{UC5}; each affected request is re-run or reported
-    individually.\caution{}
+    individually.
     \item \textbf{4a.} Responses slow because of load: the operator can
     inspect the cluster view (\hyperref[UC7]{UC7}).
 \end{itemize}
