@@ -20,6 +20,7 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amstext}
+\usepackage{amsthm}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{zed-csp}     % Z notation, for S.9 Formalizations (optional)
@@ -45,6 +46,12 @@
   \renewcommand{\theHsubsection}{#1.\arabic{subsection}}
   \setcounter{subsection}{0}%
 }
+
+% Numbered statements for S.9 Formalizations, e.g. Lemma S.9.2.3.
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[subsubsection]
+\theoremstyle{plain}
+\newtheorem{lemma}[definition]{Lemma}
 
 % Unnumbered section that still appears in the table of contents.
 \newcommand{\tocsection}[1]{%
@@ -73,6 +80,7 @@
 \textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
 2026-10-09 & Colin Chambachan & Switch from the Volere template to the Meyer template\\
+2026-10-15 & Gary Qin & S.9 Formalizations\\
 Date2 & Name(s) & Description of changes\\
 ... & ... & ...\\
 \bottomrule
@@ -473,10 +481,206 @@ in S.2 should map to at least one criterion here.}
 \end{itemize}
 
 \subsection{Formalizations}\label{subsec:formalizations}
-\plt{Mathematical or formal specification of the parts of the system that
-benefit from precision: state models, invariants, algorithms, data formats.
-Z notation is available through the \texttt{zed-csp} package. If nothing in
-the system warrants formalization, say so and why.}
+
+Two parts of \progname{} are formalized. S.9.2 defines what counts as a
+valid partitioning scheme for the model across the cluster, which every other
+requirement depends on. S.9.3 specifies, as a finite state machine, how the
+system responds when nodes join and leave the cluster. This is the precise
+form of the Dynamic Allocation goal.
+
+\subsubsection{Notation}\label{subsubsec:formal-notation}
+
+For integers $a$ and $b$, $a..b = \{\, n \in \mathbb{N} \mid a \le n \le b
+\,\}$, which is empty when $a > b$.
+
+\begin{table}[H]
+\centering
+\caption{Symbols used in the formalization}
+\label{tab:formal-symbols}
+\begin{tabularx}{\textwidth}{|l|l|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Symbol} & \textbf{Type (unit)} & \textbf{Meaning} \\
+\hline
+$N$ & $\mathbb{N}$, $N \ge 1$ & Number of partition units in the model
+(embedding, transformer layers and output head), in execution order. \\
+\hline
+$L$ & $L = 1..N$ & The set of partition units. \\
+\hline
+$D$ & finite set & The nodes currently in the cluster: devices the user has
+selected (\hyperref[FR.S.5.2]{FR.S.5.2}) and that have confirmed participation (\hyperref[FR.S.1.21]{FR.S.1.21}). \\
+\hline
+$m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s weights
+and its KV cache for \textit{CONTEXT\_MAX} tokens. \\
+\hline
+$M_d$ & $\mathbb{N}$ (bytes) & GPU-accessible memory free on node $d$ when it
+joins the cluster, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR.S.2.1}. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\noindent The formalization assumes that $M_d$ does not change while $d$ is
+in the cluster, and that $\mathit{join}(d)$ only occurs for $d \notin D$ and
+$\mathit{leave}(d)$ only for $d \in D$.
+
+\subsubsection{Valid Partitioning Schemes}\label{subsubsec:formal-partitions}
+
+\begin{definition}[Partitioning scheme]\label{def:partition}
+A \emph{partitioning scheme} is a finite sequence of partitions
+\begin{equation*}
+  P = \langle (d_1, a_1, b_1), \dots, (d_k, a_k, b_k) \rangle,
+  \qquad k \ge 1,
+\end{equation*}
+where $d_i$ is a node and $a_i, b_i \in \mathbb{N}$. Partition $i$ consists
+of units $a_i..b_i$, runs on node $d_i$, and passes its output to partition
+$i+1$. The nodes of $P$ are $\mathit{dev}(P) = \{d_1, \dots, d_k\}$.
+\end{definition}
+
+\begin{definition}[Valid partitioning scheme]\label{def:valid}
+$P$ is \emph{valid} over cluster $D$, written $P \in \mathcal{V}(D)$, if and
+only if:
+\begin{enumerate}
+  \item[(V1)] $\mathit{dev}(P) \subseteq D$ and $d_i \ne d_j$ for all
+    $1 \le i < j \le k$;
+  \item[(V2)] $a_1 = 1$ and $b_k = N$;
+  \item[(V3)] $a_i \le b_i$ for all $i \in 1..k$;
+  \item[(V4)] $a_{i+1} = b_i + 1$ for all $i \in 1..k-1$;
+  \item[(V5)] $\sum_{\ell = a_i}^{b_i} m_\ell \le M_{d_i}$ for all
+    $i \in 1..k$.
+\end{enumerate}
+\end{definition}
+
+(V1) gives each node at most one partition. (V2)--(V4) make the partitions
+consecutive, non-empty blocks of units in execution order. (V5) says each
+node has room for its partition. The Model Partitioner must return a member
+of $\mathcal{V}(D)$ whenever $\mathcal{V}(D) \ne \emptyset$, and must report
+failure otherwise (\hyperref[FR.S.2.2]{FR.S.2.2}).
+
+\begin{lemma}[Exact cover]\label{lem:cover}
+If $P \in \mathcal{V}(D)$, every unit $\ell \in L$ belongs to exactly one
+partition. That is, the sets $a_i..b_i$ for $i \in 1..k$ are non-empty,
+pairwise disjoint, and their union is $L$.
+\end{lemma}
+\begin{proof}
+Let $b_0 = 0$. By (V2) and (V4), $a_i = b_{i-1} + 1$ for all $i \in 1..k$,
+so partition $i$ consists of units $(b_{i-1}+1)..b_i$. By (V3) these sets are
+non-empty, so $0 = b_0 < b_1 < \dots < b_k = N$. Each $\ell \in L$ therefore
+satisfies $b_{i-1} < \ell \le b_i$ for exactly one $i$, so it belongs to
+exactly one partition.
+\end{proof}
+
+\subsubsection{Allocation State Machine}\label{subsubsec:formal-fsm}
+
+The system's response to nodes joining and leaving the cluster is a finite
+state machine $(Q, \Sigma, \delta, q_0)$ whose transitions are guarded by
+predicates over the cluster $D$ and the active partitioning scheme $P$.
+
+\paragraph{States.}
+$Q = \{\mathsf{U}, \mathsf{A}, \mathsf{I}, \mathsf{G}, \mathsf{R},
+\mathsf{X}\}$ with $q_0 = \mathsf{U}$:
+\begin{itemize}
+  \item $\mathsf{U}$ (Unloaded): no model is loaded.
+  \item $\mathsf{A}$ (Allocating): a target scheme $P'$ is being loaded, and
+    no request is in progress.
+  \item $\mathsf{I}$ (Idle): the model is loaded on scheme $P$.
+  \item $\mathsf{G}$ (Generating): a request is being served on $P$.
+  \item $\mathsf{R}$ (Recovering): a node in $\mathit{dev}(P)$ left during a
+    request. The request is stopped while $P'$ is loaded, then retried
+    (\hyperref[FR.S.1.13]{FR.S.1.13}).
+  \item $\mathsf{X}$ (Insufficient): $\mathcal{V}(D) = \emptyset$, so the
+    cluster cannot hold the model.
+\end{itemize}
+
+\paragraph{Events.}
+$\Sigma = \{\mathit{load}, \mathit{unload}, \mathit{req}, \mathit{fin},
+\mathit{done}\} \cup \{\mathit{join}(d), \mathit{leave}(d)\}$:
+\begin{itemize}
+  \item $\mathit{load}$ and $\mathit{unload}$: the user creates a cluster
+    with a model, or shuts it down.
+  \item $\mathit{req}$ and $\mathit{fin}$: a request is submitted, or
+    finishes.
+  \item $\mathit{done}$: the system finishes loading $P'$.
+  \item $\mathit{join}(d)$: a device the user selected confirms
+    participation and is added to the cluster.
+  \item $\mathit{leave}(d)$: follower $d$ leaves, or is detected as failing
+    (\hyperref[FR.S.1.10]{FR.S.1.10}).
+\end{itemize}
+This finite state machine only models the behaviour of follower nodes. If the leader node is detected as
+failed (\hyperref[FR.S.1.24]{FR.S.1.24}), the followers shut down and the session ends
+(\hyperref[FR.S.1.25]{FR.S.1.25}), which has the same effect as $\mathit{unload}$.
+
+\paragraph{Guards.}
+Let $D'$ be the cluster after the event: $D \cup \{d\}$ for
+$\mathit{join}(d)$, $D \setminus \{d\}$ for $\mathit{leave}(d)$, and $D$
+otherwise. Then
+\begin{equation*}
+  \varphi \;\equiv\; \mathcal{V}(D') \ne \emptyset
+  \qquad\text{and}\qquad
+  \psi \;\equiv\; d \in \mathit{dev}(P).
+\end{equation*}
+Whenever the machine enters $\mathsf{A}$ or $\mathsf{R}$, it selects a new
+target $P' \in \mathcal{V}(D')$.
+
+\paragraph{Transitions.}
+Table~\ref{tab:fsm} defines $\delta$. Combinations it does not list are
+handled as follows:
+\begin{itemize}
+  \item $\mathit{unload}$ moves every state to $\mathsf{U}$ and aborts any
+    request in progress.
+  \item $\mathit{leave}(d)$ with $\neg\psi$ in $\mathsf{I}$ or $\mathsf{G}$
+    removes $d$ from $D$ and leaves the state unchanged.
+  \item $\mathit{req}$ is rejected with an error in $\mathsf{U}$ and
+    $\mathsf{X}$. $\mathit{req}$ in $\mathsf{A}$, $\mathsf{G}$ or
+    $\mathsf{R}$, and $\mathit{join}(d)$ in $\mathsf{G}$ or $\mathsf{R}$, are
+    queued and fire in arrival order once $\mathsf{I}$ is entered. The
+    machine therefore serves one request at a time, and concurrent requests
+    (\hyperref[FR.S.1.14]{FR.S.1.14}) are not modelled.
+  \item Any other combination leaves the state unchanged.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Transition function $\delta$ of the allocation state machine}
+\label{tab:fsm}
+\small
+\begin{tabularx}{\textwidth}{|c|c|l|c|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{\#} & \textbf{State} & \textbf{Event [guard]} & \textbf{Next} &
+\textbf{Effect} \\
+\hline
+1 & $\mathsf{U}$ & $\mathit{load}$ $[\varphi]$ & $\mathsf{A}$ & Start loading $P'$. \\
+2 & $\mathsf{U}$ & $\mathit{load}$ $[\neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
+\hline
+3 & $\mathsf{A}$ & $\mathit{done}$ & $\mathsf{I}$ & $P := P'$. \\
+4 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\varphi]$ & $\mathsf{A}$ & Reselect $P'$ and restart loading. \\
+5 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
+\hline
+6 & $\mathsf{I}$ & $\mathit{req}$ & $\mathsf{G}$ & Start generating. \\
+7 & $\mathsf{I}$ & $\mathit{join}(d)$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
+8 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
+9 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
+\hline
+10 & $\mathsf{G}$ & $\mathit{fin}$ & $\mathsf{I}$ & Return the response. \\
+11 & $\mathsf{G}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{R}$ & Stop the request. \\
+12 & $\mathsf{G}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Abort the request with an error. \\
+\hline
+13 & $\mathsf{R}$ & $\mathit{done}$ & $\mathsf{G}$ & $P := P'$, retry the request. \\
+14 & $\mathsf{R}$ & $\mathit{leave}(d)$ $[\varphi]$ & $\mathsf{R}$ & Reselect $P'$ and restart loading. \\
+15 & $\mathsf{R}$ & $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Abort the request with an error. \\
+\hline
+16 & $\mathsf{X}$ & $\mathit{join}(d)$ $[\varphi]$ & $\mathsf{A}$ & Start loading $P'$. \\
+\hline
+\end{tabularx}
+\end{table}
+Row 7 needs no guard. Conditions (V1)--(V5) refer to $D$ only through
+$\mathit{dev}(P) \subseteq D$, so a scheme valid over $D$ stays valid over
+$D \cup \{d\}$. For the same reason, removing a node outside
+$\mathit{dev}(P)$ keeps $P$ valid.
+
+\paragraph{Invariant.} In states $\mathsf{I}$ and $\mathsf{G}$,
+$P \in \mathcal{V}(D)$. $P$ is only assigned in rows 3 and 13, from a $P'$
+that is reselected after every change to the cluster. The only change that
+keeps the machine in $\mathsf{I}$ or $\mathsf{G}$ removes a node outside
+$\mathit{dev}(P)$.
 
 % ===========================================================================
 \pegschapter{P}{Project}
