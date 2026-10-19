@@ -190,6 +190,10 @@ or matters most. The first use of each term in a chapter links back here.
     hidden state, that a model layer computes and passes to the next layer
     during inference. In Lake, activations cross the network between nodes as
     tensors (\req{FR.G.4.3}).
+    \glsentry{ai}{AI (artificial intelligence)} Software that performs tasks
+    which normally need human judgement, such as answering questions or
+    writing text. In this document the AI in question is always a large
+    language model (Section~\ref{subsubsec:g7-stakeholders}).
     \glsentry{api}{API (application programming interface)} A defined set of
     requests that one program can make of another. Lake's API is the
     OpenAI-compatible API served by the leader node
@@ -329,8 +333,8 @@ or matters most. The first use of each term in a chapter links back here.
     nodes for a whole model. Section~\ref{subsubsec:formal-partitions}
     defines when a scheme is valid.
     \glsentry{pegs}{PEGS} Meyer's four-chapter structure for a requirements
-    document: Project, Environment, Goals, and System
-    (Section~\ref{sec:changes}).
+    document: Project, Environment, Goals, and System (see
+    \hyperref[sec:changes]{Changes from Original SRS Meyer Template}).
     \glsentry{perplexity}{Perplexity} A measure of how well a model predicts
     a body of text; lower is better. Used to compare a split model with the
     unsplit one (Section~\ref{subsec:verification-and-acceptance-criteria}).
@@ -359,11 +363,14 @@ or matters most. The first use of each term in a chapter links back here.
     \glsentry{rtt}{RTT (round-trip time)} The time for a message to reach
     another node and for the reply to come back; a measure of network
     latency (\req{FR.S.1.3}).
-    \glsentry{session}{Session} A period of interaction between a user and
-    Lake, from forming a cluster and loading a model to shutting it down,
-    during which one or more inference requests are served.
-    \glsentry{srs}{SRS (Software Requirements Specification)} This document
-    (Section~\ref{sec:changes}).
+    \glsentry{session}{Session} A period of interaction with Lake during
+    which one or more inference requests are served. For the operator, a
+    session runs from forming a cluster and loading a model to shutting the
+    cluster down (\hyperref[UC1]{UC1}); for an inference user, a session is one
+    conversation whose context is kept between prompts (\hyperref[UC3]{UC3}).
+    \glsentry{srs}{SRS (Software Requirements Specification)} This document,
+    which records what Lake must do and why (see
+    \hyperref[sec:changes]{Changes from Original SRS Meyer Template}).
     \glsentry{streaming}{Streaming} Returning a response token by token as it
     is generated, rather than all at once when it is complete
     (\req{FR.G.4.6}).
@@ -470,7 +477,7 @@ everything is restarted. Lake builds on the same idea but makes the assignment
 something the system can change while it is running.
 Table~\ref{tab:alternatives} summarises how Lake compares. Mixed operating
 systems are marked ``partly'' for the existing tools because exo runs on
-Apple silicon through MLX and only on the \gl[cpu]{CPU} on Linux, with no Windows build
+Apple silicon through Apple's MLX framework and only on the \gl[cpu]{CPU} on Linux, with no Windows build
 \citep{Exo}, and prima.cpp supports Linux and macOS \citep{PrimaCpp2025};
 only the llama.cpp RPC backend runs on all three.
 
@@ -986,7 +993,7 @@ allocation. Both are tracked as issues in the project repository.
 recommended this template and shaped how the requirements are organised.
 
 \paragraph{User interview.} On October 16, 2026 we sent the eight questions
-in Appendix~\ref{app:interview} to an AI developer at an aerospace
+in Appendix~\ref{app:interview} to an \gl[ai]{AI} developer at an aerospace
 engineering firm, who answered in writing. He builds and runs the company's
 in-house assistant for about two hundred staff, entirely on two GPU
 machines, because much of the firm's data is export-controlled and cannot go
@@ -1090,7 +1097,7 @@ guarantee, and for retries that never repeat side effects.
 \paragraph{Researcher}
 
 \noindent\emph{Dr. Mei Lin, 35, postdoctoral researcher leading a four-person
-NLP group} \\
+natural language processing (NLP) group} \\
 ``We have six workstations and no cloud budget. I need numbers I can put in a
 paper.''
 
@@ -1241,7 +1248,7 @@ Template).
 		partition given the device's computational and networking performance.
 
 	\item \textbf{\gl[inferenceengine]{Inference Engine}} --
-		This component is the high-performance inference engine running on each device. It will handle
+		This component is the high-performance \gl{inference} engine running on each device. It will handle
 		execution of the given model partition for each device. It will call into
 		ggml \citep{Ggml} using the Rust-to-C FFI to control the execution of a
 		device's model partition.
@@ -1340,7 +1347,7 @@ Template).
 		to the original model. Satisfies \hyperref[NFR.S.6]{NFR.S.6}.
 	\item \reqlabel{FR.S.2.4}\textbf{FR.S.2.4} The system shall assign larger partitions to more capable
 		devices\footnote{The "capabilities" of any given devices are defined via a combination of network throughput,
-		GPU \gl[flops]{TFLOPs}/TOPs, GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
+		GPU \gl[flops]{TFLOPs} or TOPs (tera operations per second), GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
 		Related to \hyperref[NFR.S.4]{NFR.S.4}.
 \end{itemize}
 
@@ -2717,16 +2724,16 @@ $\mathit{dev}(P)$.
     \item \textbf{Architecture lead (Ethan Walsh)} -- Leads the architecture design of the system.
     \item \textbf{Coordinator lead (Gary Qin)} -- Leads the \gl{coordinator} and inter-process communication (\gl[ipc]{IPC}) design of the system.
     \item \textbf{Performance lead (Matthew Nesbitt)} -- Leads the performance benchmarking and optimization of the system.
-    \item \textbf{Machine learning leads (Jinwoo Hong, Colin Chambachan)} -- Lead the ML systems of Lake.
+    \item \textbf{Machine learning leads (Jinwoo Hong, Colin Chambachan)} -- Lead the machine learning systems of Lake.
     \item \textbf{Meeting chair (Rotating weekly amongst team members)} -- Leads weekly team meetings.
-    \item \textbf{QA lead (Rotating weekly amongst team members)} -- Performs quality assurance and dogfooding of the system.
+    \item \textbf{Quality assurance lead (Rotating weekly amongst team members)} -- Performs quality assurance and dogfooding of the system.
     \item \textbf{Teaching assistant (Rebecca Di Filippo)} -- Provides technical guidance and feedback throughout the project.
 \end{itemize}
 
 \subsection{Imposed Technical Choices}\label{subsec:technical-choices}
 
 \begin{itemize}
-    \item \textbf{API specification} -- Lake will follow the \gl[openaiapi]{OpenAI API} specification for its request and response formats \citep{OpenAIAPI}. This is chosen due to the widespread adoption of this API specification and the flexibility it provides when connecting to existing external clients.
+    \item \textbf{API specification} -- Lake will follow the \gl[openaiapi]{OpenAI API} specification for its request and response formats \citep{OpenAIAPI}. This is chosen due to the widespread adoption of this \gl[api]{API} specification and the flexibility it provides when connecting to existing external clients.
     \item \textbf{Supported platforms} -- Windows, macOS, and Linux will be supported platforms for \gl[node]{nodes} within the \gl[cluster]{Lake network}. Android and iOS support is a stretch goal. These are chosen due to the availability of \gl[inferenceengine]{inference engine} support and hardware acceleration support for these operating systems.
 \end{itemize}
 
@@ -2772,7 +2779,7 @@ Initial single-device prototype & Implement a model split up across two processe
 
 Expansion across two devices & Implement wired communication and model splitting (50\% and 50\%) across two devices, communicating via \gl[grpc]{gRPC}. & Design Document Revision &  Nov. 16 \\ \hline
 
-Expansion across n devices \& Partitioning algorithm & Implement model splitting for n devices through model partitioning that is aware of each device's performance and hardware limitations. & POC Demo & Nov. 23 \\ \hline
+Expansion across n devices \& Partitioning algorithm & Implement model splitting for n devices through \gl[partitioning]{model partitioning} that is aware of each device's performance and hardware limitations. & POC Demo & Nov. 23 \\ \hline
 
 \gl[dynamicallocation]{Dynamic allocation} & Implement algorithm to dynamically allocate model \gl[layer]{layers} throughout a \gl{session}. & Design Document Revision 0 & Jan. 18 \\ \hline
 
@@ -2814,8 +2821,8 @@ Tasks that will be a part of each of the following entries include:
     \gl[ui]{User interface} will be created using TypeScript due to it being an industry standard type safe language for user interfaces.
     \item \textbf{Communication Framework} - gRPC is a \gl[rpc]{remote procedure call} framework
     developed by Google. It allows a client to call a method directly on a server and prioritizes speed and performance.
-    \item \textbf{Inference Engine} - llama.cpp is an open-source \gl[llm]{LLM} inference engine. It allows users to run large language models locally on consumer hardware. It was selected due
-    to its ubiquity in the open-source AI field.
+    \item \textbf{Inference Engine} - llama.cpp is an open-source \gl[llm]{LLM} \gl{inference} engine. It allows users to run large language models locally on consumer hardware. It was selected due
+    to its ubiquity in the open-source \gl[ai]{AI} field.
     \item \textbf{Machine Learning / Tensor Library} - ggml is a standard open-source library for machine learning inference on consumer hardware. Its focus on simplicity and broad
     backend support (across multiple kernels and platforms) is why the team selected it.
     \item \textbf{Model File Format} - \gl[gguf]{GGUF} is directly compatible with llama.cpp and ggml, so will be used as the format for transporting model layers from one device to another.
