@@ -30,7 +30,9 @@
 \usepackage{pdflscape}
 \usepackage{caption}
 \usepackage[round]{natbib}
+\usepackage{geometry}
 \usepackage[export]{adjustbox}
+
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -1234,7 +1236,7 @@ Lake requires the following interfaces:
 
 \subsection{Normal Operation}\label{subsec:normal-operation}
 \begin{enumerate}
-	\item User opens Lake instances on all participating machines.
+	\item User opens Lake client instances on all participating machines.
     \item User creates a Lake cluster using the UI on one of the devices, and provides a
 		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file. This
 		device becomes the leader node.
@@ -1256,7 +1258,7 @@ Lake requires the following interfaces:
 	\item User initiates a shutdown of the Lake cluster.
 	\item Each node unloads its portion of the graph.
 	\item Leader node saves the cluster configuration to disk.
-	\item All nodes sever their connections, and all Lake instances terminate.
+	\item All nodes sever their connections, and all Lake client instances terminate.
 \end{enumerate}
 
 \subsection{Undesired Event Handling}\label{subsec:undesired-event-handling}
@@ -1288,45 +1290,521 @@ Lake requires the following interfaces:
 \end{itemize}
 
 \subsection{Detailed Usage Scenarios}\label{subsec:detailed-usage-scenarios}
-\plt{Full use cases for the scenarios introduced in G.5, one per scenario,
-in the structure below. The main success scenario should be numbered so
-extensions can reference its steps.}
 
-\noindent\textbf{Use Case Name:} Name
+This section expands each high-level scenario from
+Section~\ref{subsec:high-level-usage-scenarios} (UC1--UC8) into a full use
+case with preconditions, guarantees, a numbered main success scenario, and
+extensions. Step numbers in the extensions refer to the main success
+scenario of the same use case.
 
-\noindent\textbf{Primary Actor:} Actor
+% ---------------------------------------------------------------------------
+\subsubsection*{UC1: Form a cluster}\label{sec:uc1-detailed}
+
+\noindent\textbf{Use Case Name:} Form a cluster
+
+\noindent\textbf{Primary Actor:} Operator
 
 \noindent\textbf{Stakeholders and Interests:}
 \begin{itemize}
-    \item Stakeholder: interest.
+    \item Operator: wants to pool the available computers into one cluster
+    with little effort and to see what the cluster contains.
+    \item Device Owner: wants no device to take part without the owner's
+    consent.
+    \item Inference User: wants a working cluster to send prompts to.
 \end{itemize}
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item Precondition.
+    \item Lake client is installed on every computer the operator wants to use.
+    \item The computers are on the same local network.
+    \item The operator can open the Lake web user interface on one computer.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
 \begin{itemize}
-    \item Postcondition.
+    \item A cluster exists containing the operator's computer (the leader
+    node) and every selected computer whose owner confirmed.
+    \item The cluster view shows each member's memory and platform.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Failure Guarantees):}
 \begin{itemize}
-    \item Postcondition.
+    \item No computer is in the cluster without its owner's confirmation.
+    \item Computers that did not join are unaffected and keep running as
+    before.
+    \item The leader node's interface displays the error to the user.
 \end{itemize}
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
-    \item Step.
+    \item The operator starts the Lake client on each computer they want to use.
+    \item On one of them, the operator opens the Lake client, and that computer becomes
+    the leader node.
+    \item Client lists the other computers on the network that are running
+    Lake client.
+    \item The operator selects the computers to include.
+    \item Lake client asks each selected computer's owner to confirm
+    (\hyperref[UC2]{UC2}).
+    \item Lake client shows the cluster with each computer's memory and platform.
 \end{enumerate}
 
 \noindent\textbf{Extensions:}
 \begin{itemize}
-    \item \textbf{Na.} Alternative or failure at step N, and how it is handled.
+    \item \textbf{3a.} No other computers running Lake client are found: Lake client informs
+    the operator that none were found and that the operator can start Lake client on
+    other computers and refresh the list.
+    \item \textbf{5a.} An owner declines: that computer is left out of the
+    cluster and the operator is told which ones declined
+    (\hyperref[UC2]{UC2}).
+    \item \textbf{5b.} An owner does not respond: the request ends after a
+    timeout, the computer is left out, and the operator is notified.
+    \item \textbf{5c.} A selected computer becomes unreachable before it
+    confirms: it is left out and the operator is notified.
+    \item \textbf{6a.} No computer confirmed: the cluster contains only the
+    leader node and the operator is notified.
 \end{itemize}
 
-\noindent\textbf{Justification:} Why this scenario matters.
+\noindent\textbf{Justification:} This is the first step of any session with the
+system and is required to happen before any other actions can take place. It also
+validates that Lake will have consent confirmation from each of the computers in the 
+network in advance.
+% ---------------------------------------------------------------------------
+\subsubsection*{UC2: Confirm a device joining}\label{sec:uc2-detailed}
+
+\noindent\textbf{Use Case Name:} Confirm a device joining
+
+\noindent\textbf{Primary Actor:} Device Owner
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Device Owner: decides whether their computer's memory, compute, and
+    bandwidth are used, and wants to see what it is doing afterwards.
+    \item Operator: needs to know which computers actually joined.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item Lake client is running on the owner's computer.
+    \item An operator has selected the computer for a cluster, either when
+    forming one (\hyperref[UC1]{UC1}) or during a session
+    (\hyperref[UC6]{UC6}).
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item If accepted, the device is a member of the named cluster and its
+    owner can see the device's performance and what it is computing.
+    \item If declined, the device is not a member.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item The device does not take part in the cluster without an explicit
+    acceptance.
+    \item The operator is told the outcome for this device.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item A prompt appears on the device asking whether it may join the
+    named cluster.
+    \item The owner accepts.
+    \item The device joins the cluster.
+    \item The owner can see what the device is doing for the cluster.
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{2a.} The owner declines: the device is left out of the
+    cluster and the operator is notified.
+    \item \textbf{2b.} The owner does not respond: the request expires, the
+    device is left out, and the operator is notified.
+    \item \textbf{2c.} The owner is not at the device or the device is
+    asleep: the device is treated as unavailable and left out.
+\end{itemize}
+
+\noindent\textbf{Justification:} Consent is a stated requirement of the
+first goal (\hyperref[FR-G4-1-1]{FR-G4-1-1}), and the owner is a direct
+stakeholder who may not be the person running the cluster.
+
+% ---------------------------------------------------------------------------
+\subsubsection*{UC3: Run a model across the cluster}\label{sec:uc3-detailed}
+
+\noindent\textbf{Use Case Name:} Run a model across the cluster
+
+\noindent\textbf{Primary Actors:} Operator (to load the model); Inference User
+(to send prompts)
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Operator: wants a model larger than any one computer can hold to
+    load across the cluster.
+    \item Inference User: wants a complete, correct response to each prompt,
+    streamed as it is generated.
+    \item Device Owner: wants their device to hold only its share of the
+    model.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item A cluster exists (\hyperref[UC1]{UC1}).
+    \item The operator has a model file in a supported format
+    (GGUF).
+    \item The cluster has enough combined memory for the model.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item The model is loaded across the cluster, each node holding only its
+    assigned layers.
+    \item The user receives a complete response to each prompt, and the
+    session keeps its context for further prompts.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item If the model cannot be loaded, the operator is notified including a reason why.
+    \item A partial response from the device network is identified as such with a warning.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item The operator chooses a model file.
+    \item Lake system divides the model among the nodes and each node loads its
+    share.
+    \item Lake client reports that the model is loaded across the cluster.
+    \item A user sends a prompt.
+    \item The response streams back to the leader node.
+    \item Steps 4 and 5 repeat until the user chooses to stop the session.
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{1a.} The chosen file is not a supported model format or is
+    unreadable: Lake client rejects it and provides reasoning.
+    \item \textbf{2a.} The cluster's combined memory is too small for the
+    model: Lake does not start loading, tells the operator why, and says what
+    would fix it (for example adding a computer or choosing a smaller
+    model).
+    \item \textbf{2b.} A node fails while loading its share: Lake treats it
+    as a node leaving (\hyperref[UC5]{UC5}).
+    \item \textbf{4a.} A prompt arrives before loading has finished: Lake
+    notifies the user the model is not ready.
+    \item \textbf{5a.} A node leaves while the response is streaming: see
+    \hyperref[UC5]{UC5}.
+\end{itemize}
+
+\noindent\textbf{Justification:} This is the primary goal of Lake: running a
+model that does not fit on any single device.
+
+% ---------------------------------------------------------------------------
+\subsubsection*{UC4: Use Lake from an existing tool}\label{sec:uc4-detailed}
+
+\noindent\textbf{Use Case Name:} Use Lake from an existing tool
+
+\noindent\textbf{Primary Actor:} Inference User
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Inference User: wants to keep using the chat interface or coding
+    assistant they already use, with no changes to it.
+    \item Regulated organisations: want prompts and responses to stay only on the
+    local network.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item A cluster has a model loaded (\hyperref[UC3]{UC3}).
+    \item The user's tool can talk to an OpenAI-format API and can reach the
+    leader node over the network.
+    \item The user knows the Lake client address.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item The tool works in a similar fashion to how it would with a cloud provider.
+    \item Prompts and responses pass only through devices on the local
+    network.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item If the request cannot be served, the tool receives an error
+    response in the API's format rather than a hung connection.
+    \item No request data is sent outside the cluster.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item The user opens the chat interface or coding assistant they already
+    use.
+    \item The user points it at the Lake address instead of a cloud
+    provider.
+    \item The user uses the tool as before.
+    \item Lake receives each prompt, runs it across the cluster, and returns
+    the response (streamed if the tool asks for streaming).
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{2a.} The address is wrong or the leader node is
+    unreachable: the tool reports a connection error.
+    \item \textbf{3a.} No model is loaded: Lake client returns an error saying so
+    instead of waiting.
+    \item \textbf{3b.} The tool uses tool calling or another option Lake does
+    not support: Lake client returns an error naming the unsupported
+    option.
+    \item \textbf{4a.} A node leaves during the request: see
+    \hyperref[UC5]{UC5}.
+\end{itemize}
+
+\noindent\textbf{Justification:} Compatibility with the tools people already
+use removes the main adoption barrier and is the main route by which
+inference users reach Lake.
+
+% ---------------------------------------------------------------------------
+\subsubsection*{UC5: Keep working when a device leaves}\label{sec:uc5-detailed}
+
+\noindent\textbf{Use Case Name:} Keep working when a device leaves
+
+\noindent\textbf{Primary Actor:} Operator (informed by Lake); Inference User
+(whose request is affected)
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Inference User: wants the current prompt answered without having to
+    resubmit it, and never wants a cut-off answer presented as a complete one.
+    \item Operator: wants to know which device left and what actions will be taken.
+    \item Device Owner: wants to be able to close or disconnect their device
+    at any time.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item A cluster with at least two nodes has a model loaded and is
+    serving a session.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item The model is reassigned across the remaining nodes.
+    \item The user's current prompt has been answered, or re-run, without
+    being resubmitted.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item If the remaining nodes cannot hold the model, the operator is told
+    why and what would fix it.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item During a session, a computer in the cluster is closed or
+    disconnected by its owner.
+    \item Lake client detects that the node has left.
+    \item Lake client notifies the operator which device left and that it is
+    reorganizing.
+    \item Lake client reassigns the model's layers across the remaining nodes.
+    \item Lake client answers or re-runs the user's current prompt without the user
+    resubmitting it.
+    \item The session continues on the remaining nodes.
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{2a.} The device fails or loses its connection without
+    warning: Lake detects it as in step 2 and continues.
+    \item \textbf{4a.} The remaining computers cannot hold the model: Lake
+    stops serving, notifies the operator, and provides a potential solution (for example
+    adding a computer), and does not leave the session hanging.
+    \item \textbf{4b.} The leader node itself leaves: the session cannot
+    continue, and the operator must start again from
+    \hyperref[UC1]{UC1}.
+\end{itemize}
+
+\noindent\textbf{Justification:} Resilience to devices leaving is a key differentiator
+between Lake and existing local distributed inference providers.
+
+% ---------------------------------------------------------------------------
+\subsubsection*{UC6: Add a device during a session}\label{sec:uc6-detailed}
+
+\noindent\textbf{Use Case Name:} Add a device during a session
+
+\noindent\textbf{Primary Actor:} Operator
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Operator: wants to use a newly available computer without
+    restarting the session.
+    \item Device Owner: wants to consent before the device joins
+    (\hyperref[UC2]{UC2}).
+    \item Inference User: wants to continue prompting and benefit from the
+    added computer.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item A cluster is running a session.
+    \item A new computer running Lake client has appeared on the network.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item The new computer is a member of the cluster and holds part of the
+    model.
+    \item The operator sees the new arrangement.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item If the computer does not join, the cluster and the session continue
+    unchanged.
+    \item The user's requests are not lost or corrupted by the
+    attempt.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item The operator selects a new computer that has appeared on the
+    network.
+    \item Its owner confirms (\hyperref[UC2]{UC2}).
+    \item Lake reorganizes the model's layers to use the new computer.
+    \item Lake shows the new device network arrangement.
+    \item The user continues with the session including the new device.
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{2a.} The owner declines or does not respond: the computer
+    is not added and the session continues unchanged.
+    \item \textbf{3a.} Reorganization fails: Lake keeps the previous
+    arrangement, tells the operator, and the session continues.
+    \item \textbf{3b.} A prompt is in progress during reorganization: Lake
+    finishes it or re-runs it without the user resubmitting, and never
+    presents a partial answer as complete.
+    \item \textbf{5a.} The change in speed is not an improvement: the
+    operator can inspect the cluster view (\hyperref[UC7]{UC7}).
+\end{itemize}
+
+\noindent\textbf{Justification:} Taking advantage of new devices is a key differentiator
+between Lake and existing local distributed inference providers. It allows Lake to improve performance
+through dynamic allocation as a session progresses.
+
+% ---------------------------------------------------------------------------
+\subsubsection*{UC7: Find the bottleneck}\label{sec:uc7-detailed}
+
+\noindent\textbf{Use Case Name:} Find the bottleneck
+
+\noindent\textbf{Primary Actor:} Operator
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Operator: wants to know why responses are slow and what to change.
+    \item Inference User: wants faster responses.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item A cluster has a model loaded and has served at least one
+    request.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item The operator knows which computer or connection is the slowest and
+    can decide what to change.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item Viewing measurements does not interrupt or alter the running
+    session.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item Responses feel slow, so the operator opens the cluster view.
+    \item The view shows how long each computer and each connection takes per
+    word generated.
+    \item The view marks the slowest computer or connection.
+    \item The operator takes action depending on the provided information, ideally improving
+    the performance of the network.
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{2a.} A node is not reporting measurements: the view marks
+    it as unavailable.
+    \item \textbf{4a.} The operator removes or adds a computer: see
+    \hyperref[UC5]{UC5} or \hyperref[UC6]{UC6}.
+\end{itemize}
+
+\noindent\textbf{Justification:} Splitting a model over a network can be
+slower than one device only, so the operator must see whether pooling is
+beneficial and potential areas for improvement.
+
+% ---------------------------------------------------------------------------
+\subsubsection*{UC8: Serve several users at once}\label{sec:uc8-detailed}
+
+\noindent\textbf{Use Case Name:} Serve several users at once
+
+\noindent\textbf{Primary Actor:} Inference User (two or more)
+
+\noindent\textbf{Stakeholders and Interests:}
+\begin{itemize}
+    \item Inference Users: each wants their own response, as fast as if they
+    were alone, and wants no other user to see their prompt or answer.
+    \item Operator: wants to see when the cluster is busy enough that requests
+    queue.
+    \item Regulated organisations: want requests kept separate for data privacy.
+\end{itemize}
+
+\noindent\textbf{Preconditions:}
+\begin{itemize}
+    \item A cluster has a model loaded (\hyperref[UC3]{UC3}).
+    \item Each user's tool can reach the leader node
+    (\hyperref[UC4]{UC4}).
+\end{itemize}
+
+\noindent\textbf{Postconditions (Success Guarantees):}
+\begin{itemize}
+    \item Every user receives a complete response to their own prompt.
+    \item No user's prompt or response is visible to another user.
+\end{itemize}
+
+\noindent\textbf{Postconditions (Failure Guarantees):}
+\begin{itemize}
+    \item A request that cannot be served is queued or returns an error.
+    \item One user's request is never visible or lost to another user, requests are
+    always isolated between users.
+\end{itemize}
+
+\noindent\textbf{Main Success Scenario (Basic Flow):}
+\begin{enumerate}
+    \item Two or more users send prompts to the same cluster at the same
+    time, from their own tools.
+    \item Lake processes the requests concurrently, each at a different
+    stage of the model, keeping their state separate.
+    \item Each user sees their own response stream back.
+    \item Each response arrives roughly as fast as it would have alone.
+\end{enumerate}
+
+\noindent\textbf{Extensions:}
+\begin{itemize}
+    \item \textbf{2a.} The cluster is busy enough that further requests
+    cannot start immediately: Lake queues them, and the operator sees the
+    queue in the cluster view.
+    \item \textbf{3a.} A node leaves while several requests are in progress:
+    see \hyperref[UC5]{UC5}; each affected request is re-run or reported
+    individually.
+    \item \textbf{4a.} Responses slow because of load: the operator can
+    inspect the cluster view (\hyperref[UC7]{UC7}).
+\end{itemize}
+
+\noindent\textbf{Justification:} Serving several users at once is one of the
+main advantages of splitting a model by layers, and it is where Lake's
+throughput gain is clear.
 
 \subsection{Prioritization}\label{subsec:prioritization}
 \plt{Every requirement from S.2 and the Environmental Requirements table,
@@ -1652,41 +2130,111 @@ $\mathit{dev}(P)$.
   \label{tab:project-milestones}
 \end{table}
 
-\subsection{Tasks and Deliverables}\label{subsec:tasks}
-\plt{The work breakdown: each task, what it produces, and which milestone it
-feeds. Tasks should be small enough to assign to one or two people.}
 
-\begin{table}[H]
+\subsection{Tasks and Deliverables}\label{subsec:tasks}
+
+\newpage
+\newgeometry{top=0.5in,left=0.5in}
+\begin{table}[htbp]
 \centering
-\begin{tabular}{|p{3cm}|p{5.5cm}|p{3cm}|p{2.5cm}|}
+\begin{tabular}{|p{3cm}|p{5cm}|p{3cm}|p{2cm}|}
 \hline
 \textbf{Task} & \textbf{Description / Steps} & \textbf{Deliverable} & \textbf{Due Date} \\ \hline
-Task & Description & Deliverable & Date \\ \hline
+
+Initial single-device prototype & Implement a model split up across two processes on a single device, communicating via inter-process communication. & V\&V Plan Revision & Nov. 2 \\ \hline
+
+Expansion across two devices & Implement wired communication and model splitting (50\% and 50\%) across two devices, communicating via gRPC. & Design Document Revision &  Nov. 16 \\ \hline
+
+Expansion across n devices \& Partitioning algorithm & Implement model splitting for n devices through model partitioning that is aware of each device's performance and hardware limitations. & POC Demo & Nov. 23 \\ \hline
+
+Dynamic allocation & Implement algorithm to dynamically allocate model layers throughout a session. & Design Document Revision 0 & Jan. 18 \\ \hline
+
+Test model allocation and dynamic add/drop & Test that system can handle devices being added or dropped from the network and that model split changes to maintain efficiency as network changes. & Design Document Revision 1 & Jan. 18 \\ \hline
+
+User Interface Design \& Network Display & Add user interface on top of API interface, listing statistics on model split and performance for each device. & Rev 0 Demo & Feb. 1 \\ \hline
+
+Integration \& Communication Testing & Completion of integration testing to ensure sessions work and can handle various node failures. & Final Demo & Mar. 15 \\ \hline
+
+User \& System Testing & Pass off the system to new users to ensure they intuitively understand how to control the system and are aware of its benefits. & Final Demo & Mar. 15 \\ \hline
+
+Final Delivery & Final tweaks to appearance, performance, and demonstration ahead of the Capstone EXPO. & Final Documentation & Mar. 31 \\ \hline
+
 \end{tabular}
 \caption{Tasks and Deliverables}
 \label{tab:tasks-deliverables}
 \end{table}
 
-\subsection{Required Technology Elements}\label{subsec:required-tech}
-\plt{Everything the project needs to obtain or build before the system can be
-delivered: libraries, hardware, datasets, services, licences, compute. Note
-anything not yet secured.}
+\FloatBarrier
+\restoregeometry
+\newpage
+
+Tasks that will be a part of each of the following entries include:
 
 \begin{itemize}
-    \item \textbf{Element} -- Purpose and status.
+    \item \textbf{Unit Testing:} It is expected that each function and method will be tested in an isolated fashion. This is to ensure that each component works as intended and integration testing
+    only reveals issues that originate from component to component interactions.
+    \item \textbf{Documentation \& Clean Code:} It is expected that each pull request or addition of new code will come with the relevant documentation and proper syntax. This is to alleviate cleanup work
+    that is often left for the end of the project.
+\end{itemize}
+
+\subsection{Required Technology Elements}\label{subsec:required-tech}
+
+\begin{itemize}
+    \item \textbf{Primary Programming Language} - The primary programming languages for the 
+    system will be Python and Rust. Python is chosen due to its common use for artificial intelligence applications
+    and rich library ecosystem. Rust is chosen due to its high performance and type safety, along with it being a common choice for
+    working directly with tensors. On each node, Python will be used for coordinator operations and Rust will be used for the inference engine. 
+    User interface will be created using TypeScript due to it being an industry standard type safe language for user interfaces.
+    \item \textbf{Communication Framework} - gRPC is a remote procedure call framework
+    developed by Google. It allows a client to call a method directly on a server and prioritizes speed and performance.
+    \item \textbf{Inference Engine} - llama.cpp is an open-source LLM inference engine. It allows users to run large language models locally on consumer hardware. It was selected due
+    to its ubiquity in the open-source AI field.
+    \item \textbf{Machine Learning / Tensor Library} - ggml is a standard open-source library for machine learning inference on consumer hardware. Its focus on simplicity and broad
+    backend support (across multiple kernels and platforms) is why the team selected it.
+    \item \textbf{Model File Format} - gguf is directly compatible with llama.cpp and ggml, so will be used as the format for transporting model layers from one device to another.
+    \item \textbf{Frontend Framework} Next.js with TypeScript and Vite as the build tool. This is what the team is familiar with and aligns with the earlier choice for TypeScript as the 
+    frontend language.
+    \item \textbf{Hardware} Multiple $(>=2)$ laptop or personal computer devices that can be connected via Thunderbolt to run local inference tests.
+    \item \textbf{Version Control} Git, along with GitHub for source code management.
+    \item \textbf{Continuous Integration} GitHub Actions for build pipelines and testing.
+    \item \textbf{Testing API and Interface} OpenAI API Interface will be used for testing the system without using the user interface (or prior to building the user interface). 
 \end{itemize}
 
 \subsection{Risk and Mitigation Analysis}\label{subsec:risk}
-\plt{Project risks (schedule, technical, people, external dependencies), each
-with its likelihood, impact, and mitigation. System hazards belong in the
-Hazard Analysis, not here.}
 
 \begin{itemize}
-    \item \textbf{Risk: Name}
+    \item \textbf{Risk: Lack of Performance Improvement when parallelizing a model}
     \begin{itemize}
-        \item Description:
-        \item Mitigation:
+        \item Description: This project focuses on the potential improvements of parallelizing
+        a model across a pool of devices. If in testing it is determined that splitting up a model
+        is not yielding considerably better results in terms of speed or model benchmarks, the system
+        may lose users.
+        \item Mitigation: Place additional focus on prioritizing privacy of data and size of model that can be split
+        up across a pool. This shifts the project's selling points from speed to privacy and quality and still achieves
+        the original project goal.
     \end{itemize}
+    \item \textbf{Risk: Chosen Communication Technology (gRPC) fails to meet project needs}
+    \begin{itemize}
+        \item Description: In the case gRPC does not meet project needs, the team's original strategy for inter-device communication will fail.
+        \item Mitigation: Perform initial research and record alternative options. Also research the core technology behind these libraries so that the team can
+        make adaptations to fit a library to the project.
+    \end{itemize}
+    \item \textbf{Risk: User Interface is Unclear}
+    \begin{itemize}
+        \item Description: The user is unable to tell which devices are being used, or feedback about the device network
+        is unclear to the user.
+        \item Mitigation: Ensure that user testing and observation is completed by the team prior to the final delivery. This
+        should be done by people unfamiliar with the product to ensure that controls and feedback are intuitive and easy to learn.
+    \end{itemize}
+    \item \textbf{Risk: External Deliverables and Constraints Impacting Timeliness and Quality of Project Work}
+    \begin{itemize}
+        \item Description: Due to various other commitments including work, other courses, and extra-curriculars, team members may not be able to complete high quality project work and deliverables on-time.
+        \item Mitigation: At the first meeting for a deliverable, the team will allocate tasks and assign issues to each member so workload is clear.
+        As the team progresses through the deliverable, they may adjust the workload as needed, however should aim for an even split over the course of the project.
+        The team will also establish an extended review meeting to conduct prior to deliverable hand-off to ensure it aligns with the rubric, the requirements,
+        and their own quality standard.
+    \end{itemize}
+    
 \end{itemize}
 
 \subsection{Requirements Process and Report}\label{subsec:requirements-process}
@@ -1814,9 +2362,14 @@ Section~\ref{subsubsec:g7-sources}.
 
 \wss{ChatGPT (version 5) was used to brainstorm ideas for the template for this disclose section.}
 
+
 \subsection{AI Tools Used}
 
 \wss{Give the name of the AI tool(s) used and the version.}
+
+\begin{itemize}
+    \item Claude Sonnet 5.5
+\end{itemize}
 
 \subsection{How and Where Used}
 
@@ -1830,6 +2383,9 @@ inconsistencies.}
 \wss{You do not need to report every interaction, but you should disclose the
 uses that materially contributed to your work}
 
+Claude Sonnet 5.5 was used for extending the use cases in G.5 to the detailed usage scenarios in S.6. It was used for generating the structure of a 
+detailed usage scenarios by inferring the actors and steps involved in the original use case.
+
 \subsection{Verification of AI-Generated Content}
 
 \wss{\begin{itemize}
@@ -1842,6 +2398,8 @@ uses that materially contributed to your work}
 consistency, and appropriateness of the submitted document, regardless of
 whether material was generated by a human or an AI system.}
 \end{itemize}}
+
+Any generated additions to section S.6 (originating from G.5) were reviewed manually and edited to ensure they are accurate and align with project goals.
 
 \newpage
 
