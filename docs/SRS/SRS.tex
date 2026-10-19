@@ -625,7 +625,7 @@ Lake requires the following interfaces:
 
 \subsection{Normal Operation}\label{subsec:normal-operation}
 \begin{enumerate}
-	\item User opens Lake instances on all participating machines.
+	\item User opens Lake client instances on all participating machines.
     \item User creates a Lake cluster using the UI on one of the devices, and provides a
 		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file. This
 		device becomes the leader node.
@@ -647,7 +647,7 @@ Lake requires the following interfaces:
 	\item User initiates a shutdown of the Lake cluster.
 	\item Each node unloads its portion of the graph.
 	\item Leader node saves the cluster configuration to disk.
-	\item All nodes sever their connections, and all Lake instances terminate.
+	\item All nodes sever their connections, and all Lake client instances terminate.
 \end{enumerate}
 
 \subsection{Undesired Event Handling}\label{subsec:undesired-event-handling}
@@ -704,7 +704,7 @@ scenario of the same use case.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item Lake is installed on every computer the operator wants to use.
+    \item Lake client is installed on every computer the operator wants to use.
     \item The computers are on the same local network.
     \item The operator can open the Lake web user interface on one computer.
 \end{itemize}
@@ -726,21 +726,21 @@ scenario of the same use case.
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
-    \item The operator starts Lake on each computer they want to use.
-    \item On one of them, the operator opens Lake, and that computer becomes
+    \item The operator starts the Lake client on each computer they want to use.
+    \item On one of them, the operator opens the Lake client, and that computer becomes
     the leader node.
-    \item Lake lists the other computers on the network that are running
-    Lake.
+    \item Client lists the other computers on the network that are running
+    Lake client.
     \item The operator selects the computers to include.
-    \item Lake asks each selected computer's owner to confirm
+    \item Lake client asks each selected computer's owner to confirm
     (\hyperref[UC2]{UC2}).
-    \item Lake shows the cluster with each computer's memory and platform.
+    \item Lake client shows the cluster with each computer's memory and platform.
 \end{enumerate}
 
 \noindent\textbf{Extensions:}
 \begin{itemize}
-    \item \textbf{3a.} No other computers running Lake are found: Lake tells
-    the operator that none were found and that the operator can start Lake on
+    \item \textbf{3a.} No other computers running Lake client are found: Lake client informs
+    the operator that none were found and that the operator can start Lake client on
     other computers and refresh the list.
     \item \textbf{5a.} An owner declines: that computer is left out of the
     cluster and the operator is told which ones declined
@@ -754,7 +754,7 @@ scenario of the same use case.
 \end{itemize}
 
 \noindent\textbf{Justification:} This is the first step of any session with the
-Lake system and is required to happen before any other actions can take place. It also
+system and is required to happen before any other actions can take place. It also
 validates that Lake will have consent confirmation from each of the computers in the 
 network in advance.
 % ---------------------------------------------------------------------------
@@ -773,7 +773,7 @@ network in advance.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item Lake is running on the owner's computer.
+    \item Lake client is running on the owner's computer.
     \item An operator has selected the computer for a cluster, either when
     forming one (\hyperref[UC1]{UC1}) or during a session
     (\hyperref[UC6]{UC6}).
@@ -859,9 +859,9 @@ stakeholder who may not be the person running the cluster.
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
     \item The operator chooses a model file.
-    \item Lake divides the model among the nodes and each node loads its
+    \item Lake system divides the model among the nodes and each node loads its
     share.
-    \item Lake reports that the model is loaded across the cluster.
+    \item Lake client reports that the model is loaded across the cluster.
     \item A user sends a prompt.
     \item The response streams back to the leader node.
     \item Steps 4 and 5 repeat until the user chooses to stop the session.
@@ -870,7 +870,7 @@ stakeholder who may not be the person running the cluster.
 \noindent\textbf{Extensions:}
 \begin{itemize}
     \item \textbf{1a.} The chosen file is not a supported model format or is
-    unreadable: Lake rejects it provides reasoning.
+    unreadable: Lake client rejects it and provides reasoning.
     \item \textbf{2a.} The cluster's combined memory is too small for the
     model: Lake does not start loading, tells the operator why, and says what
     would fix it (for example adding a computer or choosing a smaller
@@ -906,7 +906,7 @@ model that does not fit on any single device.
     \item A cluster has a model loaded (\hyperref[UC3]{UC3}).
     \item The user's tool can talk to an OpenAI-format API and can reach the
     leader node over the network.
-    \item The user knows Lake's address.
+    \item The user knows the Lake client address.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
@@ -927,7 +927,7 @@ model that does not fit on any single device.
 \begin{enumerate}
     \item The user opens the chat interface or coding assistant they already
     use.
-    \item The user points it at Lake's address instead of a cloud
+    \item The user points it at the Lake address instead of a cloud
     provider.
     \item The user uses the tool as before.
     \item Lake receives each prompt, runs it across the cluster, and returns
@@ -938,10 +938,10 @@ model that does not fit on any single device.
 \begin{itemize}
     \item \textbf{2a.} The address is wrong or the leader node is
     unreachable: the tool reports a connection error.
-    \item \textbf{3a.} No model is loaded: Lake returns an error saying so
+    \item \textbf{3a.} No model is loaded: Lake client returns an error saying so
     instead of waiting.
     \item \textbf{3b.} The tool uses tool calling or another option Lake does
-    not support: Lake returns an error naming the unsupported
+    not support: Lake client returns an error naming the unsupported
     option.
     \item \textbf{4a.} A node leaves during the request: see
     \hyperref[UC5]{UC5}.
@@ -991,11 +991,11 @@ inference users reach Lake.
 \begin{enumerate}
     \item During a session, a computer in the cluster is closed or
     disconnected by its owner.
-    \item Lake detects that the node has left.
-    \item Lake notifies the operator which device left and that it is
-    reorganising.
-    \item Lake reassigns the model's layers across the remaining nodes.
-    \item Lake answers or re-runs the user's current prompt without the user
+    \item Lake client detects that the node has left.
+    \item Lake client notifies the operator which device left and that it is
+    reorganizing.
+    \item Lake client reassigns the model's layers across the remaining nodes.
+    \item Lake client answers or re-runs the user's current prompt without the user
     resubmitting it.
     \item The session continues on the remaining nodes.
 \end{enumerate}
@@ -1005,7 +1005,7 @@ inference users reach Lake.
     \item \textbf{2a.} The device fails or loses its connection without
     warning: Lake detects it as in step 2 and continues.
     \item \textbf{4a.} The remaining computers cannot hold the model: Lake
-    stops serving, tells the operator why and what would fix it (for example
+    stops serving, notifies the operator, and provides a potential solution (for example
     adding a computer), and does not leave the session hanging.
     \item \textbf{4b.} The leader node itself leaves: the session cannot
     continue, and the operator must start again from
@@ -1035,7 +1035,7 @@ between Lake and existing local distributed inference providers.
 \noindent\textbf{Preconditions:}
 \begin{itemize}
     \item A cluster is running a session.
-    \item A new computer running Lake has appeared on the network.
+    \item A new computer running Lake client has appeared on the network.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
@@ -1058,7 +1058,7 @@ between Lake and existing local distributed inference providers.
     \item The operator selects a new computer that has appeared on the
     network.
     \item Its owner confirms (\hyperref[UC2]{UC2}).
-    \item Lake reorganises the model's layers to use the new computer.
+    \item Lake reorganizes the model's layers to use the new computer.
     \item Lake shows the new device network arrangement.
     \item The user continues with the session including the new device.
 \end{enumerate}
@@ -1067,9 +1067,9 @@ between Lake and existing local distributed inference providers.
 \begin{itemize}
     \item \textbf{2a.} The owner declines or does not respond: the computer
     is not added and the session continues unchanged.
-    \item \textbf{3a.} Reorganisation fails: Lake keeps the previous
+    \item \textbf{3a.} Reorganization fails: Lake keeps the previous
     arrangement, tells the operator, and the session continues.
-    \item \textbf{3b.} A prompt is in progress during reorganisation: Lake
+    \item \textbf{3b.} A prompt is in progress during reorganization: Lake
     finishes it or re-runs it without the user resubmitting, and never
     presents a partial answer as complete.
     \item \textbf{5a.} The change in speed is not an improvement: the
