@@ -2037,8 +2037,9 @@ teaching assistant and other reviewers judge it against these goals:
     systems runs a model (group 12).
   \item \textbf{Dynamic Allocation}: the cluster keeps serving requests after
     nodes join and leave, and the reallocation time is recorded (group 6).
-  \item \textbf{Concurrent Inference}: the cluster serves at least two users
-    at once without their outputs interfering (group 13).
+  \item \textbf{Concurrent Inference}: the cluster serves at least
+    \textit{MIN\_CONCURRENT} users at once without their outputs interfering
+    (group 13).
 \end{itemize}
 A few people who are not on the team also try the system in the usability
 session (group 10), to confirm that it is understandable to new users.
@@ -2195,8 +2196,8 @@ group.
     \req{FR.S.4.6}, \req{NFR.S.5}.\\
     \textit{Method:} load tests with increasing numbers of concurrent
     requests on clusters of increasing size.\\
-    \textit{Acceptance:} every cluster serves at least two requests at the
-    same time; no tokens from one request appear in another; and the number
+    \textit{Acceptance:} every cluster serves at least
+    \textit{MIN\_CONCURRENT} requests at the same time; no tokens from one request appear in another; and the number
     of concurrent requests served with at most
     \textit{MAX\_DEGRADATION} loss of per-request throughput grows in
     proportion to the number of nodes.
@@ -2763,6 +2764,8 @@ as testing gives better data.
 \textit{INSTALL\_CLICKS} & 10 & Maximum clicks to install \progname{} on Windows or macOS. Used in \req{NFR.S.3}. \\
 \hline
 \textit{MAX\_DEGRADATION} & 20\% & Maximum loss of per-request throughput when serving concurrent requests. Used in \req{NFR.S.5}. \\
+\hline
+\textit{MIN\_CONCURRENT} & 2 & Minimum number of requests every cluster must serve at the same time. Used in S.8 group 13 and the Validation list. \\
 \hline
 \textit{BENCH\_RATIO} & 95\% & Minimum benchmark score of a split model, relative to the unsplit model. Used in \req{NFR.S.6}. \\
 \hline
