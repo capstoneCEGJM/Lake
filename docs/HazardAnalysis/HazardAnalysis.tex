@@ -5,6 +5,12 @@
 \usepackage{float}
 \usepackage{longtable}
 \usepackage{hyperref}
+\usepackage{multirow}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{lscape}
+\usepackage{longtable}
+\usepackage{pdflscape}
+\usepackage{geometry}
 
 \hypersetup{
     colorlinks=true,       % false: boxed links; true: colored links
@@ -38,9 +44,7 @@
 \toprule
 \textbf{Date} & \textbf{Developer(s)} & \textbf{Change}\\
 \midrule
-Date1 & Name(s) & Description of changes\\
-Date2 & Name(s) & Description of changes\\
-... & ... & ...\\
+October 14, 2026 & All & Initial revision \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -57,44 +61,286 @@ Date2 & Name(s) & Description of changes\\
 
 \pagenumbering{arabic}
 
-\wss{You are free to modify this template.}
-
 \section{Introduction}
 
-\wss{You can include your definition of what a hazard is here.}
+This document is the hazard analysis for \progname{}. \progname{} splits a
+large language model (LLM) into blocks of layers and runs each block on a
+different device on a local network, so that the devices can run a model
+together that none of them could run alone. The leader node's coordinator assigns
+blocks of layers to the devices and accepts prompts from the user. Each
+follower node runs its block and passes the result on to the next
+device.
+
+\subsection{Definition of a Hazard}
+
+For this document, a hazard is a state or condition of \progname{}
+that, combined with conditions in its environment that the system does not
+control, can lead to one of the losses listed in
+Section~\ref{SecLosses}. Examples of such conditions are a device losing
+power, a congested network, or an untrusted device on the same network. For
+example, a device being assigned more layers than its memory can hold is a
+hazard, and the crashes that follow are the loss. A failure mode is a
+specific way a component can fail, and it can create a hazard.
+
+\progname{} has almost no potential for physical harm, so its hazards are
+mainly about privacy, security, the correctness and availability of
+responses, and the effect of the system on the user's own devices.
 
 \section{Scope and Purpose of Hazard Analysis}
 
-\wss{You should say what \textbf{loss} could be incurred because of the
-hazards.}
+\subsection{Purpose}
+
+The purpose of this analysis is to find the ways \progname{} can cause a loss
+while the project is still in the requirements phase, when a hazard can be
+removed by changing a requirement instead of the code. Each hazard found in
+the FMEA leads to a safety or security requirement, which is added to the SRS
+and then verified through the V\&V Plan.
+
+\subsection{Scope}
+
+\noindent\textbf{In scope:}
+\begin{itemize}
+  \item The software components of \progname{}: the coordinator, the model
+    partitioner, the inference engine on each device, the communication
+    between devices, and the user interface.
+  \item The interaction of these components with the user's devices, the
+    local network that connects them, and the model files that are loaded.
+\end{itemize}
+
+\noindent\textbf{Out of scope:}
+\begin{itemize}
+  \item The content the model generates. Harmful, biased or false
+    text produced by a correctly running model is a property of the model,
+    which the user chooses and \progname{} treats as an input. Incorrect
+    output caused by \progname{} itself is in scope.
+  \item Defects in the operating system, drivers or GPU hardware. These are
+    outside \progname{}'s control, so this analysis does not try to prevent
+    them. It does cover their effects, such as a device crashing partway
+    through a request, because \progname{} must respond to them.
+  \item Attackers outside the local network, and physical access to a
+    device. \progname{} is not exposed to the internet, and a person with
+    physical access to a device already controls everything on it.
+\end{itemize}
+
+\subsection{Losses}
+\label{SecLosses}
+
+The hazards in this document can lead to the losses below.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}p{3.4cm}X}
+\toprule
+\textbf{ID} & \textbf{Loss} & \textbf{Description}\\
+\midrule
+L1 & Loss of privacy or security & Prompts, responses or data passed between
+  devices are seen by a person or device that is not meant to see them, or an
+  untrusted device gives an attacker access to data or code on the user's
+  devices.\\
+L2 & Loss of output integrity & The user receives a wrong or incoherent
+  response because of \progname{}, for example from data corrupted between
+  devices or a wrong assignment of layers, without knowing that it is
+  wrong.\\
+L3 & Loss of availability & A request fails or never completes, or a session
+  is lost partway through generating a response.\\
+L4 & Harm to the user's devices or work & \progname{} uses so much memory,
+  processing time or power on a device that the user's other applications
+  crash, unsaved work is lost, or the device itself crashes or freezes.\\
+\bottomrule
+\end{tabularx}
+\end{center}
 
 \section{System Boundaries and Components}
 
-\wss{Dividing the system into components will help you brainstorm the hazards.
-You shouldn't do a full design of the components, just get a feel for the major
-ones.  For projects that involve hardware, the components will typically include
-each individual piece of hardware.  If your software will have a database, or an
-important library, these are also potential components.}
+\subsection{Coordinator}
+\label{subsec:coordinator}
+This component exists on all nodes, but the following responsibilities are only run on the leader node:
+\begin{itemize}
+	\item Providing an OpenAI-API compatible API to the user for use with tools like
+		\href{https://opencode.ai/}{OpenCode}.
+	\item Tracking cluster health, and detecting node failures.
+	\item Notifying nodes of partitioning changes.
+	\item Rebuilding the cluster and saving in-progress requests
+		in the case of node failure, removal, or addition.
+	\item Measuring node connection performance.
+\end{itemize}
+On a follower node, it is primarily responsible for managing the inference engine
+on its device, following the instructions of the leader node.
+
+\subsection{Model Partitioner}
+This component determines how to partition the model among the participating devices. It
+decides at which points to cut the graph, how large each partition is, and which device gets
+each partition. This component is integral to ensuring that each device is assigned an appropriate
+partition given the device's computational and networking performance.
+
+\subsection{Inference Engine}
+This component is the high-performance inference engine running on each device. It will handle
+execution of the given model partition for each device. It will call into
+\href{https://github.com/ggml-org/ggml}{ggml} using the Rust-to-C FFI (TODO: glossary) to control the execution of a
+device's model partition.
+
+\subsection{Tensor I/O}
+This component handles the compressing, sending, receiving, and decompressing of tensors between devices.
+It will leverage \href{https://grpc.io/}{gRPC} for high-performance communication, with the potential
+to use a custom solution should \href{https://grpc.io/}{gRPC} fail to meet our requirements in practice.
+
+\subsection{Boundaries}
+The system boundaries for Lake primarily consist of:
+\begin{itemize}
+	\item The \hyperref[subsec:coordinator]{Coordinator's} OpenAI-API compatible API.
+	\item Model files (GGUF) loaded from disk.
+	\item Networking components between devices (Thunderbolt, Ethernet, Wi-Fi, routers).
+	\item The OS and GPU resources on each individual device.
+\end{itemize}
 
 \section{Critical Assumptions}
 \label{SecAssumptions}
 
-\wss{These assumptions that are made about the software or system.  You should
-minimize the number of assumptions that remove potential hazards.  For instance,
-you could assume a part will never fail, but it is generally better to include
-this potential failure mode.}
+We assume:
+\begin{itemize}
+	\item The model file (GGUF) provided to Lake is already a functional LLM before partitioning.
+	\item User requests are only made through the API on the leader device.
+	\item Only one model will be run by the pool at a time.
+	\item The local area network connecting the devices is private, and trusted by the user.
+\end{itemize}
 
+\newgeometry{landscape, top=0.5in, bottom=0.5in, left=0.75in, right=0.75in}
+\begin{landscape}
 \section{Failure Mode and Effect Analysis}
 \label{SecFMEA}
 
-\wss{Include your FMEA table here. This is the most important part of this document.}
-\wss{The safety requirements in the table do not have to have the prefix SR.
-The most important thing is to show traceability to your SRS. You might trace to
-requirements you have already written, or you might need to add new
-requirements.}
-\wss{If no safety requirement can be devised, other mitigation strategies can be
-entered in the table, including strategies involving providing additional
-documentation, and/or test cases.}
+The following Failure Mode and Effect Analysis (FMEA) table summarizes potential failure modes for the Lake system based on each component.
+It also details potential causes and effects for each of the failures, along with a recommended action to mitigate
+the potential failure. Components are listed based on their appearance above in Section 3. Beyond this, there are also
+hazards listed for general communication failures that may take place in between nodes or components, as well as privacy failures.
+
+\begin{longtable}{|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.2\textwidth}|p{0.05\textwidth}|p{0.1\textwidth}|}
+\hline
+Component
+  & Failure Modes
+  & Effects of Failure
+  & Causes of Failure
+  & Recommended Action
+  & SR
+  & Reference \\ \hline
+\endfirsthead
+%
+\endhead
+%
+% ---------------------------------------------------------------- H0
+%
+  % (Model Coordinator: multirow label is in the second row below)
+  & Incorrect or outdated device health statistics are reported back to the user.
+  & Coordinator sends requests to device that is unable to handle requests and inference fails.
+  & Health checks are too infrequent from the coordinator or user interface displays older data than available.
+  & Scheduled health checks to each device and removal of data from user interface as soon as new data reaches leader node.
+  & SR0-1
+  & H0-1 \\ \cline{2-7}
+\multirow{-2}{\dimexpr0.2\textwidth\relax}{Coordinator}
+  & Coordinator component in leader node fails to notify follower node of partitioning change.
+  & Follower node sends data to other failed follower node and inference fails.
+  & Lack of proper and timely notification system and health checks from leader node.
+  & Scheduled health checks to each device prior to each message to ensure inference is not lost on a failed node.
+  & SR0-2
+  & H0-2 \\ \hline
+%
+% ---------------------------------------------------------------- H1
+%
+  % (Model Partition: multirow label is in the third row below)
+  & Single device node is allocated 100\% of the model.
+  & Fails the core purpose of Lake and overworks single device by avoiding parallelization.
+  & Improper boundaries on model partition algorithm.
+  & Boundaries to ensure each device is allocated $>$0\% of the model, and re-balancing checks made throughout a session to verify boundary is not violated.
+  & SR1-1
+  & H1-1 \\ \cline{2-7}
+  & The model is insufficiently partitioned and cannot be split up amongst the
+    device pool. (\# Partitions $<$ \# Devices)
+  & Model runs on only part of available hardware and does not achieve best possible performance.
+  & Poor constraints on model partition algorithm.
+  & Ensure that layers are split up into enough pieces to span all devices
+    (pigeonhole principle) and build checks into initial algorithm to guarantee each device handles part of inference.
+  & SR1-2
+  & H1-2 \\ \cline{2-7}
+\multirow{-3}{\dimexpr0.2\textwidth\relax}{Model Partition}
+  & Device is allocated a partition larger than it's available memory.
+  & Device crashes and loss of network.
+  & Improper consideration of device hardware requirements and lack of tolerances.
+  & Ensure tolerances built into partition algorithm to keep models at (100-t)\% of device availability (t is specified threshold 
+  that will be determined in testing).
+  & SR1-3
+  & H1-3 \\ \hline
+%
+% ---------------------------------------------------------------- H2
+%
+Inference Engine
+  & Follower device fails or crashes during local inference.
+  & Inference is lost and response cannot be returned to user.
+  & A myriad of local failures could cause the device to not complete the inference. This could be hardware constraints or other device processes interfering.
+  & Leader device is able to prevent failures from being shown to user and send retry request(s) to produce proper output.
+  & SR2-1
+  & H2-1 \\ \hline
+%
+% ---------------------------------------------------------------- H3
+%
+  % (Tensor I/O: multirow label is in the second row below)
+  & Node receives incoherent tensors and cannot produce output to user.
+  & User does not receive a response to their prompt and cannot use the system.
+  & Communication failure (lost or corrupted data) between two nodes.
+  & Place checks throughout the inference process for corrupted or lost tensors and restart inference from leader, temporarily removing the node where corruption/loss occurred from the network. Additionally, checksums 
+  can be implemented to catch network corruption, with the system restarting if the checksums do not match.
+  & SR3-1
+  & H3-1 \\ \cline{2-7}
+\multirow{-2}{\dimexpr0.2\textwidth\relax}{Tensor I/O}
+  & Leader node fails to extract compressed tensors. 
+  & User does not receive a response to their prompt and cannot use the system.
+  & $i$ - Follower device fails to produce proper output or $ii$ - Leader cannot interpret output and run final inference to produce output.
+  & Using the checks identified in H3-1, identify the node causing the failure and temporarily remove it from the network before restarting. If no problem is indicated from any follower node, restart
+  inference and notify user of the issue.
+  & SR3-2
+  & H3-2 \\ \hline
+%
+% ---------------------------------------------------------------- H4
+%
+  % (General Communication: multirow label is in the third row below)
+  & Communication between two nodes times out between devices or fails entirely.
+  & Failure of system, loss of inference if midway through session.
+  & Failure of communication protocol between nodes at hardware level (Thunderbolt, Wi-Fi, Ethernet).
+  & Monitor average communication times between nodes and alert user to check connections if it exceeds a threshold. This can be measured through packet loss and throughput metrics. Restart inference if communication is lost and remove failed node.
+  & SR4-1
+  & H4-1 \\ \cline{2-7}
+  & Device health status communication fails.
+  & Leader node unaware if device fails, loss of system is possible if unknown device's performance is degraded.
+  & Failure on behalf of leader node to send outbound requests, or failure of follower nodes to receive and respond to requests.
+  & Monitor for devices not returning health checks, after multiple missed, remove device from inference network until health response is received by leader. In the case of leader node failure, the system's follower nodes will interpret a 
+  lack of incoming health requests as leader failure and shut down since no further coordination can take place.
+  & SR4-2
+  & H4-2 \\ \cline{2-7}
+\multirow{-3}{\dimexpr0.2\textwidth\relax}{General Communication}
+  & Communication becomes noticeably slower for user compared to expected performance.
+  & Users leaving the system and opting for another provider.
+  & Inefficiency in between nodes or complete network slowness. Model is split up across too many devices causing too much communication overhead for each prompt.
+  & Simplification of network. If inference is taking too long to complete based on historical system data, remove least capable devices on the network to reduce communication overhead.
+  & SR4-3
+  & H4-3 \\ \hline
+%
+% ---------------------------------------------------------------- H5
+%
+  % (Privacy: multirow label is in the second row below)
+  & Untrusted node on the device network.
+  & Allows unintended access to the system and potential loss of data to bad actors. Reduces user trust in the system and may lead to loss of users.
+  & Lack of initial authorization of each node or operation of the system on an untrusted network where unknown devices can join. 
+  & Ensure that system is only operated on limited networks where all potential devices are known. Alternatively, the leader node must gain approval from the user before adding an unknown device to the network.
+  & SR5-1
+  & H5-1 \\ \cline{2-7}
+\multirow{-2}{\dimexpr0.2\textwidth\relax}{Privacy}
+  & Data leakage from a node leading to untrusted access or data leakage.
+  & Untrusted users who have access to any of the participating nodes can see and steal data. Reduces user trust in the system and could lead to degraded or failed performance.
+  & Lack of initial authentication, or storage of unnecessary temporary data on intermediary devices.
+  & Ensure that any devices in the network are explicitly approved by the user and that any unnecessary data is not stored on intermediary devices.
+  & SR5-2
+  & H5-2 \\ \hline
+\end{longtable}
+\end{landscape}
+\restoregeometry
 
 \section{Safety and Security Requirements}
 \label{SecSafetyReqs}
@@ -215,10 +461,16 @@ into scope.
 
 \subsection{AI Tools Used}
 
+<<<<<<< ours
 Anthropic Claude (Sonnet 5.5, Opus 5.5, and Fable 5.1 through Claude Code),
 OpenAI GPT (GPT-6 Sol), and Google Gemini (3.8 Flash, falling back to
 3.5 Flash Lite, through the repository's automated rubric-review action) were used in conjunction with
 team member discussions while writing this document.
+=======
+\begin{itemize}
+    \item Claude Sonnet 5.5
+\end{itemize}
+>>>>>>> theirs
 
 \subsection{How and Where Used}
 
@@ -238,6 +490,8 @@ hazards or write safety requirements.
 
 The Gemini rubric review provides advisory comments on each pull request;
 the team reads them and decides what, if anything, to change.
+
+Claude Sonnet 5.5 was used for assistance in creating the FMEA table formatting (no content). It was used for creating the landscape table with custom column widths that could span multiple pages.
 
 \subsection{Verification of AI-Generated Content}
 
