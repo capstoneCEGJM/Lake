@@ -119,17 +119,18 @@ created as a discussion thread for particular design decisions that require deli
 Team members may fill roles dynamically throughout the year as best fits the situation. Some roles,
 however, are assigned permanent members. Members may fill more than one role, and roles may be
 filled by more than one member. Quality Assurance role is dynamic and follows the same rotation as Meeting Chair.
+Technical leads were assigned while writing the Software Requirements
+Specification (SRS). The list below matches its Roles and Personnel section.
 Identified member roles are as follows:
 \begin{itemize}
 	\item Liaison: Ethan Walsh
 	\item Meeting Chair: Dynamic
 	\item Quality Assurance: Dynamic
 	\item Repo/Org Administrator: Matthew Nesbitt
-	\item Technical Lead (Architecture): TBD
-	\item Technical Lead (IPC): TBD
-	\item Technical Lead (UI/UX): TBD
-	\item Technical Lead (ML): TBD
-	\item Technical Lead (Performance): TBD
+	\item Technical Lead (Architecture): Ethan Walsh
+	\item Technical Lead (Coordinator): Gary Qin
+	\item Technical Lead (ML): Jinwoo Hong, Colin Chambachan
+	\item Technical Lead (Performance): Matthew Nesbitt
 \end{itemize}
 
 \section{Workflow Plan}
@@ -375,8 +376,9 @@ thing that can go wrong:
 \begin{enumerate}
   \item Two processes on the same laptop, talking over localhost. This tests
     the split by itself, without a real network or different platforms.
-  \item Two laptops of the same type connected by wired Ethernet, which adds
-    real network latency.
+  \item Two laptops of the same type connected by a Thunderbolt cable, which
+    adds real transfer latency. Wired Ethernet is a target for larger
+    clusters.
   \item Two laptops with different operating systems and processor
     architectures, for example an Apple Silicon MacBook and an x86 Windows or
     Linux machine.
