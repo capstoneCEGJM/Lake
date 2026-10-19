@@ -27,6 +27,7 @@ September 28, 2026 & Ethan Walsh & Sections 1, 2, 4 and 5 (Problem
 September 28, 2026 & Jinwoo Hong & Section 3 (Stretch Goals)\\
 September 28, 2026 & Gary Qin & Reflection appendix\\
 October 4, 2026 & Ethan Walsh & Refinement of Inputs/Outputs and addition of impact statement to end of Problem Statement\\
+October 15, 2026 & Gary Qin & Clarified which privacy protections are in the core scope (Sections 1.1 and 3.4)\\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -44,8 +45,16 @@ due to hardware restrictions. Users currently cannot access the benefits of
 both approaches: low-cost, high-quality, private artificial intelligence. 
 Addressing this gap would create more democratized access to large language models. 
 
-This project aims to build a system to partition and distribute a given artificial intelligence model across a local network of devices, enabling 
-improved performance and model capacity while operating on private, self-owned infrastructure.
+This project aims to build a system to partition and distribute a given artificial
+intelligence model across a local network of devices, enabling improved performance
+and model capacity while operating on private, self-owned infrastructure.
+
+In the core project, privacy means that prompts, responses and model data stay on
+devices within the user's own local network and are never sent to an external AI
+provider. The core project does not encrypt traffic between devices or authenticate
+devices before they join (see Section 3.4). Users must therefore run Lake only on
+devices they trust, connected by a local network they control, since other devices
+on that network could read the traffic between devices.
 
 \subsection{Inputs and Outputs}
 
@@ -135,7 +144,7 @@ iOS and Android inference is commonly supported by inference engines, but practi
 The distributed system can serve inference to at least two concurrent users at the same time, rather than completing singular requests sequentially. Each request must keep its own state so user outputs do not interfere with one another. This would improve aggregate throughput and observed latency when multiple users are using the model.
 
 \subsection{Privacy and Security}
-Communication between devices is encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensuring only trusted devices are utilized.
+Communication between devices is encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensuring only trusted devices are utilized. This goal removes the need for the trusted-network assumption in Section 1.1, making Lake suitable for networks that untrusted devices also use.
 
 \section{Custom Documents (CDs)}
 
