@@ -142,7 +142,7 @@ Added E.7 Standards and Legal/Regulatory Factors & Meyer's Environment chapter h
 \hline
 Added S.4 Normal Operation and S.5 Undesired Event Handling & Separates expected behaviour from error handling instead of mixing both into S.2 Functionality. \\
 \hline
-Added S.9 Formalizations & Provides a place for mathematical or formal specification of the parts of the system that benefit from it. \\
+Added S.9 Formalisations & Provides a place for mathematical or formal specification of the parts of the system that benefit from it. \\
 \hline
 Added Safety and Security Requirements & Lets the requirements from the Hazard Analysis be ported into this document. \\
 \hline
@@ -810,7 +810,7 @@ roles land on real people. They are composites, not individuals.
 I want to run the 70B model, not the 8B one.''
 
 Priya runs models on her gaming desktop with Ollama and llama.cpp and knows
-what quantization and context length mean. She reads release notes, has
+what quantisation and context length mean. She reads release notes, has
 opinions about which models are good, and is comfortable with a command
 line, installing software on several operating systems, and reading logs.
 Her problem is that the model she wants does not fit on her desktop, and a
@@ -892,7 +892,7 @@ Template).
 \subsection{Assumptions}\label{subsec:assumptions}
 
 \begin{itemize}
-    \item \textbf{Device owners authorize their nodes for use} -- Device owners have authorized their device to be used in the Lake network as a node for serving inference.
+    \item \textbf{Device owners authorise their nodes for use} -- Device owners have authorised their device to be used in the Lake network as a node for serving inference.
     \item \textbf{Participating nodes are trusted devices within the Lake network} -- Each node is trusted to run and process potentially sensitive inference data.
     \item \textbf{Permitted model use} -- Lake operators are using permitted models for inference that adhere to the respective licensing.
     \item \textbf{Network reachability} -- Nodes within the Lake network must be able to communicate over a network connection.
@@ -903,7 +903,7 @@ Template).
 \subsection{Effects}\label{subsec:effects}
 
 \begin{itemize}
-    \item \textbf{Resource usage} -- Device owners' CPU/GPU, memory, and disk usage will increase while the device is part of the Lake network, potentially making the device too resource constrained to multi-task or perform other activities. When not in use, any cached data or the stored layers can continue to utilize disk space.
+    \item \textbf{Resource usage} -- Device owners' CPU/GPU, memory, and disk usage will increase while the device is part of the Lake network, potentially making the device too resource constrained to multi-task or perform other activities. When not in use, any cached data or the stored layers can continue to utilise disk space.
     \item \textbf{Energy usage} -- Devices will consume more power, increasing energy usage, heat generated, fan usage, and decreasing battery life if unplugged.
     \item \textbf{Network bandwidth usage} -- The Lake network may utilize a large amount of a network's bandwidth, inhibiting other devices or processes from accessing the network.
     \item \textbf{Logged data} -- During inference, logs and other diagnostic information can be stored and persist on the node's disk. Logs must exclude sensitive request data as specified in SR5-2.
@@ -1681,7 +1681,7 @@ between Lake and existing local distributed inference providers.
     \item The operator selects a new computer that has appeared on the
     network.
     \item Its owner confirms (\hyperref[UC2]{UC2}).
-    \item Lake reorganizes the model's layers to use the new computer.
+    \item Lake reorganises the model's layers to use the new computer.
     \item Lake shows the new device network arrangement.
     \item The user continues with the session including the new device.
 \end{enumerate}
@@ -1690,9 +1690,9 @@ between Lake and existing local distributed inference providers.
 \begin{itemize}
     \item \textbf{2a.} The owner declines or does not respond: the computer
     is not added and the session continues unchanged.
-    \item \textbf{3a.} Reorganization fails: Lake keeps the previous
+    \item \textbf{3a.} Reorganisation fails: Lake keeps the previous
     arrangement, tells the operator, and the session continues.
-    \item \textbf{3b.} A prompt is in progress during reorganization: Lake
+    \item \textbf{3b.} A prompt is in progress during reorganisation: Lake
     finishes it or re-runs it without the user resubmitting, and never
     presents a partial answer as complete.
     \item \textbf{5a.} The change in speed is not an improvement: the
@@ -1828,7 +1828,7 @@ assigned with the following rules:
   \item \textbf{S}: improves a core goal, but the system still meets that goal
     without it.
   \item \textbf{C}: belongs to a stretch goal in the Problem Statement, or is
-    an optimization with no effect on the core goals.
+    an optimisation with no effect on the core goals.
   \item \textbf{W}: explicitly deferred to a later release. No requirement is
     currently W.
 \end{itemize}
@@ -1851,7 +1851,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.1.4}{Discover devices}{M}{A cluster cannot be formed without finding the other nodes.}
 \priorityrow{FR.S.1.5}{Neighbour info to Tensor I/O}{M}{Each node must know where to send its output tensors.}
 \end{tabularx}
-\caption{Prioritization of Coordinator requirements on all nodes}
+\caption{Prioritisation of Coordinator requirements on all nodes}
 \label{tab:prioritization-coordinator}
 \end{table}
 
@@ -1860,7 +1860,7 @@ were last decided on 2026-10-16.
 \small
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
-\priorityrow{FR.S.1.6}{Send partitions}{M}{Distributing partitions is the core of model parallelization.}
+\priorityrow{FR.S.1.6}{Send partitions}{M}{Distributing partitions is the core of model parallelisation.}
 \priorityrow{FR.S.1.7}{Monitor cluster}{S}{Needed for the dashboard and failure detection, not for inference.}
 \priorityrow{FR.S.1.8}{Inputs to Model Partitioner}{M}{The Model Partitioner needs the available nodes and their memory to produce a valid scheme.}
 \priorityrow{FR.S.1.9}{OpenAI-compatible API}{M}{The only way users submit prompts.}
@@ -1874,7 +1874,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.1.17}{Wait for confirmations}{M}{Required to keep untrusted devices out of a cluster (NFR.S.12).}
 \priorityrow{FR.S.1.18}{Selected followers only}{M}{Same as FR.S.1.17.}
 \end{tabularx}
-\caption{Prioritization of Coordinator requirements on the leader node}
+\caption{Prioritisation of Coordinator requirements on the leader node}
 \label{tab:prioritization-leader}
 \end{table}
 
@@ -1891,7 +1891,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.1.24}{Detect leader failure}{S}{Without it, followers keep holding resources after the leader fails, but no data is lost.}
 \priorityrow{FR.S.1.25}{Shut down on leader failure}{S}{Same as FR.S.1.24.}
 \end{tabularx}
-\caption{Prioritization of Coordinator requirements on follower nodes}
+\caption{Prioritisation of Coordinator requirements on follower nodes}
 \label{tab:prioritization-follower}
 \end{table}
 
@@ -1905,7 +1905,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.2.3}{Equivalent to original}{M}{A split that changes the model produces wrong output.}
 \priorityrow{FR.S.2.4}{Size by capability}{S}{Improves speed; a split based on memory alone still works.}
 \end{tabularx}
-\caption{Prioritization of Model Partitioner requirements}
+\caption{Prioritisation of Model Partitioner requirements}
 \label{tab:prioritization-partitioner}
 \end{table}
 
@@ -1915,12 +1915,12 @@ were last decided on 2026-10-16.
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
 \priorityrow{FR.S.3.1}{Load partition}{M}{Each node must hold its layers in GPU-accessible memory to run them.}
-\priorityrow{FR.S.3.2}{Run incoming tensors}{M}{Core of model parallelization.}
-\priorityrow{FR.S.3.3}{Send output tensors}{M}{Core of model parallelization.}
+\priorityrow{FR.S.3.2}{Run incoming tensors}{M}{Core of model parallelisation.}
+\priorityrow{FR.S.3.3}{Send output tensors}{M}{Core of model parallelisation.}
 \priorityrow{FR.S.3.4}{Measure performance}{S}{Same as FR.S.1.2.}
 \priorityrow{FR.S.3.5}{Concurrent requests}{M}{Same as FR.S.1.14; each node must process tensors from several requests.}
 \end{tabularx}
-\caption{Prioritization of Inference Engine requirements}
+\caption{Prioritisation of Inference Engine requirements}
 \label{tab:prioritization-engine}
 \end{table}
 
@@ -1930,13 +1930,13 @@ were last decided on 2026-10-16.
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
 \priorityrow{FR.S.4.1}{Connect to neighbours}{M}{Tensors cannot pass between nodes without a connection.}
-\priorityrow{FR.S.4.2}{Adaptive compression}{C}{An optimization; tensors can be sent uncompressed.}
-\priorityrow{FR.S.4.3}{Receive tensors}{M}{Core of model parallelization. Decompression applies only if FR.S.4.2 is implemented.}
+\priorityrow{FR.S.4.2}{Adaptive compression}{C}{An optimisation; tensors can be sent uncompressed.}
+\priorityrow{FR.S.4.3}{Receive tensors}{M}{Core of model parallelisation. Decompression applies only if FR.S.4.2 is implemented.}
 \priorityrow{FR.S.4.4}{Send tensors}{M}{Same as FR.S.4.3.}
 \priorityrow{FR.S.4.5}{Measure network}{S}{Same as FR.S.1.3.}
 \priorityrow{FR.S.4.6}{Request association}{M}{Without it, tensors from concurrent requests mix and outputs interfere.}
 \end{tabularx}
-\caption{Prioritization of Tensor I/O requirements}
+\caption{Prioritisation of Tensor I/O requirements}
 \label{tab:prioritization-tensor-io}
 \end{table}
 
@@ -1953,7 +1953,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.5.6}{Highlight bottlenecks}{C}{Useful, but users can read bottlenecks from the metrics in FR.S.5.5.}
 \priorityrow{FR.S.5.7}{Invite prompt}{M}{Same as FR.S.1.20.}
 \end{tabularx}
-\caption{Prioritization of Web UI requirements}
+\caption{Prioritisation of Web UI requirements}
 \label{tab:prioritization-web-ui}
 \end{table}
 
@@ -1974,11 +1974,11 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.10}{No stored request data}{M}{Privacy is a primary reason to use Lake.}
 \priorityrow{NFR.S.11}{No data leaves the cluster}{M}{Same as NFR.S.10. The developer we interviewed would not use Lake with telemetry.}
 \priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
-\priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimization goal.}
+\priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimisation goal.}
 \priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
 \priorityrow{NFR.S.15}{GPU vendors}{M}{Same as NFR.S.13; the Problem Statement supports NVIDIA, AMD and Apple GPUs.}
 \end{tabularx}
-\caption{Prioritization of non-functional requirements}
+\caption{Prioritisation of non-functional requirements}
 \label{tab:prioritization-nfr}
 \end{table}
 
@@ -1987,8 +1987,8 @@ were last decided on 2026-10-16.
 \small
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
-\priorityrow{NFR.E.1}{Supported platforms}{M}{Required by the Cross-Platform Optimization goal. The Android and iOS part is a stretch goal and is C.}
-\priorityrow{NFR.E.2}{Model layer partitioning}{M}{The core of model parallelization.}
+\priorityrow{NFR.E.1}{Supported platforms}{M}{Required by the Cross-Platform Optimisation goal. The Android and iOS part is a stretch goal and is C.}
+\priorityrow{NFR.E.2}{Model layer partitioning}{M}{The core of model parallelisation.}
 \priorityrow{NFR.E.3}{OpenAI API specification}{M}{Same as FR.S.1.9.}
 \priorityrow{NFR.E.4}{Model weights unchanged}{M}{Modified weights produce wrong output.}
 \priorityrow{NFR.E.5}{No third-party services}{M}{Privacy is a primary reason to use Lake.}
@@ -1996,7 +1996,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.E.7}{GPL compliance}{M}{A licence violation would prevent Lake from being distributed.}
 \priorityrow{NFR.E.8}{Model licences}{M}{Same as NFR.E.7, for the models Lake runs.}
 \end{tabularx}
-\caption{Prioritization of environmental requirements}
+\caption{Prioritisation of environmental requirements}
 \label{tab:prioritization-env}
 \end{table}
 
@@ -2019,7 +2019,7 @@ were last decided on 2026-10-16.
 \priorityrow{SR5-1}{Two-sided approval}{M}{Same as NFR.S.12.}
 \priorityrow{SR5-2}{No sensitive data in logs}{M}{Same as NFR.S.10.}
 \end{tabularx}
-\caption{Prioritization of safety and security requirements}
+\caption{Prioritisation of safety and security requirements}
 \label{tab:prioritization-safety}
 \end{table}
 
@@ -2038,11 +2038,11 @@ measured against the goals in the Problem Statement. The team demonstrates the
 system at the proof of concept, Revision 0 and final demonstrations, and the
 teaching assistant and other reviewers judge it against these goals:
 \begin{itemize}
-  \item \textbf{Model Parallelization}: a model split across two or more
+  \item \textbf{Model Parallelisation}: a model split across two or more
     nodes produces coherent output (groups 2 and 3 below).
   \item \textbf{Improved Local Performance}: the cluster runs a model that no
     single node can hold (group 3).
-  \item \textbf{Cross-Platform Optimization}: a cluster mixing operating
+  \item \textbf{Cross-Platform Optimisation}: a cluster mixing operating
     systems runs a model (group 12).
   \item \textbf{Dynamic Allocation}: the cluster keeps serving requests after
     nodes join and leave, and the reallocation time is recorded (group 6).
@@ -2190,7 +2190,7 @@ group.
   \item \textbf{Look and feel.} \req{NFR.S.7}.\\
     \textit{Method:} inspection of the Web UI source.\\
     \textit{Acceptance:} until the requirement is made measurable, every
-    color and font used comes from the Web UI's theme definition.
+    colour and font used comes from the Web UI's theme definition.
 
   \item \textbf{Compatibility.} \req{NFR.S.13}--\req{NFR.S.15},
     \req{NFR.E.1}.\\
@@ -2226,9 +2226,9 @@ group.
 \end{enumerate}
 \endgroup
 
-\subsection{Formalizations}\label{subsec:formalizations}
+\subsection{Formalisations}\label{subsec:formalizations}
 
-Two parts of \progname{} are formalized. S.9.2 defines what counts as a
+Two parts of \progname{} are formalised. S.9.2 defines what counts as a
 valid partitioning scheme for the model across the cluster, which every other
 requirement depends on. S.9.3 specifies, as a finite state machine, how the
 system responds when nodes join and leave the cluster. This is the precise
@@ -2241,7 +2241,7 @@ For integers $a$ and $b$, $a..b = \{\, n \in \mathbb{N} \mid a \le n \le b
 
 \begin{table}[H]
 \centering
-\caption{Symbols used in the formalization}
+\caption{Symbols used in the formalisation}
 \label{tab:formal-symbols}
 \begin{tabularx}{\textwidth}{|l|l|>{\raggedright\arraybackslash}X|}
 \hline
@@ -2264,7 +2264,7 @@ joins the cluster, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR
 \end{tabularx}
 \end{table}
 
-\noindent The formalization assumes that $M_d$ does not change while $d$ is
+\noindent The formalisation assumes that $M_d$ does not change while $d$ is
 in the cluster, and that $\mathit{join}(d)$ only occurs for $d \notin D$ and
 $\mathit{leave}(d)$ only for $d \in D$.
 
@@ -2592,13 +2592,13 @@ Tasks that will be a part of each of the following entries include:
 \subsection{Risk and Mitigation Analysis}\label{subsec:risk}
 
 \begin{itemize}
-    \item \textbf{Risk: Lack of Performance Improvement when parallelizing a model}
+    \item \textbf{Risk: Lack of Performance Improvement when parallelising a model}
     \begin{itemize}
-        \item Description: This project focuses on the potential improvements of parallelizing
+        \item Description: This project focuses on the potential improvements of parallelising
         a model across a pool of devices. If in testing it is determined that splitting up a model
         is not yielding considerably better results in terms of speed or model benchmarks, the system
         may lose users.
-        \item Mitigation: Place additional focus on prioritizing privacy of data and size of model that can be split
+        \item Mitigation: Place additional focus on prioritising privacy of data and size of model that can be split
         up across a pool. This shifts the project's selling points from speed to privacy and quality and still achieves
         the original project goal.
     \end{itemize}

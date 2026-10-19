@@ -43,7 +43,7 @@ and insufficient data privacy protections. Although some users have opted for
 open-source models on local devices, these models are often limited in quality 
 due to hardware restrictions. Users currently cannot access the benefits of 
 both approaches: low-cost, high-quality, private artificial intelligence. 
-Addressing this gap would create more democratized access to large language models. 
+Addressing this gap would create more democratised access to large language models. 
 
 This project aims to build a system to partition and distribute a given artificial
 intelligence model across a local network of devices, enabling improved performance
@@ -109,7 +109,7 @@ measured in a variety of metrics:
 \begin{itemize}
 	\item Primary Metrics:
 		\begin{itemize}
-			\item Model size that can be accommodated (number of parameters and quantization)
+			\item Model size that can be accommodated (number of parameters and quantisation)
 		\end{itemize}
 	\item Secondary Metrics:
 		\begin{itemize}
@@ -124,14 +124,14 @@ measured in a variety of metrics:
 This goal will be considered complete if the primary metric is substantially improved. Improving the
 secondary metrics will be considered as additional bonus.
 
-\subsection{Model Parallelization}
-This goal is the motivating question that brought about this project: can a model be parallelized across multiple local devices and run successfully by producing coherent output? This goal is defined as the system parallelizing an artificial intelligence model (more specifically, a large language model based on the transformer architecture) across more than one local device. Currently, this goal will be considered met when the system is able to split up the layers of a model across the pool of available devices.
+\subsection{Model Parallelisation}
+This goal is the motivating question that brought about this project: can a model be parallelised across multiple local devices and run successfully by producing coherent output? This goal is defined as the system parallelising an artificial intelligence model (more specifically, a large language model based on the transformer architecture) across more than one local device. Currently, this goal will be considered met when the system is able to split up the layers of a model across the pool of available devices.
     
-\subsection{Cross-Platform Optimization}
+\subsection{Cross-Platform Optimisation}
 The system is able to operate across different operating systems and platforms (e.g. Windows, Mac, and Linux) so that users may easily connect their devices. Achieving this will result in the user base not being limited based on their existing device type.
 
 \subsection{Dynamic Allocation}
-In the case goal 2.2 can be achieved (model parallelization), the system can dynamically allocate the parallelized model across the pool of available devices. This can be done when a device joins or leaves the network, given that there are sufficient pooled resources to run the model. This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network. The success of the goal will be evaluated by verifying that the distributed model can serve requests after model layers are reassigned, as well as measuring the reallocation time.
+In the case goal 2.2 can be achieved (model parallelisation), the system can dynamically allocate the parallelised model across the pool of available devices. This can be done when a device joins or leaves the network, given that there are sufficient pooled resources to run the model. This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network. The success of the goal will be evaluated by verifying that the distributed model can serve requests after model layers are reassigned, as well as measuring the reallocation time.
 
 \subsection{Concurrent Inference}\label{sec:concurrent-inference}
 The system serves requests from several users at the same time instead of one
@@ -153,7 +153,7 @@ The system can operate via both wired and wireless connection (v0: wired, v1+: w
 iOS and Android inference is commonly supported by inference engines, but practical feasibility of distributing inference to smartphones remains unknown, due to the limitations of smartphone hardware.
 
 \subsection{Privacy and Security}\label{sec:privacy-security}
-Communication between devices is encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensuring only trusted devices are utilized. This goal removes the need for the trusted-network assumption in Section 1.1, making Lake suitable for networks that untrusted devices also use.
+Communication between devices is encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensuring only trusted devices are utilised. This goal removes the need for the trusted-network assumption in Section 1.1, making Lake suitable for networks that untrusted devices also use.
 
 \section{Custom Documents (CDs)}
 
