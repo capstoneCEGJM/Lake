@@ -176,7 +176,7 @@ Added a Symbolic Constants appendix & The SRS checklist asks for literal values 
     \item \textbf{Inference Engine} -- The software module that loads the LLM and executes its model layer partitions to generate output.
     \item \textbf{KV cache} -- The cache of key-value pairs that are used to store the activations of an LLM.
     \item \textbf{Lake} -- A decentralized network of devices that work together to serve LLM inference via model layer partitioning.
-    \item \textbf{Lake Client} -- The user-facing client interfaces for both consuming the API responses and configuring the Lake system.
+    \item \textbf{Lake Client} -- The instance of Lake installed and running on one device. Every node in a cluster runs one; the leader node's client also serves the web UI and the API.
     \item \textbf{Latency} -- The elapsed time between the start of an inference request and a defined event, such as the completion of the first token, or the completion of the entire response.  
     \item \textbf{LLM (large language model)} -- An artificial intelligence model that is trained on a large dataset of text and is used to generate text.
     \item \textbf{Model layer partitioning} -- The distribution of an LLM's layers across a device pool.
@@ -1268,7 +1268,7 @@ Lake requires the following interfaces:
 
 \subsection{Normal Operation}\label{subsec:normal-operation}
 \begin{enumerate}
-	\item User opens Lake client instances on all participating machines.
+	\item User starts the Lake client on all participating machines.
     \item User creates a Lake cluster using the UI on one of the devices, and provides a
 		GGUF file \citep{GGUF}. This
 		device becomes the leader node.
@@ -1290,7 +1290,7 @@ Lake requires the following interfaces:
 	\item User initiates a shutdown of the Lake cluster.
 	\item Each node unloads its portion of the graph.
 	\item Leader node saves the cluster configuration to disk.
-	\item All nodes sever their connections, and all Lake client instances terminate.
+	\item All nodes sever their connections, and every Lake client terminates.
 \end{enumerate}
 
 \subsection{Undesired Event Handling}\label{subsec:undesired-event-handling}
@@ -1347,7 +1347,7 @@ scenario of the same use case.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item Lake client is installed on every computer the operator wants to use.
+    \item The Lake client is installed on every computer the operator wants to use.
     \item The computers are on the same local network.
     \item The operator can open the Lake web user interface on one computer.
 \end{itemize}
@@ -1370,21 +1370,21 @@ scenario of the same use case.
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
     \item The operator starts the Lake client on each computer they want to use.
-    \item On one of them, the operator opens the Lake client, and that computer becomes
-    the leader node.
-    \item Client lists the other computers on the network that are running
+    \item On one of them, the operator opens the web UI, and that computer
+    becomes the leader node.
+    \item Lake lists the other computers on the network that are running the
     Lake client.
     \item The operator selects the computers to include.
-    \item Lake client asks each selected computer's owner to confirm
+    \item Lake asks each selected computer's owner to confirm
     (\hyperref[UC2]{UC2}).
-    \item Lake client shows the cluster with each computer's memory and platform.
+    \item Lake shows the cluster with each computer's memory and platform.
 \end{enumerate}
 
 \noindent\textbf{Extensions:}
 \begin{itemize}
-    \item \textbf{3a.} No other computers running Lake client are found: Lake client informs
-    the operator that none were found and that the operator can start Lake client on
-    other computers and refresh the list.
+    \item \textbf{3a.} No other computers running the Lake client are found:
+    Lake informs the operator that none were found and that the operator can
+    start the Lake client on other computers and refresh the list.
     \item \textbf{5a.} An owner declines: that computer is left out of the
     cluster and the operator is told which ones declined
     (\hyperref[UC2]{UC2}).
@@ -1416,7 +1416,7 @@ network in advance.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item Lake client is running on the owner's computer.
+    \item The Lake client is running on the owner's computer.
     \item An operator has selected the computer for a cluster, either when
     forming one (\hyperref[UC1]{UC1}) or during a session
     (\hyperref[UC6]{UC6}).
@@ -1502,9 +1502,9 @@ stakeholder who may not be the person running the cluster.
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
     \item The operator chooses a model file.
-    \item Lake system divides the model among the nodes and each node loads its
+    \item Lake divides the model among the nodes and each node loads its
     share.
-    \item Lake client reports that the model is loaded across the cluster.
+    \item Lake reports that the model is loaded across the cluster.
     \item A user sends a prompt.
     \item The response streams back to the leader node.
     \item Steps 4 and 5 repeat until the user chooses to stop the session.
@@ -1513,7 +1513,7 @@ stakeholder who may not be the person running the cluster.
 \noindent\textbf{Extensions:}
 \begin{itemize}
     \item \textbf{1a.} The chosen file is not a supported model format or is
-    unreadable: Lake client rejects it and provides reasoning.
+    unreadable: Lake rejects it and provides reasoning.
     \item \textbf{2a.} The cluster's combined memory is too small for the
     model: Lake does not start loading, tells the operator why, and says what
     would fix it (for example adding a computer or choosing a smaller
@@ -1549,7 +1549,7 @@ model that does not fit on any single device.
     \item A cluster has a model loaded (\hyperref[UC3]{UC3}).
     \item The user's tool can talk to an OpenAI-format API and can reach the
     leader node over the network.
-    \item The user knows the Lake client address.
+    \item The user knows the leader node's API address.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
@@ -1581,10 +1581,10 @@ model that does not fit on any single device.
 \begin{itemize}
     \item \textbf{2a.} The address is wrong or the leader node is
     unreachable: the tool reports a connection error.
-    \item \textbf{3a.} No model is loaded: Lake client returns an error saying so
+    \item \textbf{3a.} No model is loaded: Lake returns an error saying so
     instead of waiting.
     \item \textbf{3b.} The tool uses tool calling or another option Lake does
-    not support: Lake client returns an error naming the unsupported
+    not support: Lake returns an error naming the unsupported
     option.
     \item \textbf{4a.} A node leaves during the request: see
     \hyperref[UC5]{UC5}.
@@ -1634,11 +1634,11 @@ inference users reach Lake.
 \begin{enumerate}
     \item During a session, a computer in the cluster is closed or
     disconnected by its owner.
-    \item Lake client detects that the node has left.
-    \item Lake client notifies the operator which device left and that it is
+    \item Lake detects that the node has left.
+    \item Lake notifies the operator which device left and that it is
     reorganizing.
-    \item Lake client reassigns the model's layers across the remaining nodes.
-    \item Lake client answers or re-runs the user's current prompt without the user
+    \item Lake reassigns the model's layers across the remaining nodes.
+    \item Lake answers or re-runs the user's current prompt without the user
     resubmitting it.
     \item The session continues on the remaining nodes.
 \end{enumerate}
@@ -1678,7 +1678,7 @@ between Lake and existing local distributed inference providers.
 \noindent\textbf{Preconditions:}
 \begin{itemize}
     \item A cluster is running a session.
-    \item A new computer running Lake client has appeared on the network.
+    \item A new computer running the Lake client has appeared on the network.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
