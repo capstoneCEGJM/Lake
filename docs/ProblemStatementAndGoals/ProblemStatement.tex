@@ -139,8 +139,8 @@ after another. Splitting a model lets each device work on a different
 request. Each request keeps its own state so outputs do not interfere. The
 goal is met when at least \textit{MIN\_CONCURRENT} requests run at once with
 none losing more than \textit{MAX\_DEGRADATION} of its throughput when run
-alone, and this number grows linearly with the number of devices. Both
-values are SRS symbolic constants.
+alone. The number of requests served this way grows linearly with the
+number of devices. Both values are SRS symbolic constants.
 
 \section{Stretch Goals}
 
