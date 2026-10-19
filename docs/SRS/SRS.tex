@@ -1211,16 +1211,14 @@ Template).
 		that would give insight into what the data sent in the request might have been.}
 		after the request has completed.
 	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send any data
-		outside the cluster, except the response to the client that sent the
-		request, and discovery and invitation messages to devices on the local
-		network (\req{FR.S.1.4}, \req{FR.S.5.1}, \req{FR.S.1.20}). This
-		includes request data, usage statistics, crash and diagnostic reports,
-		update checks and any other telemetry. Health and performance reports
-		between nodes (\req{FR.S.1.23}) stay in the cluster and are allowed.
-		\emph{Rationale:} the developer we interviewed
-		(Section~\ref{subsubsec:g7-sources}, Appendix~\ref{app:interview})
-		works with export-controlled data and needs Lake to run offline with no
-		telemetry or automatic updates. Realises \req{NFR.G.4.1}.
+		outside the cluster, except responses to the client and discovery and
+		invitation messages to devices on the local network. This includes request
+		data, usage statistics, crash and diagnostic reports, update checks and
+		any other telemetry. Health and performance reports between nodes are
+		allowed. \emph{Rationale:} The developer we interviewed works with
+		export-controlled data and needs Lake to run offline with no telemetry or
+		automatic updates. Related to \req{NFR.G.4.1}, \req{FR.S.1.4},
+		\req{FR.S.1.20}, \req{FR.S.1.23} and \req{FR.S.5.1}.
 	\item \label{NFR.S.12}\textbf{NFR.S.12} The system shall not include untrusted devices in
 		a cluster. Satisfied by \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18},
 		\hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, and \hyperref[FR.S.5.7]{FR.S.5.7}.
@@ -1976,7 +1974,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.8}{Reject bad model files}{M}{Prevents crashes and misleading output from a corrupted file.}
 \priorityrow{NFR.S.9}{Packet loss}{S}{The transport protocol already handles most loss and corruption.}
 \priorityrow{NFR.S.10}{No stored request data}{M}{Privacy is a primary reason to use Lake.}
-\priorityrow{NFR.S.11}{No data leaves the cluster, no telemetry}{M}{Same as NFR.S.10. The interviewed developer (Section~\ref{subsubsec:g7-sources}) would not use Lake with telemetry.}
+\priorityrow{NFR.S.11}{No telemetry}{M}{Same as NFR.S.10. The developer we interviewed would not use Lake with telemetry.}
 \priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
 \priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimization goal.}
 \priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
@@ -2164,8 +2162,8 @@ group.
     \req{SR5-2}.\\
     \textit{Method:} after a set of requests, every file \progname{} wrote,
     including diagnostic logs, is searched for the prompts and responses; all
-    traffic from every node is captured during requests, while idle, and
-    during an update check if the release has one.\\
+    traffic from every node is captured during requests, while idle and
+    during any update check.\\
     \textit{Acceptance:} no request data remains on disk after its request
     completes. Logs contain no prompts, responses, tensor data or KV cache
     content. Every captured packet goes to a cluster node, a local device
