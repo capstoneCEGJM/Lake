@@ -946,10 +946,9 @@ the goals and their metrics, the stretch goals, the hardware limits, and the
 technology direction. The Hazard Analysis contributes the safety and security
 requirements and the critical assumptions.
 
-\paragraph{Peer review.} Reviews of the Problem Statement from Team~07 and
-from a reviewer on another team led to a clearer statement of what privacy
-covers in the first release and to a measurable definition of dynamic
-allocation. Both are tracked as issues in the project repository.
+\paragraph{Peer review.} Team~07's review of the Problem Statement filed
+six issues in the project repository. Two of them clarified what privacy
+covers in the first release and made dynamic allocation measurable.
 
 \paragraph{Teaching assistant.} Meetings with the \gl[ta]{teaching assistant}
 recommended this template and shaped how the requirements are organised.
@@ -2843,16 +2842,73 @@ Tasks that will be a part of each of the following entries include:
 \end{itemize}
 
 \subsection{Requirements Process and Report}\label{subsec:requirements-process}
-\plt{How requirements were elicited and how they will be maintained: who was
-consulted, through which channels, how changes are tracked, and how this
-document will be kept in sync with the Hazard Analysis, V\&V Plan and design.}
 
-\begin{itemize}
-    \item \textbf{Elicitation} --
-    \item \textbf{Communication} --
-    \item \textbf{Change Tracking} --
-    \item \textbf{Process Updates} --
-\end{itemize}
+\paragraph*{Elicitation.} The goals and metrics came from the Problem
+Statement and the Development Plan. The safety and security requirements
+came from the Hazard Analysis. Team~07 reviewed the Problem Statement and
+filed six issues. Two of them led to the privacy scope in \req{NFR.G.4.1}
+and the measurable form of \req{FR.G.4.4}. Meetings with the teaching
+assistant led us to Meyer's template and its chapter structure. On October
+16, 2026 we sent eight written questions to an AI developer who runs an
+in-house assistant at an aerospace company. His answers are in
+Appendix~\ref{app:interview}. The rest came from our own use of local
+inference tools, the distributed inference systems we studied, and the ggml,
+llama.cpp and OpenAI API documentation.
+
+\paragraph*{Communication.} The team meets every Friday on Discord with a
+rotating chair and talks on the Discord server between meetings. We also
+meet the teaching assistant separately. Decisions that affect a document go
+into a GitHub issue or a pull request review. Issues are our only formal
+action items. A change agreed in a meeting or in chat is not final until it
+has an issue. Feedback from peer reviewers and the teaching assistant also
+comes in as issues. Each one is closed by a pull request or a written reason.
+
+\paragraph*{Change tracking.} Each section of this document had its own
+issue (\#94 to \#131). A section was done when it reached level four of the
+course rubric, had its template note removed and built cleanly with
+\texttt{make}. Every change goes through a pull request that needs two
+approvals and must pass continuous integration. It builds every PDF and
+posts an automated rubric review. Requirement identifiers never change. New
+requirements take the next free number in their group and dropped ones are
+marked withdrawn. This keeps references from the Hazard Analysis, the V\&V
+Plan and the design valid. Major revisions are recorded in
+Table~\ref{TblRevisionHistory}. Each priority in
+Section~\ref{subsec:prioritization} shows the date it was last decided.
+
+\paragraph*{Process updates.} Each recommended action in the Hazard Analysis
+FMEA is a safety and security requirement (SR0-1 to SR5-2). They are copied
+word for word into the Safety and Security Requirements section on
+page~\pageref{sec:safety-security}. Five of the 13 refine an FR.S or NFR.S
+requirement. The Hazard Analysis cites that requirement. The Hazard Analysis
+roadmap uses the milestone dates in Section~\ref{subsec:schedule}. A pull
+request that changes any of these edits both documents.
+
+The V\&V Plan is due November 2, 2026. It will use the 15 verification
+groups in Section~\ref{subsec:verification-and-acceptance-criteria} as its
+test cases and the \hyperref[app:constants]{Symbolic Constants} appendix for
+its thresholds. Every system, environmental, and safety and security
+requirement is in at least one group. A new requirement is not accepted
+without one. The Design Document is due November 16, 2026. It will trace
+each module to its requirements, and its modules must hide the likely
+changes in Section~\ref{subsec:likely-changes-to-requirements}. If a later
+document finds a gap, we fix it here first and then update that document.
+
+\paragraph*{Report.} This revision has 12 high-level requirements in
+Section~\ref{subsec:functionality-overview}, six functional and six
+non-functional. They are refined into 47 functional and 15 non-functional
+system requirements in Section~\ref{subsec:functionality}. With eight
+environmental and 13 safety and security requirements, there are 83
+prioritised requirements. Of these, 58 are must, 21 should, four could and
+none deferred. There are eight use cases, six likely changes and four
+unlikely changes. About a dozen items trace to people outside the team.
+Two are the Team~07 issues above. The rest come from the user interview. It
+confirmed or changed \req{FR.G.4.6}, \req{NFR.G.4.1}, \req{UC5}, \req{UC7},
+the device-owner stakeholder and the second persona. It also raised a
+no-telemetry requirement for S.2 that is still an open issue. The priorities
+were last decided on October 16, 2026. The peer review of this document is
+due October 22, 2026. We will handle its issues and the teaching assistant's
+feedback before writing the V\&V Plan. Revision 1 is due with the final
+documentation on March 31, 2027.
 
 % ===========================================================================
 \newpage
