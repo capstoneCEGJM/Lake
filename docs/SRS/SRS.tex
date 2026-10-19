@@ -137,7 +137,7 @@ which organises a specification into four chapters: Goals (G), Environment
 than a course template, so we have adapted it. Table~\ref{ChangesFromTemplate}
 records each structural change and the reason for it. The LaTeX structure is
 adapted from a Meyer-template specification written by a previous capstone
-team and shared with us by our teaching assistant.
+team and shared with us by our \gl[ta]{teaching assistant}.
 
 \begin{table}[H]
 \small
@@ -148,7 +148,7 @@ team and shared with us by our teaching assistant.
 \hline
 Glossary (E.1) moved to the front of the document & Terms and acronyms must be defined before first use, and information should live in one place. E.1 now points here. \\
 \hline
-Requirement tables added to each PEGS chapter & Meyer's template describes requirements in prose. Labelled tables of functional (FR) and non-functional (NFR) requirements give each requirement an ID that can be prioritized, traced and verified. \\
+Requirement tables added to each \gl[pegs]{PEGS} chapter & Meyer's template describes requirements in prose. Labelled tables of functional (FR) and non-functional (NFR) requirements give each requirement an ID that can be prioritized, traced and verified. \\
 \hline
 Added G.8 User Profiles & Meyer lists stakeholders (G.7) but has no place for the distinct characteristics of each user group. \\
 \hline
@@ -166,7 +166,7 @@ Added References & Meyer's template has no references section. \\
 \hline
 Added Appendices (Generative AI Use Disclosure, Reflection) & Required by the course. \\
 \hline
-Added S.10 Likely changes to requirements & Required by the SRS rubric. \\
+Added S.10 Likely changes to requirements & Required by the \gl[srs]{SRS} rubric. \\
 \hline
 Added S.11 Unlikely changes to requirements & Required by the SRS rubric. \\
 \hline
@@ -418,15 +418,15 @@ chapter (Section~\ref{sec:srs-E}).
 
 \subsection{Context and Overall Objective}\label{subsec:context-and-overall-objective}
 
-LLMs have become an everyday tool, and almost everyone
+\gl[llm]{LLMs} have become an everyday tool, and almost everyone
 who uses one does so through a commercial provider's web interface or
-application programming interface (API). The alternative is to run an open
+application programming interface (\gl[api]{API}). The alternative is to run an open
 model on your own machine, which keeps your data at home but limits you to
 whatever fits in one device's memory. Most households, offices, and labs
 already own several computers, and most of them sit idle most of the time.
 
 Lake runs a single pre-trained LLM across several consumer devices on one
-local network. The model is split by layer, each device holds and runs only
+local network. The model is split by \gl{layer}, each device holds and runs only
 its share, and the devices pass intermediate results between them so that
 together they answer a prompt as if the model were running on one machine.
 The objective is to let people run models that are too large for any one of
@@ -449,7 +449,7 @@ outside the boundary.
 \subsection{Current Situation}\label{subsec:current-situation}
 
 Today there are two ways to use an LLM. The first is a hosted service from one
-of the major inference providers. These give the best model quality, but every
+of the major \gl{inference} providers. These give the best model quality, but every
 prompt leaves the premises, the cost grows with use, and the user has no
 control over how their data is handled. For a clinic or a law office this is
 often not acceptable at all.
@@ -463,14 +463,14 @@ the same desk.
 
 A few projects already spread a model over several machines: exo
 \citep{Exo}, prima.cpp \citep{PrimaCpp2025}, and the remote procedure call
-(RPC) backend of llama.cpp. They assign layers to devices once, when the model
-loads, and the assignment stays fixed for the session. If a device drops off
+(\gl[rpc]{RPC}) backend of llama.cpp. They assign layers to devices once, when the
+model loads, and the assignment stays fixed for the \gl{session}. If a device drops off
 the network the session fails, and a device added later goes unused until
 everything is restarted. Lake builds on the same idea but makes the assignment
 something the system can change while it is running.
 Table~\ref{tab:alternatives} summarises how Lake compares. Mixed operating
 systems are marked ``partly'' for the existing tools because exo runs on
-Apple silicon through MLX and only on the CPU on Linux, with no Windows build
+Apple silicon through MLX and only on the \gl[cpu]{CPU} on Linux, with no Windows build
 \citep{Exo}, and prima.cpp supports Linux and macOS \citep{PrimaCpp2025};
 only the llama.cpp RPC backend runs on all three.
 
@@ -518,8 +518,9 @@ Section~\ref{subsec:functionality}.
 
 \subsubsection*{Larger models on existing hardware}
 A user can run a model that does not fit on any one of their devices. The
-measure is the largest model, by parameter count, precision, and context
-window, that a cluster can serve compared with the largest the single best
+measure is the largest model, by parameter count, precision, and
+\gl[contextwindow]{context window}, that a \gl{cluster} can serve compared with
+the largest the single best
 device in that cluster can serve alone. This is the primary benefit, and the
 Model Size requirement in Section~\ref{subsec:functionality} states the
 target.
@@ -554,7 +555,7 @@ service with no changes on their side. The measure is an unmodified
 third-party client completing a session against Lake.
 
 \subsubsection*{Several users at once}
-While one request's token is being computed on one node, another request's
+While one request's \gl{token} is being computed on one \gl{node}, another request's
 token can be computed on the next, so a cluster can serve several users
 without each one waiting for the others. The measure is the number of
 requests the cluster can serve at once before any single request slows by
@@ -563,22 +564,23 @@ Section~\ref{subsec:functionality}, and how that number grows with the
 number of nodes.
 
 \subsubsection*{Speed, where the split allows it}
-Response time and throughput (tokens per second) for a single request are
+Response time and \gl[throughput]{throughput} (tokens per second) for a single request are
 secondary measures. A split model is not expected to beat a single device
 on a model that already fits on that device, since every token still passes
 through every layer in order. The gain is in capacity, and in throughput
 when several requests are served at once. The practitioner we interviewed (see
 Section~\ref{subsubsec:g7-sources}) expected the same: a split over an office
-network would likely be slower than one good GPU for live chat, but worth it
-for background work such as re-indexing documents, OCR, and overnight test
+network would likely be slower than one good \gl[gpu]{GPU} for live chat, but worth
+it for background work such as re-indexing documents, \gl[ocr]{OCR}, and overnight test
 runs, which is a use we had not considered.
 
 \subsection{Functionality Overview}\label{subsec:functionality-overview}
 
 This section is a capsule version of the System chapter. Each high-level
 requirement here maps to one or more of the components in
-Section~\ref{subsec:components} (the Coordinator, the Model Partitioner, the
-Inference Engine, Tensor I/O, and the Web UI) and to detailed requirements in
+Section~\ref{subsec:components} (the \gl[coordinator]{Coordinator}, the
+\gl[partitioner]{Model Partitioner}, the \gl[inferenceengine]{Inference Engine},
+\gl[tensorio]{Tensor I/O}, and the \gl[webui]{Web UI}) and to detailed requirements in
 Section~\ref{subsec:functionality}.
 
 \subsubsection{Functional Requirements}\label{subsubsec:g4-functional}
@@ -590,8 +592,9 @@ that realise it, so a change in either place can be traced to the other.
 
 \begin{itemize}
     \item \reqlabel{FR.G.4.1}\textbf{FR.G.4.1 Form a cluster with consent.}
-    Lake runs on each device. From the web user interface (UI) on one device,
-    which becomes the leader node, the operator sees the other devices on the
+    Lake runs on each device. From the web user interface (\gl[ui]{UI}) on one
+    device, which becomes the \gl[leader]{leader node}, the \gl{operator} sees the
+    other devices on the
     local network that are running Lake and chooses which to include. Each
     chosen device asks its owner to confirm before it joins, so no device
     takes part without consent. \emph{Realised by} \req{FR.S.1.4},
@@ -599,7 +602,7 @@ that realise it, so a change in either place can be traced to the other.
     \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{FR.S.5.7}, and
     \req{NFR.S.12}.
     \item \reqlabel{FR.G.4.2}\textbf{FR.G.4.2 Load and partition a model.}
-    The operator picks a model in GGUF format \citep{GGUF}, the file format
+    The operator picks a model in \gl[gguf]{GGUF} format \citep{GGUF}, the file format
     used by llama.cpp. Lake measures each node's memory, compute, and network
     performance, decides which range of layers each node will hold, and has
     each node load only that range. \emph{Realised by} \req{FR.S.5.3},
@@ -607,9 +610,10 @@ that realise it, so a change in either place can be traced to the other.
     \req{FR.S.1.19}, \req{FR.S.1.1}, \req{FR.S.3.1}, \req{NFR.S.4}, and
     \req{NFR.E.2}.
     \item \reqlabel{FR.G.4.3}\textbf{FR.G.4.3 Run inference across the
-    cluster.} A prompt enters at the first node, the activations pass from
-    node to node in layer order, and generated tokens stream back to the user
-    one at a time. Each node keeps the key-value (KV) cache for its own
+    cluster.} A prompt enters at the first node, the \gl[activation]{activations}
+    pass from node to node in layer order, and generated tokens
+    \gl[streaming]{stream} back to the user one at a time. Each node keeps the
+    \gl[kvcache]{key-value (KV) cache} for its own
     layers, so nothing about the conversation has to be re-sent between
     tokens. Several requests can be in flight at once, each at a different
     node, and their state is kept apart. \emph{Realised by} \req{FR.S.1.5},
@@ -626,21 +630,21 @@ that realise it, so a change in either place can be traced to the other.
     \item \reqlabel{FR.G.4.5}\textbf{FR.G.4.5 Measure performance.} Lake
     records compute time on each node and transfer time between nodes. These
     measurements drive the partitioner and are shown in the web UI, which
-    highlights the node or link that is the bottleneck and compares the
+    highlights the node or link that is the \gl{bottleneck} and compares the
     cluster against the single best machine in it, so the operator can see
     whether pooling is paying off. \emph{Realised by} \req{FR.S.1.2},
     \req{FR.S.1.3}, \req{FR.S.3.4}, \req{FR.S.4.5}, \req{FR.S.1.23},
     \req{FR.S.1.7}, \req{FR.S.1.16}, \req{FR.S.5.5}, \req{FR.S.5.6}, and
     \req{NFR.S.1}.
     \item \reqlabel{FR.G.4.6}\textbf{FR.G.4.6 Serve prompts through a standard
-    API.} The leader node exposes an HTTP API in the OpenAI format
-    \citep{OpenAIAPI}, including streaming and tool calling, so any client
+    API.} The leader node exposes an \gl[http]{HTTP} API in the OpenAI format
+    \citep{OpenAIAPI}, including streaming and \gl[toolcalling]{tool calling}, so any client
     that can talk to a hosted provider can talk to Lake. \emph{Realised by}
     \req{FR.S.1.9} and \req{NFR.E.3}.
 \end{itemize}
 
 Two of these carry most of the value: \req{FR.G.4.2} and \req{FR.G.4.4}.
-Partitioning is what lets a model larger than any one device run at all,
+\gl[partitioning]{Partitioning} is what lets a model larger than any one device run at all,
 which is the primary goal of the project. Reallocation is what sets Lake
 apart from exo and the llama.cpp RPC backend, both of which fix the split
 when the model loads. Without the first there is no product; without the
@@ -656,7 +660,7 @@ each names the detailed requirement that gives it a measurable target.
     \item \reqlabel{NFR.G.4.1}\textbf{NFR.G.4.1 Request data stays in the
     cluster.} No prompt, response, or intermediate data is sent to any device
     outside the cluster, none is kept after a request completes, and Lake
-    sends no telemetry. This is the privacy benefit, and it is the reason an
+    sends no \gl{telemetry}. This is the privacy benefit, and it is the reason an
     organisation handling export-controlled or medical data could use Lake at
     all. \emph{Realised by} \req{NFR.S.10}, \req{NFR.S.11}, \req{NFR.S.12},
     and \req{NFR.E.5}.
@@ -694,8 +698,9 @@ privacy-bound organisation and the user who already has a model they like.
 
 \subsubsection{RACI Matrix}\label{subsubsec:g4-raci}
 
-Table~\ref{tab:raci} shows who is responsible, accountable, consulted, and
-informed for each high-level requirement, using the stakeholders from
+Table~\ref{tab:raci} is a \gl[raci]{RACI} matrix: it shows who is responsible,
+accountable, consulted, and informed for each high-level requirement, using
+the stakeholders from
 Section~\ref{subsec:stakeholders-and-requirements-sources}.
 
 \begin{table}[H]
@@ -866,8 +871,8 @@ the System chapter record which of these may change.
 
 \begin{itemize}
     \item \emph{No training or fine-tuning.} Lake runs pre-trained
-    transformer models that ggml \citep{Ggml} supports. Lake does not train,
-    fine-tune, quantize, or otherwise modify a model, and does not change the
+    \gl{transformer} models that ggml \citep{Ggml} supports. Lake does not train,
+    fine-tune, \gl[quantization]{quantize}, or otherwise modify a model, and does not change the
     quality of its output.
     \item \emph{Trusted network and devices.} In the first release, traffic
     between nodes is not encrypted and devices are not authenticated beyond
@@ -885,7 +890,7 @@ the System chapter record which of these may change.
     up a model that already runs well on one device. The benefit is running
     models that would not otherwise fit.
     \item \emph{No model hosting.} Lake does not download or distribute
-    model weights. Users supply a model file under that model's own license.
+    model \gl{weights}. Users supply a model file under that model's own license.
 \end{itemize}
 
 \subsection{Stakeholders and Requirements Sources}\label{subsec:stakeholders-and-requirements-sources}
@@ -977,7 +982,7 @@ from a reviewer on another team led to a clearer statement of what privacy
 covers in the first release and to a measurable definition of dynamic
 allocation. Both are tracked as issues in the project repository.
 
-\paragraph{Teaching assistant.} Meetings with the teaching assistant
+\paragraph{Teaching assistant.} Meetings with the \gl[ta]{teaching assistant}
 recommended this template and shaped how the requirements are organised.
 
 \paragraph{User interview.} On October 16, 2026 we sent the eight questions
@@ -987,7 +992,7 @@ in-house assistant for about two hundred staff, entirely on two GPU
 machines, because much of the firm's data is export-controlled and cannot go
 to a cloud provider. The
 interview confirmed the privacy benefit as the reason such organisations run
-locally at all, confirmed the OpenAI-compatible API as a must (with
+locally at all, confirmed the \gl[openaiapi]{OpenAI-compatible API} as a must (with
 streaming, tool calling, and structured output), and confirmed the
 bottleneck view in \hyperref[UC7]{UC7}. It corrected us in three places: a
 split over an office network is expected to be slower than one good GPU for
@@ -1000,13 +1005,13 @@ second persona and the device-owner stakeholder.
 
 \paragraph{Regulation and guidance.} No law requires an organisation to run
 its models locally, but several make it the simplest way to comply. Canada's
-private-sector privacy law, PIPEDA \citep{PIPEDA}, keeps an organisation
+private-sector privacy law, \gl[pipeda]{PIPEDA} \citep{PIPEDA}, keeps an organisation
 accountable for personal information it passes to a third party. Export
 control regimes such as Canada's Controlled Goods Program under the Defence
 Production Act \citep{DPA1985, CGR2001} restrict who may examine or possess
 controlled technical data, which includes software and documentation, and
 this is the kind of rule that keeps the interviewee's firm off hosted
-services. NIST's generative AI profile \citep{NIST2024} lists data privacy,
+services. \gl[nist]{NIST}'s generative AI profile \citep{NIST2024} lists data privacy,
 information integrity, and information security among the risks an operator
 of a generative model is expected to manage. These documents are the
 background for \hyperref[NFR.G.4.1]{NFR.G.4.1} and the no-telemetry
@@ -1022,7 +1027,7 @@ Section~\ref{subsec:high-level-usage-scenarios}.
 \citep{PrimaCpp2025}, and the RPC backend of llama.cpp \citep{LlamaCpp} were
 studied to learn what current systems do and where they fall short. The gap
 they share, a split that is fixed when the model loads, is the origin of the
-dynamic allocation goal.
+\gl[dynamicallocation]{dynamic allocation} goal.
 
 \paragraph{Libraries and formats.} The ggml and llama.cpp documentation and
 source \citep{Ggml, LlamaCpp, GGUF} define which models and hardware can be
@@ -1035,9 +1040,10 @@ structure follows.
 
 \subsection{User Profiles}\label{subsec:user-profiles}
 
-The Environment chapter distinguishes three roles: the inference user who
-sends prompts, the Lake operator who sets up and runs the cluster, and the
-device owner who contributes a machine. The personas below represent the
+The Environment chapter distinguishes three roles: the \gl[inferenceuser]{inference
+user} who sends prompts, the Lake operator who sets up and runs the cluster, and
+the \gl[deviceowner]{device owner} who contributes a machine. The personas below
+represent the
 three direct user groups from Table~\ref{tab:stakeholders} and show how those
 roles land on real people. They are composites, not individuals.
 
@@ -1107,24 +1113,24 @@ Template).
 \subsection{Environment Components}\label{subsec:environment-components}
 
 \begin{itemize}
-    \item \textbf{Inference users (a.k.a users)} -- Individuals who interact with the Lake network to serve inference requests.
-    \item \textbf{Lake operators} -- Individuals who manage the Lake network, including the device pool and the model.
-    \item \textbf{Device owners} -- Individuals who contribute one or more nodes towards the device pool.
+    \item \textbf{\gl[inferenceuser]{Inference users} (a.k.a users)} -- Individuals who interact with the \gl[cluster]{Lake network} to serve \gl{inference} requests.
+    \item \textbf{Lake \gl[operator]{operators}} -- Individuals who manage the Lake network, including the \gl[devicepool]{device pool} and the model.
+    \item \textbf{\gl[deviceowner]{Device owners}} -- Individuals who contribute one or more \gl[node]{nodes} towards the device pool.
     \item \textbf{Operating systems and drivers} -- Windows, macOS, and Linux operating systems that have the supported drivers to facilitate inference requests. Android and iOS operating system support is a stretch goal.
     \item \textbf{Network equipment} -- Routers, switches, Thunderbolt cables, and any other hardware necessary to connect the nodes to the network. Connectivity via Wi-Fi is a stretch goal.
-    \item \textbf{Model} -- Pre-trained and open-source model weights that are permitted to be downloaded and utilized by the Lake network via model layer partitioning.
-    \item \textbf{External API consumers} -- Other services that utilize the Lake API to serve inference requests. This acts as the main interface for consumers to use Lake, such as coding agent harnesses (e.g. Claude Code, Codex, Pi).
+    \item \textbf{Model} -- Pre-trained and open-source model \gl{weights} that are permitted to be downloaded and utilized by the Lake network via \gl[partitioning]{model layer partitioning}.
+    \item \textbf{External \gl[api]{API} consumers} -- Other services that utilize the Lake API to serve inference requests. This acts as the main interface for consumers to use Lake, such as coding agent harnesses (e.g. Claude Code, Codex, Pi).
  
 \end{itemize}
 
 \subsection{Constraints}\label{subsec:constraints}
 
 \begin{itemize}
-    \item \textbf{Device hardware} -- Each node should have a sufficient CPU, GPU, memory, and storage such that its assigned model layers, KV cache, and other Lake software components can fit and run within the device, such that distributed inference has both a higher token throughput and lower latency than an equivalent single-device inference.
+    \item \textbf{Device hardware} -- Each node should have a sufficient \gl[cpu]{CPU}, \gl[gpu]{GPU}, memory, and storage such that its assigned model \gl[layer]{layers}, \gl[kvcache]{KV cache}, and other Lake software components can fit and run within the device, such that distributed inference has both a higher \gl[throughput]{token throughput} and lower \gl{latency} than an equivalent single-device inference.
     \item \textbf{Network communication} -- Network communication, whether wired or wireless, should have a sufficiently high bandwidth and low latency. Inter-node communication overhead may make distributed inference slower than single-device inference.
     \item \textbf{Platform compatibility} -- Nodes within the Lake network must operate on Windows, macOS, and Linux (as well as Android and iOS as stretch goals) as hardware acceleration and inference platforms are limited by the available drivers on these operating systems.
-    \item \textbf{API compatibility} -- Lake must implement a standardized OpenAI API spec such that existing external clients can easily utilize Lake, \citep{OpenAIAPI}, as specified in Section S.3.
-    \item \textbf{Model architecture} -- Only supported LLM architectures that Lake's model layer partitioning supports can be used.
+    \item \textbf{API compatibility} -- Lake must implement a standardized \gl[openaiapi]{OpenAI API} spec such that existing external clients can easily utilize Lake, \citep{OpenAIAPI}, as specified in Section S.3.
+    \item \textbf{Model architecture} -- Only supported \gl[llm]{LLM} architectures that Lake's model layer partitioning supports can be used.
 \end{itemize}
 
 \subsection{Assumptions}\label{subsec:assumptions}
@@ -1153,8 +1159,8 @@ Template).
 \begin{itemize}
     \item The provided model must remain unchanged. Loading the model and partitioning its layers must not mutate the underlying model weights.
     \item Inference must be contained within the Lake network, and must not be sent to 3rd-party services.
-    \item All nodes within the Lake network must be using compatible layer partitions that originate from the same model's layers.
-    \item All nodes must serve inference in a way that the activations are performed in the same order as in single-device inference.
+    \item All nodes within the Lake network must be using compatible layer \gl[partition]{partitions} that originate from the same model's layers.
+    \item All nodes must serve inference in a way that the \gl[activation]{activations} are performed in the same order as in single-device inference.
     \item Intermediate data from one request must not be used for another independent request.
 \end{itemize}
 
@@ -1168,7 +1174,7 @@ Template).
 
 \noindent\textbf{Legal and Regulatory Factors:}
 \begin{itemize}
-    \item \textbf{Software licensing} -- Lake is available under the GNU GPL v3.0 license \citep{GPLv3}. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
+    \item \textbf{Software licensing} -- Lake is available under the GNU \gl[gpl]{GPL} v3.0 license \citep{GPLv3}. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
     \item \textbf{Model licensing} -- Pretrained LLMs used for inference are subject to their respective licenses. Lake must be compliant with these licenses for its use and distribution.
 \end{itemize}
 
@@ -1214,38 +1220,38 @@ Template).
 \end{figure}
 
 \begin{itemize}
-	\item \textbf{Coordinator} -- This component exists on all nodes,
-		but the following responsibilities are only run on the leader node:
+	\item \textbf{\gl[coordinator]{Coordinator}} -- This component exists on all \gl[node]{nodes},
+		but the following responsibilities are only run on the \gl[leader]{leader node}:
 		\begin{itemize}
 			\item Providing an OpenAI-API compatible API to the user for use with tools like
 				OpenCode \citep{OpenCode}.
-			\item Tracking cluster health, and detecting node failures.
+			\item Tracking \gl{cluster} health, and detecting node failures.
 			\item Notifying nodes of partitioning changes.
 			\item Rebuilding the cluster and saving in-progress requests
 				in the case of node failure, removal, or addition.
 			\item Measuring node connection performance.
 		\end{itemize}
-		On a follower node, it is primarily responsible for managing the inference engine
+		On a \gl[follower]{follower node}, it is primarily responsible for managing the inference engine
 		on its device, following the instructions of the leader node.
 
-	\item \textbf{Model Partitioner} --
+	\item \textbf{\gl[partitioner]{Model Partitioner}} --
 		This component determines how to partition the model among the participating devices. It
-		decides at which points to cut the graph, how large each partition is, and which device gets
+		decides at which points to cut the graph, how large each \gl{partition} is, and which device gets
 		each partition. This component is integral to ensuring that each device is assigned an appropriate
 		partition given the device's computational and networking performance.
 
-	\item \textbf{Inference Engine} --
+	\item \textbf{\gl[inferenceengine]{Inference Engine}} --
 		This component is the high-performance inference engine running on each device. It will handle
 		execution of the given model partition for each device. It will call into
 		ggml \citep{Ggml} using the Rust-to-C FFI to control the execution of a
 		device's model partition.
 
-	\item \textbf{Tensor I/O} --
-		This component handles the compressing, sending, receiving, and decompressing of tensors between devices.
+	\item \textbf{\gl[tensorio]{Tensor I/O}} --
+		This component handles the compressing, sending, receiving, and decompressing of \gl[tensor]{tensors} between devices.
 		It will leverage gRPC \citep{GRPC} for high-performance communication, with the potential
 		to use a custom solution should gRPC fail to meet our requirements in practice.
 
-	\item \textbf{Web UI} --
+	\item \textbf{\gl[webui]{Web UI}} --
 		This component handles displaying cluster information and structure to the user, as well as allowing user
 		inputs to configure a new cluster, or modify an existing cluster.
 \end{itemize}
@@ -1257,11 +1263,11 @@ Template).
 	\item \reqlabel{FR.S.1.1}\textbf{FR.S.1.1} The system shall provide the local Inference Engine with the model partition
 		assigned to the local device.
 	\item \reqlabel{FR.S.1.2}\textbf{FR.S.1.2} The system shall collect device health/performance
-		information\footnote{e.g. token throughput, end-to-end partition latency, backpressure.}
+		information\footnote{e.g. \gl[throughput]{token throughput}, end-to-end partition \gl{latency}, \gl{backpressure}.}
 		from the local Inference Engine on a 5 second interval.
 		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 	\item \reqlabel{FR.S.1.3}\textbf{FR.S.1.3} The system shall collect the network health/performance
-		information\footnote{e.g. RTT, throughput, backpressure.}
+		information\footnote{e.g. \gl[rtt]{RTT}, throughput, backpressure.}
 		for established connections from the Tensor I/O component on a 5 second interval.
 		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 	\item \reqlabel{FR.S.1.4}\textbf{FR.S.1.4} The system shall continuously scan for all other devices on the same network
@@ -1278,7 +1284,7 @@ Template).
 				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 			\item \reqlabel{FR.S.1.8}\textbf{FR.S.1.8} The system shall provide the Model Partitioner with the available nodes,
 				and gathered node performance data, to help inform optimal model cut points.
-			\item \reqlabel{FR.S.1.9}\textbf{FR.S.1.9} The system shall provide an HTTP API matching OpenAI's API.
+			\item \reqlabel{FR.S.1.9}\textbf{FR.S.1.9} The system shall provide an \gl[http]{HTTP} \gl[api]{API} matching OpenAI's API.
 			\item \reqlabel{FR.S.1.10}\textbf{FR.S.1.10} The system shall detect failing follower
 				nodes\footnote{A "failing" device is defined as severely degraded ($<50\%$ of historical)
 				token throughput, whether it be due to network or device resource instability.}.
@@ -1326,7 +1332,7 @@ Template).
 \textbf{Functional Requirements}
 \begin{itemize}
 	\item \reqlabel{FR.S.2.1}\textbf{FR.S.2.1} The system shall assign all devices a partition smaller than their available
-		GPU-accessible memory, with additional room left for runtime overhead. Related to \hyperref[NFR.S.4]{NFR.S.4}.
+		\gl[gpu]{GPU}-accessible memory, with additional room left for runtime overhead. Related to \hyperref[NFR.S.4]{NFR.S.4}.
 		Satisfies hazard H1-3 from the Hazard Analysis.
 	\item \reqlabel{FR.S.2.2}\textbf{FR.S.2.2} The system shall report failure in the case that no valid partition across
 		the cluster exists (e.g. not enough GPU-accessible memory).
@@ -1334,7 +1340,7 @@ Template).
 		to the original model. Satisfies \hyperref[NFR.S.6]{NFR.S.6}.
 	\item \reqlabel{FR.S.2.4}\textbf{FR.S.2.4} The system shall assign larger partitions to more capable
 		devices\footnote{The "capabilities" of any given devices are defined via a combination of network throughput,
-		GPU TFLOPs/TOPs, GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
+		GPU \gl[flops]{TFLOPs}/TOPs, GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
 		Related to \hyperref[NFR.S.4]{NFR.S.4}.
 \end{itemize}
 
@@ -1358,7 +1364,7 @@ Template).
 \begin{itemize}
 	\item \reqlabel{FR.S.4.1}\textbf{FR.S.4.1} The system shall establish connections with neighbouring nodes' Tensor I/O components.
 	\item \reqlabel{FR.S.4.2}\textbf{FR.S.4.2} The system shall dynamically choose the compression level of
-		outgoing tensors to maximize throughput based on available CPU-time and network throughput.
+		outgoing tensors to maximize throughput based on available \gl[cpu]{CPU}-time and network throughput.
 	\item \reqlabel{FR.S.4.3}\textbf{FR.S.4.3} The system shall accept input tensors from the upstream node, decompress them,
 		and provide them to the Inference Engine.
 	\item \reqlabel{FR.S.4.4}\textbf{FR.S.4.4} The system shall accept output tensors from the Inference Engine, compress
@@ -1385,7 +1391,7 @@ Template).
 		input file is infeasible given the selected devices. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
 	\item \reqlabel{FR.S.5.5}\textbf{FR.S.5.5} The system shall display the performance metrics of the cluster as a whole,
 		as well as for each individual node and connection. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
-	\item \reqlabel{FR.S.5.6}\textbf{FR.S.5.6} The system shall highlight nodes or network connections causing bottlenecks (TODO: glossary bottleneck)
+	\item \reqlabel{FR.S.5.6}\textbf{FR.S.5.6} The system shall highlight nodes or network connections causing \gl[bottleneck]{bottlenecks}
 		in the cluster. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}. Satisfies hazard H4-3 from the Hazard Analysis.
 	\item \reqlabel{FR.S.5.7}\textbf{FR.S.5.7} The system shall, upon receiving an invite to join a cluster, display a prompt
 		for the user to either confirm or decline the invitation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
@@ -1412,7 +1418,7 @@ Template).
 \paragraph{Performance}
 \begin{itemize}
 	\item \reqlabel{NFR.S.4}\textbf{NFR.S.4} \textbf{Model Size:} The cluster must be able to run a model with more
-		parameters, higher precision, or larger context window than would be able to run individually on the
+		parameters, higher precision, or larger \gl[contextwindow]{context window} than would be able to run individually on the
 		node with the most memory. Related to \hyperref[FR.S.2.1]{FR.S.2.1}, and
 		\hyperref[FR.S.2.4]{FR.S.2.4}.
 	\item \reqlabel{NFR.S.5}\textbf{NFR.S.5} \textbf{Scalability:} The number of concurrent requests with < 20\%
@@ -1464,41 +1470,42 @@ Template).
 \paragraph{Compatibility}
 \begin{itemize}
 	\item \reqlabel{NFR.S.13}\textbf{NFR.S.13} \textbf{Operating System:} The system shall be compatible with Windows, macOS, Linux.
-	\item \reqlabel{NFR.S.14}\textbf{NFR.S.14} \textbf{CPU Architecture:} The system shall be compatible with x86\_64 and ARM CPU architectures.
+	\item \reqlabel{NFR.S.14}\textbf{NFR.S.14} \textbf{CPU Architecture:} The system shall be compatible with \gl[x86]{x86\_64} and \gl[arm]{ARM} CPU architectures.
 	\item \reqlabel{NFR.S.15}\textbf{NFR.S.15} \textbf{GPU Technology:} The system shall be compatible with NVIDIA, AMD, and Apple GPUs.
 \end{itemize}
 
 \subsection{Interfaces}\label{subsec:interfaces}
 Lake requires the following interfaces:
 \begin{itemize}
-    \item \textbf{OpenAI compatible API} -- An HTTP server, following the OpenAI API structure.
+    \item \textbf{\gl[openaiapi]{OpenAI compatible API}} -- An HTTP server, following the OpenAI API structure.
 		This will be the API used to interact with the user, via third-party tools of the user's
 		choice that accept the OpenAI API (e.g. OpenCode \citep{OpenCode}).
 	\item \textbf{GGUF input model} -- An input file using the
 		GGUF file format \citep{GGUF}. This contains
 		the model Lake will partition and run.
-	\item \textbf{Rust-to-C FFI} -- The Rust-to-C foreign function interface will be used to call
+	\item \textbf{Rust-to-C \gl[ffi]{FFI}} -- The Rust-to-C foreign function interface will be used to call
 		ggml \citep{Ggml} from the Inference Engine.
 	\item \textbf{gRPC between nodes} -- A gRPC-based API used to communicate between nodes.
-	\item \textbf{REST API between Coordinator and Web UI} -- A REST API for communication between the
+	\item \textbf{\gl[rest]{REST} API between Coordinator and Web UI} -- A REST API for communication between the
 		leader Coordinator and the Web UI.
 \end{itemize}
 
 \subsection{Normal Operation}\label{subsec:normal-operation}
 \begin{enumerate}
-	\item User starts the Lake client on all participating machines.
-    \item User creates a Lake cluster using the UI on one of the devices, and provides a
+	\item User starts the \gl[lakeclient]{Lake client} on all participating machines.
+    \item User creates a Lake cluster using the \gl[ui]{UI} on one of the devices, and provides a
 		GGUF file \citep{GGUF}. This
 		device becomes the leader node.
 	\item Leader node checks connectivity with follower nodes, and collects performance
 		metrics for each node.
-	\item Partitioner devises a partitioning scheme based on the collected metrics.
+	\item Partitioner devises a \gl[scheme]{partitioning scheme} based on the collected metrics.
 	\item Leader node sends the model partitions to their respective devices.
-	\item Neighbouring nodes on the partition graph establish direct P2P connections.
+	\item Neighbouring nodes on the partition graph establish direct peer-to-peer
+		(\gl[p2p]{P2P}) connections.
 	\item User initiates inference request by providing a prompt via the OpenAI compatible
 		API.
-	\item Leader node sends the prompt tokens to the inference engine corresponding to the
-		first node of the graph, initiating prefill.
+	\item Leader node sends the prompt \gl[token]{tokens} to the inference engine corresponding to the
+		first node of the graph, initiating \gl{prefill}.
 	\item Prompt tokens propagate through the graph until prefill completes, and the first
 		output token is generated.
 	\item Output tokens are repeatedly fed back into the top of the graph, generating a new token
@@ -1556,11 +1563,11 @@ scenario of the same use case.
 
 \noindent\textbf{Stakeholders and Interests:}
 \begin{itemize}
-    \item Operator: wants to pool the available computers into one cluster
+    \item \gl[operator]{Operator}: wants to pool the available computers into one cluster
     with little effort and to see what the cluster contains.
-    \item Device Owner: wants no device to take part without the owner's
-    consent.
-    \item Inference User: wants a working cluster to send prompts to.
+    \item \gl[deviceowner]{Device Owner}: wants no device to take part without the
+    owner's consent.
+    \item \gl[inferenceuser]{Inference User}: wants a working cluster to send prompts to.
 \end{itemize}
 
 \noindent\textbf{Preconditions:}
@@ -1614,7 +1621,7 @@ scenario of the same use case.
     leader node and the operator is notified.
 \end{itemize}
 
-\noindent\textbf{Justification:} This is the first step of any session with the
+\noindent\textbf{Justification:} This is the first step of any \gl{session} with the
 system and is required to happen before any other actions can take place. It also
 validates that Lake will have consent confirmation from each of the computers in the 
 network in advance.
@@ -1690,7 +1697,7 @@ stakeholder who may not be the person running the cluster.
     \item Operator: wants a model larger than any one computer can hold to
     load across the cluster.
     \item Inference User: wants a complete, correct response to each prompt,
-    streamed as it is generated.
+    \gl[streaming]{streamed} as it is generated.
     \item Device Owner: wants their device to hold only its share of the
     model.
 \end{itemize}
@@ -1699,14 +1706,14 @@ stakeholder who may not be the person running the cluster.
 \begin{itemize}
     \item A cluster exists (\hyperref[UC1]{UC1}).
     \item The operator has a model file in a supported format
-    (GGUF).
+    (\gl[gguf]{GGUF}).
     \item The cluster has enough combined memory for the model.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
 \begin{itemize}
     \item The model is loaded across the cluster, each node holding only its
-    assigned layers.
+    assigned \gl[layer]{layers}.
     \item The user receives a complete response to each prompt, and the
     session keeps its context for further prompts.
 \end{itemize}
@@ -1801,7 +1808,7 @@ model that does not fit on any single device.
     unreachable: the tool reports a connection error.
     \item \textbf{3a.} No model is loaded: Lake returns an error saying so
     instead of waiting.
-    \item \textbf{3b.} The tool uses tool calling or another option Lake does
+    \item \textbf{3b.} The tool uses \gl[toolcalling]{tool calling} or another option Lake does
     not support: Lake returns an error naming the unsupported
     option.
     \item \textbf{4a.} A node leaves during the request: see
@@ -1939,7 +1946,7 @@ between Lake and existing local distributed inference providers.
 
 \noindent\textbf{Justification:} Taking advantage of new devices is a key differentiator
 between Lake and existing local distributed inference providers. It allows Lake to improve performance
-through dynamic allocation as a session progresses.
+through \gl[dynamicallocation]{dynamic allocation} as a session progresses.
 
 % ---------------------------------------------------------------------------
 \subsubsection*{UC7: Find the bottleneck}\label{sec:uc7-detailed}
@@ -2267,14 +2274,14 @@ were last decided on 2026-10-16.
 
 Named values such as \textit{HEALTH\_INTERVAL} are defined in the
 \hyperref[app:constants]{Symbolic Constants} appendix. The detailed test
-cases for each group are given in the V\&V Plan.
+cases for each group are given in the \gl[vv]{V\&V} Plan.
 
 \subsubsection{Validation}
 
 Validation checks that \progname{} is the right system for its stakeholders,
 measured against the goals in the Problem Statement. The team demonstrates the
-system at the proof of concept, Revision 0 and final demonstrations, and the
-teaching assistant and other reviewers judge it against these goals:
+system at the \gl[poc]{proof of concept}, Revision 0 and final demonstrations, and
+the \gl[ta]{teaching assistant} and other reviewers judge it against these goals:
 \begin{itemize}
   \item \textbf{Model Parallelization}: a model split across two or more
     nodes produces coherent output (groups 2 and 3 below).
@@ -2321,12 +2328,12 @@ group.
     \req{FR.S.1.6}, \req{FR.S.1.15}, \req{FR.S.1.19}, \req{FR.S.2.3},
     \req{FR.S.3.1}--\req{FR.S.3.3}, \req{FR.S.4.1}, \req{FR.S.4.3},
     \req{FR.S.4.4}, \req{NFR.S.6}.\\
-    \textit{Method:} an integration test in continuous integration that
+    \textit{Method:} an integration test in \gl[ci]{continuous integration} that
     splits a small model across two processes and compares the output with an
-    unsplit run of the same model; benchmark and perplexity runs on team
+    unsplit run of the same model; benchmark and \gl{perplexity} runs on team
     hardware.\\
     \textit{Acceptance:} on a single platform, the split model produces the
-    same tokens as the unsplit model under greedy decoding. Across platforms,
+    same tokens as the unsplit model under \gl[greedy]{greedy decoding}. Across platforms,
     and on every benchmark, the split model scores at least
     \textit{BENCH\_RATIO} of the unsplit model's score.
 
@@ -2458,7 +2465,7 @@ group.
     integration; an automated audit of dependency licences; a review of the
     licence of each model used in testing and demonstrations.\\
     \textit{Acceptance:} every merged pull request passes the linting and
-    formatting stage; no dependency has a licence incompatible with GPL v3.0;
+    formatting stage; no dependency has a licence incompatible with \gl[gpl]{GPL} v3.0;
     every model used is permitted for that use by its licence.
 \end{enumerate}
 \endgroup
@@ -2485,15 +2492,15 @@ For integers $a$ and $b$, $a..b = \{\, n \in \mathbb{N} \mid a \le n \le b
 \textbf{Symbol} & \textbf{Type (unit)} & \textbf{Meaning} \\
 \hline
 $N$ & $\mathbb{N}$, $N \ge 1$ & Number of partition units in the model
-(embedding, transformer layers and output head), in execution order. \\
+(embedding, \gl{transformer} layers and output head), in execution order. \\
 \hline
 $L$ & $L = 1..N$ & The set of partition units. \\
 \hline
 $D$ & finite set & The nodes currently in the cluster: devices the user has
 selected (\hyperref[FR.S.5.2]{FR.S.5.2}) and that have confirmed participation (\hyperref[FR.S.1.21]{FR.S.1.21}). \\
 \hline
-$m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s weights
-and its KV cache for \textit{CONTEXT\_MAX} tokens. \\
+$m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s \gl{weights}
+and its \gl[kvcache]{KV cache} for \textit{CONTEXT\_MAX} tokens. \\
 \hline
 $M_d$ & $\mathbb{N}$ (bytes) & GPU-accessible memory free on node $d$ when it
 joins the cluster, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR.S.2.1}. \\
@@ -2689,12 +2696,12 @@ $\mathit{dev}(P)$.
 \begin{itemize}
 	\item \label{UC.1}\textbf{UC.1} Model training and fine-tuning support is unlikely to be added to Lake. Lake is
 		primarily an inference framework, so the addition of training would be out of scope for such a project.
-	\item \label{UC.2}\textbf{UC.2} Additional input model formats aside from GGUF (TODO: glossary) are unlikely to
-		be added, as GGUF is one of the most common standards for LLMs (TODO: glossary). Additionally, models
+	\item \label{UC.2}\textbf{UC.2} Additional input model formats aside from \gl[gguf]{GGUF} are unlikely to
+		be added, as GGUF is one of the most common standards for \gl[llm]{LLMs}. Additionally, models
 		in other formats can be converted to GGUF so there is little reason for Lake to support them directly.
 	\item \label{UC.3}\textbf{UC.3} A primary goal of Lake is privacy (see \hyperref[NFR.S.11]{NFR.S.11}),
 		so modifications that would compromise privacy like incorporating cloud-based services are unlikely.
-	\item \label{UC.4}\textbf{UC.4} Even though one of Lake's goals is to run larger models, integrating quantization
+	\item \label{UC.4}\textbf{UC.4} Even though one of Lake's goals is to run larger models, integrating \gl{quantization}
 		tools into Lake is unlikely. Lake's scope is focused on distributed inference, and quantization tools
 		would better fit in the scope of an independent project.
 \end{itemize}
@@ -2708,7 +2715,7 @@ $\mathit{dev}(P)$.
     \item \textbf{Liaison (Ethan Walsh)} -- Coordinates communication between the team and other project stakeholders and faculty.
     \item \textbf{Repository administrator (Matthew Nesbitt)} -- Manages repository and organizational configurations.
     \item \textbf{Architecture lead (Ethan Walsh)} -- Leads the architecture design of the system.
-    \item \textbf{Coordinator lead (Gary Qin)} -- Leads the coordinator and IPC design of the system.
+    \item \textbf{Coordinator lead (Gary Qin)} -- Leads the \gl{coordinator} and inter-process communication (\gl[ipc]{IPC}) design of the system.
     \item \textbf{Performance lead (Matthew Nesbitt)} -- Leads the performance benchmarking and optimization of the system.
     \item \textbf{Machine learning leads (Jinwoo Hong, Colin Chambachan)} -- Lead the ML systems of Lake.
     \item \textbf{Meeting chair (Rotating weekly amongst team members)} -- Leads weekly team meetings.
@@ -2719,8 +2726,8 @@ $\mathit{dev}(P)$.
 \subsection{Imposed Technical Choices}\label{subsec:technical-choices}
 
 \begin{itemize}
-    \item \textbf{API specification} -- Lake will follow the OpenAI API specification for its request and response formats \citep{OpenAIAPI}. This is chosen due to the widespread adoption of this API specification and the flexibility it provides when connecting to existing external clients.
-    \item \textbf{Supported platforms} -- Windows, macOS, and Linux will be supported platforms for nodes within the Lake network. Android and iOS support is a stretch goal. These are chosen due to the availability of inference engine support and hardware acceleration support for these operating systems.
+    \item \textbf{API specification} -- Lake will follow the \gl[openaiapi]{OpenAI API} specification for its request and response formats \citep{OpenAIAPI}. This is chosen due to the widespread adoption of this API specification and the flexibility it provides when connecting to existing external clients.
+    \item \textbf{Supported platforms} -- Windows, macOS, and Linux will be supported platforms for \gl[node]{nodes} within the \gl[cluster]{Lake network}. Android and iOS support is a stretch goal. These are chosen due to the availability of \gl[inferenceengine]{inference engine} support and hardware acceleration support for these operating systems.
 \end{itemize}
 
 \subsection{Schedule and Milestones}\label{subsec:schedule}
@@ -2731,9 +2738,9 @@ $\mathit{dev}(P)$.
   \hline
   \textbf{Milestone} & \textbf{Due Date} \\ \hline
   Team formation and project selection & Sep 18, 2026 \\ \hline
-  Problem statement, PoC plan, development plan, team charter & Sep 28, 2026 \\ \hline
-  SRS and Hazard Analysis Rev 0 & Oct 19, 2026 \\ \hline
-  V\&V Plan Rev 0 & Nov 2, 2026 \\ \hline
+  Problem statement, \gl[poc]{PoC} plan, development plan, team charter & Sep 28, 2026 \\ \hline
+  \gl[srs]{SRS} and Hazard Analysis Rev 0 & Oct 19, 2026 \\ \hline
+  \gl[vv]{V\&V} Plan Rev 0 & Nov 2, 2026 \\ \hline
   Design Document Rev -1 and CD-Fall & Nov 16, 2026 \\ \hline
   PoC demonstration & Nov 23--Dec 3, 2026 \\ \hline
   Design Document Rev 0 & Jan 18, 2027 \\ \hline
@@ -2763,11 +2770,11 @@ $\mathit{dev}(P)$.
 
 Initial single-device prototype & Implement a model split up across two processes on a single device, communicating via inter-process communication. & V\&V Plan Revision & Nov. 2 \\ \hline
 
-Expansion across two devices & Implement wired communication and model splitting (50\% and 50\%) across two devices, communicating via gRPC. & Design Document Revision &  Nov. 16 \\ \hline
+Expansion across two devices & Implement wired communication and model splitting (50\% and 50\%) across two devices, communicating via \gl[grpc]{gRPC}. & Design Document Revision &  Nov. 16 \\ \hline
 
 Expansion across n devices \& Partitioning algorithm & Implement model splitting for n devices through model partitioning that is aware of each device's performance and hardware limitations. & POC Demo & Nov. 23 \\ \hline
 
-Dynamic allocation & Implement algorithm to dynamically allocate model layers throughout a session. & Design Document Revision 0 & Jan. 18 \\ \hline
+\gl[dynamicallocation]{Dynamic allocation} & Implement algorithm to dynamically allocate model \gl[layer]{layers} throughout a \gl{session}. & Design Document Revision 0 & Jan. 18 \\ \hline
 
 Test model allocation and dynamic add/drop & Test that system can handle devices being added or dropped from the network and that model split changes to maintain efficiency as network changes. & Design Document Revision 1 & Jan. 18 \\ \hline
 
@@ -2803,20 +2810,20 @@ Tasks that will be a part of each of the following entries include:
     \item \textbf{Primary Programming Language} - The primary programming languages for the 
     system will be Python and Rust. Python is chosen due to its common use for artificial intelligence applications
     and rich library ecosystem. Rust is chosen due to its high performance and type safety, along with it being a common choice for
-    working directly with tensors. On each node, Python will be used for coordinator operations and Rust will be used for the inference engine. 
-    User interface will be created using TypeScript due to it being an industry standard type safe language for user interfaces.
-    \item \textbf{Communication Framework} - gRPC is a remote procedure call framework
+    working directly with \gl[tensor]{tensors}. On each node, Python will be used for coordinator operations and Rust will be used for the inference engine. 
+    \gl[ui]{User interface} will be created using TypeScript due to it being an industry standard type safe language for user interfaces.
+    \item \textbf{Communication Framework} - gRPC is a \gl[rpc]{remote procedure call} framework
     developed by Google. It allows a client to call a method directly on a server and prioritizes speed and performance.
-    \item \textbf{Inference Engine} - llama.cpp is an open-source LLM inference engine. It allows users to run large language models locally on consumer hardware. It was selected due
+    \item \textbf{Inference Engine} - llama.cpp is an open-source \gl[llm]{LLM} inference engine. It allows users to run large language models locally on consumer hardware. It was selected due
     to its ubiquity in the open-source AI field.
     \item \textbf{Machine Learning / Tensor Library} - ggml is a standard open-source library for machine learning inference on consumer hardware. Its focus on simplicity and broad
     backend support (across multiple kernels and platforms) is why the team selected it.
-    \item \textbf{Model File Format} - gguf is directly compatible with llama.cpp and ggml, so will be used as the format for transporting model layers from one device to another.
+    \item \textbf{Model File Format} - \gl[gguf]{GGUF} is directly compatible with llama.cpp and ggml, so will be used as the format for transporting model layers from one device to another.
     \item \textbf{Frontend Framework} Next.js with TypeScript and Vite as the build tool. This is what the team is familiar with and aligns with the earlier choice for TypeScript as the 
     frontend language.
     \item \textbf{Hardware} Multiple $(>=2)$ laptop or personal computer devices that can be connected via Thunderbolt to run local inference tests.
     \item \textbf{Version Control} Git, along with GitHub for source code management.
-    \item \textbf{Continuous Integration} GitHub Actions for build pipelines and testing.
+    \item \textbf{\gl[ci]{Continuous Integration}} GitHub Actions for build pipelines and testing.
     \item \textbf{Testing API and Interface} OpenAI API Interface will be used for testing the system without using the user interface (or prior to building the user interface). 
 \end{itemize}
 
