@@ -376,34 +376,34 @@ that realise it, so a change in either place can be traced to the other.
     which becomes the leader node, the operator sees the other devices on the
     local network that are running Lake and chooses which to include. Each
     chosen device asks its owner to confirm before it joins, so no device
-    takes part without consent. \emph{Realised by} FR.S.1.4, FR.S.5.1, FR.S.5.2, FR.S.1.17, FR.S.1.18, FR.S.1.20, FR.S.1.21, FR.S.5.7, and NFR.S.12.
+    takes part without consent. \emph{Realised by} \hyperref[FR.S.1.4]{FR.S.1.4}, \hyperref[FR.S.5.1]{FR.S.5.1}, \hyperref[FR.S.5.2]{FR.S.5.2}, \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18}, \hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, \hyperref[FR.S.5.7]{FR.S.5.7}, and \hyperref[NFR.S.12]{NFR.S.12}.
     \item \label{FR.G.4.2}\textbf{FR.G.4.2 Load and partition a model.}
     The operator picks a model in GGUF format \citep{GGUF}, the file format
     used by llama.cpp. Lake measures each node's memory, compute, and network
     performance, decides which range of layers each node will hold, and has
-    each node load only that range. \emph{Realised by} FR.S.5.3, FR.S.1.8, FR.S.2.1 to FR.S.2.4, FR.S.1.6, FR.S.1.19, and FR.S.3.1.
+    each node load only that range. \emph{Realised by} \hyperref[FR.S.5.3]{FR.S.5.3}, \hyperref[FR.S.1.8]{FR.S.1.8}, \hyperref[FR.S.2.1]{FR.S.2.1} to \hyperref[FR.S.2.4]{FR.S.2.4}, \hyperref[FR.S.1.6]{FR.S.1.6}, \hyperref[FR.S.1.19]{FR.S.1.19}, and \hyperref[FR.S.3.1]{FR.S.3.1}.
     \item \label{FR.G.4.3}\textbf{FR.G.4.3 Run inference across the
     cluster.} A prompt enters at the first node, the activations pass from
     node to node in layer order, and generated tokens stream back to the user
     one at a time. Each node keeps the key-value (KV) cache for its own
     layers, so nothing about the conversation has to be re-sent between
     tokens. Several requests can be in flight at once, each at a different
-    node, and their state is kept apart. \emph{Realised by} FR.S.3.2, FR.S.3.3, FR.S.4.1, FR.S.4.3, FR.S.4.4, and, for concurrent requests, FR.S.1.14, FR.S.3.5, FR.S.4.6, and NFR.S.5.
+    node, and their state is kept apart. \emph{Realised by} \hyperref[FR.S.3.2]{FR.S.3.2}, \hyperref[FR.S.3.3]{FR.S.3.3}, \hyperref[FR.S.4.1]{FR.S.4.1}, \hyperref[FR.S.4.3]{FR.S.4.3}, \hyperref[FR.S.4.4]{FR.S.4.4}, and, for concurrent requests, \hyperref[FR.S.1.14]{FR.S.1.14}, \hyperref[FR.S.3.5]{FR.S.3.5}, \hyperref[FR.S.4.6]{FR.S.4.6}, and \hyperref[NFR.S.5]{NFR.S.5}.
     \item \label{FR.G.4.4}\textbf{FR.G.4.4 Reallocate when the cluster
     changes.} When a node leaves, fails, or joins, the leader re-partitions
     the model across the nodes that remain and resumes serving, retrying any
     request that was in progress. If the cluster no longer has enough memory
-    for the model, the user is told why rather than left with a hung session. \emph{Realised by} FR.S.1.10 to FR.S.1.13, FR.S.1.22, FR.S.2.2, and FR.S.5.4.
+    for the model, the user is told why rather than left with a hung session. \emph{Realised by} \hyperref[FR.S.1.10]{FR.S.1.10} to \hyperref[FR.S.1.13]{FR.S.1.13}, \hyperref[FR.S.1.22]{FR.S.1.22}, \hyperref[FR.S.2.2]{FR.S.2.2}, and \hyperref[FR.S.5.4]{FR.S.5.4}.
     \item \label{FR.G.4.5}\textbf{FR.G.4.5 Measure performance.} Lake
     records compute time on each node and transfer time between nodes. These
     measurements drive the partitioner and are shown in the web UI, which
     highlights the node or link that is the bottleneck and compares the
     cluster against the single best machine in it, so the operator can see
-    whether pooling is paying off. \emph{Realised by} FR.S.1.2, FR.S.1.3, FR.S.1.7, FR.S.1.23, FR.S.3.4, FR.S.4.5, FR.S.5.5, FR.S.5.6, and NFR.S.1.
+    whether pooling is paying off. \emph{Realised by} \hyperref[FR.S.1.2]{FR.S.1.2}, \hyperref[FR.S.1.3]{FR.S.1.3}, \hyperref[FR.S.1.7]{FR.S.1.7}, \hyperref[FR.S.1.23]{FR.S.1.23}, \hyperref[FR.S.3.4]{FR.S.3.4}, \hyperref[FR.S.4.5]{FR.S.4.5}, \hyperref[FR.S.5.5]{FR.S.5.5}, \hyperref[FR.S.5.6]{FR.S.5.6}, and \hyperref[NFR.S.1]{NFR.S.1}.
     \item \label{FR.G.4.6}\textbf{FR.G.4.6 Serve prompts through a standard
     API.} The leader node exposes an HTTP API in the OpenAI format
     \citep{OpenAIAPI}, including streaming and tool calling, so any client
-    that can talk to a hosted provider can talk to Lake. \emph{Realised by} FR.S.1.9 and NFR.E.3.
+    that can talk to a hosted provider can talk to Lake. \emph{Realised by} \hyperref[FR.S.1.9]{FR.S.1.9} and \hyperref[NFR.E.3]{NFR.E.3}.
 \end{itemize}
 
 Two of these carry most of the value: \hyperref[FR.G.4.2]{FR.G.4.2}
@@ -426,30 +426,30 @@ each names the detailed requirement that gives it a measurable target.
     outside the cluster, none is kept after a request completes, and Lake
     sends no telemetry. This is the privacy benefit, and it is the reason an
     organisation handling export-controlled or medical data could use Lake at
-    all. \emph{Realised by} NFR.S.10, NFR.S.11, NFR.S.12, and NFR.E.5.
+    all. \emph{Realised by} \hyperref[NFR.S.10]{NFR.S.10}, \hyperref[NFR.S.11]{NFR.S.11}, \hyperref[NFR.S.12]{NFR.S.12}, and \hyperref[NFR.E.5]{NFR.E.5}.
     \item \label{NFR.G.4.2}\textbf{NFR.G.4.2 Runs on Windows, macOS, and
     Linux.} Each is a supported platform for any node, and one cluster can
     mix all three. This is the cross-platform goal from the Problem
-    Statement. \emph{Realised by} NFR.S.3, NFR.S.13 to NFR.S.15, and NFR.E.1.
+    Statement. \emph{Realised by} \hyperref[NFR.S.3]{NFR.S.3}, \hyperref[NFR.S.13]{NFR.S.13} to \hyperref[NFR.S.15]{NFR.S.15}, and \hyperref[NFR.E.1]{NFR.E.1}.
     \item \label{NFR.G.4.3}\textbf{NFR.G.4.3 The split does not change the
     model.} A model run through Lake produces output of the same quality as
     the same model run on one machine, within the tolerance set by NFR.S.6.
     Users
-    would not trust a system that made their model worse. \emph{Realised by} NFR.S.6, FR.S.2.3, and NFR.E.4.
+    would not trust a system that made their model worse. \emph{Realised by} \hyperref[NFR.S.6]{NFR.S.6}, \hyperref[FR.S.2.3]{FR.S.2.3}, and \hyperref[NFR.E.4]{NFR.E.4}.
     \item \label{NFR.G.4.4}\textbf{NFR.G.4.4 License compliance.} Lake
     respects the licenses of the software it builds on and of the models it
-    runs, as set out in Section~\ref{subsec:standards}. \emph{Realised by} NFR.E.7 and NFR.E.8.
+    runs, as set out in Section~\ref{subsec:standards}. \emph{Realised by} \hyperref[NFR.E.7]{NFR.E.7} and \hyperref[NFR.E.8]{NFR.E.8}.
     \item \label{NFR.G.4.5}\textbf{NFR.G.4.5 Installable without expert
     help.} A user can install Lake on each supported platform from an
     installer or a single package-manager command, without building from
     source or editing configuration files. Both the home user and the
     organisation in Section~\ref{subsec:user-profiles} said they would not
-    deploy a tool that needs more than that. \emph{Realised by} NFR.S.3.
+    deploy a tool that needs more than that. \emph{Realised by} \hyperref[NFR.S.3]{NFR.S.3}.
     \item \label{NFR.G.4.6}\textbf{NFR.G.4.6 Serves more users as nodes
     are added.} The number of requests a cluster can serve at once without
     any one of them slowing beyond a set tolerance grows with the number of
     nodes. This is the measure behind the concurrent inference goal.
-    \emph{Realised by} NFR.S.5.
+    \emph{Realised by} \hyperref[NFR.S.5]{NFR.S.5}.
 \end{itemize}
 
 Privacy and fidelity matter most. A local inference tool that leaked data or
