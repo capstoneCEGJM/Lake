@@ -1215,7 +1215,7 @@ Template).
 		invitation messages to devices on the local network. This includes request
 		data, usage statistics, crash and diagnostic reports, update checks and
 		any other telemetry. Health and performance reports between nodes are
-		allowed. \emph{Rationale:} The developer we interviewed works with
+		allowed. \textbf{Rationale:} The developer we interviewed works with
 		export-controlled data and needs Lake to run offline with no telemetry or
 		automatic updates. Related to \req{NFR.G.4.1}, \req{FR.S.1.4},
 		\req{FR.S.1.20}, \req{FR.S.1.23} and \req{FR.S.5.1}.
@@ -1974,7 +1974,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.8}{Reject bad model files}{M}{Prevents crashes and misleading output from a corrupted file.}
 \priorityrow{NFR.S.9}{Packet loss}{S}{The transport protocol already handles most loss and corruption.}
 \priorityrow{NFR.S.10}{No stored request data}{M}{Privacy is a primary reason to use Lake.}
-\priorityrow{NFR.S.11}{No telemetry}{M}{Same as NFR.S.10. The developer we interviewed would not use Lake with telemetry.}
+\priorityrow{NFR.S.11}{No data leaves the cluster}{M}{Same as NFR.S.10. The developer we interviewed would not use Lake with telemetry.}
 \priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
 \priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimization goal.}
 \priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
