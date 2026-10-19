@@ -53,6 +53,9 @@
   \setcounter{subsection}{0}%
 }
 
+% Link to a requirement by its label, e.g. \req{NFR.S.11}.
+\newcommand{\req}[1]{\hyperref[#1]{#1}}
+
 % Numbered statements for S.9 Formalizations, e.g. Lemma S.9.2.3.
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}[subsubsection]
@@ -1207,8 +1210,17 @@ Template).
 		data\footnote{\textbf{Request data} refers to any data sent to Lake as part of the request, or any data
 		that would give insight into what the data sent in the request might have been.}
 		after the request has completed.
-	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send \textbf{any} data to any device other than those included
-		in the cluster. This includes, but is not limited to all kinds of request data, telemetery, and user data.
+	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send any data to
+		any destination outside the cluster, with one exception: the response
+		returned to the client that made the request. This covers request data,
+		usage statistics, crash and diagnostic reports, update checks, and any
+		other telemetry. Health and performance reports between nodes of the
+		cluster (\req{FR.S.1.23}) stay inside the cluster and are allowed.
+		\emph{Rationale:} the developer interviewed in
+		Section~\ref{subsubsec:g7-sources} runs models locally because his
+		firm's data is export-controlled, and asked that Lake send nothing home,
+		not even usage or crash reports (Appendix~\ref{app:interview}). This
+		requirement realises \req{NFR.G.4.1}.
 	\item \label{NFR.S.12}\textbf{NFR.S.12} The system shall not include untrusted devices in
 		a cluster. Satisfied by \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18},
 		\hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, and \hyperref[FR.S.5.7]{FR.S.5.7}.
@@ -1964,7 +1976,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.8}{Reject bad model files}{M}{Prevents crashes and misleading output from a corrupted file.}
 \priorityrow{NFR.S.9}{Packet loss}{S}{The transport protocol already handles most loss and corruption.}
 \priorityrow{NFR.S.10}{No stored request data}{M}{Privacy is a primary reason to use Lake.}
-\priorityrow{NFR.S.11}{Data stays in cluster}{M}{Same as NFR.S.10.}
+\priorityrow{NFR.S.11}{No data leaves the cluster, no telemetry}{M}{Same as NFR.S.10. The interviewed developer (Section~\ref{subsubsec:g7-sources}) made no telemetry a condition of deploying Lake at all.}
 \priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
 \priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimization goal.}
 \priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
@@ -2018,9 +2030,6 @@ were last decided on 2026-10-16.
 \FloatBarrier
 
 \subsection{Verification and Acceptance Criteria}\label{subsec:verification-and-acceptance-criteria}
-
-% Link to a requirement by its label.
-\newcommand{\req}[1]{\hyperref[#1]{#1}}
 
 Named values such as \textit{HEALTH\_INTERVAL} are defined in the
 \hyperref[app:constants]{Symbolic Constants} appendix. The detailed test
@@ -2155,13 +2164,15 @@ group.
     \req{SR5-2}.\\
     \textit{Method:} after a set of requests, every file \progname{} wrote,
     including diagnostic logs, is searched for the prompts and responses; all
-    network traffic from every node is captured during a session, including
-    while idle.\\
+    network traffic from every node is captured through a session that
+    includes requests, a period with no requests, and a check for updates
+    (or whatever the software offers in its place).\\
     \textit{Acceptance:} no request data remains on disk after its request
     completes; logs contain no prompts, responses, tensor data or KV cache
-    content; and every packet \progname{} sends goes to a node of the cluster
-    or to the client that made the request, never to a third-party service.
-    This covers request data, telemetry and user data alike.
+    content; and every packet \progname{} sends, in every part of the
+    capture, including the idle period and the update check, is addressed to
+    a node of the cluster or to the client that made the request. A single
+    packet to any other destination fails the test.
 
   \item \textbf{API.} \req{FR.S.1.9}, \req{NFR.E.3}.\\
     \textit{Method:} requests through the official OpenAI client library and
