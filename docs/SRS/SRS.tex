@@ -178,7 +178,7 @@ Added a Symbolic Constants appendix & The SRS checklist asks for literal values 
     \item \textbf{Inference Engine} -- The software module that loads the LLM and executes its model layer partitions to generate output.
     \item \textbf{KV cache} -- The cache of key-value pairs that are used to store the activations of an LLM.
     \item \textbf{Lake} -- A decentralized network of devices that work together to serve LLM inference via model layer partitioning.
-    \item \textbf{Lake Client} -- The instance of Lake installed and running on one device. Every node in a cluster runs one; the leader node's client also serves the web UI and the API.
+    \item \textbf{Lake Client} -- The copy of Lake running on one device. Every node runs one, and the leader node's client also serves the Web UI and the API.
     \item \textbf{Latency} -- The elapsed time between the start of an inference request and a defined event, such as the completion of the first token, or the completion of the entire response.  
     \item \textbf{LLM (large language model)} -- An artificial intelligence model that is trained on a large dataset of text and is used to generate text.
     \item \textbf{Model layer partitioning} -- The distribution of an LLM's layers across a device pool.
@@ -1372,7 +1372,7 @@ scenario of the same use case.
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
     \item The operator starts the Lake client on each computer they want to use.
-    \item On one of them, the operator opens the web UI, and that computer
+    \item On one of them, the operator opens the Web UI, and that computer
     becomes the leader node.
     \item Lake lists the other computers on the network that are running the
     Lake client.
