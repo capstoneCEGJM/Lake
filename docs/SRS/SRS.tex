@@ -471,12 +471,9 @@ Mixed operating systems in one pool & N/A & N/A & Partly & Windows, macOS, Linux
 
 \subsection{Expected Benefits}\label{subsec:expected-benefits}
 
-The benefits below follow the goals in the Problem Statement: the four
-numbered goals and concurrent inference, which is a goal in its own right
-because serving several requests at once is one of the main advantages of
-splitting a model by layers.
-Figure~\ref{fig:goal-model} is a goal model thats reflects this. Each benefit below states the measure we
-will use to check it, and the requirements that deliver them are in
+The benefits below follow the five goals in the Problem Statement, as shown
+in the goal model in Figure~\ref{fig:goal-model}. Each benefit states the
+measure we will use to check it. The requirements that deliver them are in
 Section~\ref{subsec:functionality}.
 
 \begin{landscape}
@@ -854,8 +851,9 @@ the System chapter record which of these may change.
     AMD, or Apple, because inference on a CPU alone is too slow to be useful
     in a cluster. Smartphones are a stretch goal.
     \item \emph{Wired connections first.} The first revision targets wired
-    Ethernet. Wireless operation is a stretch goal because its \gl{latency} and
-    variability may make the split model too slow.
+    links: Thunderbolt for the two-device proof of concept and Ethernet for
+    larger clusters. Wireless operation is a stretch goal because its
+    latency and variability may make the split model too slow.
     \item \emph{Not faster for models that already fit.} Lake does not speed
     up a model that already runs well on one device. The benefit is running
     models that would not otherwise fit.
@@ -2040,7 +2038,7 @@ have, \textbf{C} could have, \textbf{W} won't have (this release). They are
 assigned with the following rules:
 \begin{itemize}
   \item \textbf{M}: needed to meet one of the goals in
-    Section~\ref{subsec:expected-benefits}, including concurrent inference.
+    Section~\ref{subsec:expected-benefits}.
   \item \textbf{S}: improves a core goal, but the system still meets that goal
     without it.
   \item \textbf{C}: belongs to a stretch goal in the Problem Statement, or is
@@ -2263,8 +2261,9 @@ goals:
     systems runs a model (group 12).
   \item \textbf{Dynamic Allocation}: the cluster keeps serving requests after
     nodes join and leave, and the reallocation time is recorded (group 6).
-  \item \textbf{Concurrent Inference}: the cluster serves at least two users
-    at once without their outputs interfering (group 13).
+  \item \textbf{Concurrent Inference}: the cluster serves at least
+    \textit{MIN\_CONCURRENT} users at once without their outputs interfering
+    (group 13).
 \end{itemize}
 A few people who are not on the team also try the system in the usability
 session (group 10), to confirm that it is understandable to new users.
@@ -2420,8 +2419,8 @@ group.
     \req{FR.S.4.6}, \req{NFR.S.5}.\\
     \textit{Method:} load tests with increasing numbers of concurrent
     requests on clusters of increasing size.\\
-    \textit{Acceptance:} every cluster serves at least two requests at the
-    same time; no tokens from one request appear in another; and the number
+    \textit{Acceptance:} every cluster serves at least
+    \textit{MIN\_CONCURRENT} requests at the same time; no tokens from one request appear in another; and the number
     of concurrent requests served with at most
     \textit{MAX\_DEGRADATION} loss of per-request throughput grows in
     proportion to the number of nodes.
@@ -2595,8 +2594,14 @@ handled as follows:
     $\mathsf{X}$. $\mathit{req}$ in $\mathsf{A}$, $\mathsf{G}$ or
     $\mathsf{R}$, and $\mathit{join}(d)$ in $\mathsf{G}$ or $\mathsf{R}$, are
     queued and fire in arrival order once $\mathsf{I}$ is entered. The
-    machine therefore serves one request at a time, and concurrent requests
-    (\hyperref[FR.S.1.14]{FR.S.1.14}) are not modelled.
+    machine therefore tracks one request at a time, which is a
+    simplification of concurrent inference
+    (\hyperref[FR.S.1.14]{FR.S.1.14}). With several
+    requests, $\mathsf{G}$ means at least one request is in progress on $P$.
+    $\mathit{req}$ in $\mathsf{G}$ then starts another request instead of
+    being queued, $\mathit{fin}$ returns to $\mathsf{I}$ only when the last
+    request finishes, and $\mathit{leave}(d)$ with $\psi$ in $\mathsf{G}$ or
+    $\mathsf{R}$ stops and retries every request, since they all run on $P$.
   \item Any other combination leaves the state unchanged.
 \end{itemize}
 
@@ -2981,6 +2986,8 @@ as testing gives better data.
 \textit{INSTALL\_CLICKS} & 10 & Maximum clicks to install \progname{} on Windows or macOS. Used in \req{NFR.S.3}. \\
 \hline
 \textit{MAX\_DEGRADATION} & 20\% & Maximum loss of per-request throughput when serving concurrent requests. Used in \req{NFR.S.5}. \\
+\hline
+\textit{MIN\_CONCURRENT} & 2 & Minimum number of requests every cluster must serve at the same time. Used in S.8 group 13 and the Validation list. \\
 \hline
 \textit{BENCH\_RATIO} & 95\% & Minimum benchmark score of a split model, relative to the unsplit model. Used in \req{NFR.S.6}. \\
 \hline
