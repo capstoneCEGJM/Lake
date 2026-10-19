@@ -2167,16 +2167,12 @@ group.
     \req{SR5-2}.\\
     \textit{Method:} after a set of requests, every file \progname{} wrote,
     including diagnostic logs, is searched for the prompts and responses; all
-    network traffic from every node is captured through a session that
-    includes requests, a period with no requests and, where the release can
-    check for updates, one such check.\\
+    traffic from every node is captured during requests, while idle, and
+    during an update check if the release has one.\\
     \textit{Acceptance:} no request data remains on disk after its request
     completes; logs contain no prompts, responses, tensor data or KV cache
-    content; and every packet \progname{} sends, in every part of the
-    capture, including the idle period and any update check, is addressed to
-    a node of the cluster, to a device on the local network being discovered
-    or invited, or to the client that made the request. A single packet to
-    any other destination fails the test.
+    content; every captured packet goes to a cluster node, a local device
+    being discovered or invited, or the client that sent the request.
 
   \item \textbf{API.} \req{FR.S.1.9}, \req{NFR.E.3}.\\
     \textit{Method:} requests through the official OpenAI client library and
