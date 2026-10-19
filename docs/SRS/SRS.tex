@@ -151,6 +151,8 @@ Added S.11 Unlikely changes to requirements & Required by the SRS rubric \\
 \hline
 Added Appendix (User Interview) & Records the questions put to a potential user and their answers, so the requirements sources in G.7 can be checked. \\
 \hline
+Added a Symbolic Constants appendix & The SRS checklist asks for literal values to be given as named constants, listed in a table in an appendix. \\
+\hline
 \end{tabularx}
 \end{table}
 
@@ -1307,41 +1309,342 @@ extensions can reference its steps.}
 \noindent\textbf{Justification:} Why this scenario matters.
 
 \subsection{Prioritization}\label{subsec:prioritization}
-\plt{Every requirement from S.2 and the Environmental Requirements table,
-with a MoSCoW priority and the reason for it. Group the tables by component.
-The Date column records when the priority was last decided.}
+\plt{The Environmental Requirements and the Safety and Security Requirements
+are prioritized here once those sections are final.}
 
 \noindent Priorities follow MoSCoW: \textbf{M} must have, \textbf{S} should
-have, \textbf{C} could have, \textbf{W} won't have (this release).
+have, \textbf{C} could have, \textbf{W} won't have (this release). They are
+assigned with the following rules:
+\begin{itemize}
+  \item \textbf{M}: needed to meet a goal in the Problem Statement (model
+    parallelization, model capacity, cross-platform operation, dynamic
+    allocation), or to keep inference correct and private.
+  \item \textbf{S}: improves a core goal, but the system still meets that goal
+    without it.
+  \item \textbf{C}: belongs to a stretch goal in the Problem Statement, or is
+    an optimization with no effect on the core goals.
+  \item \textbf{W}: explicitly deferred to a later release. No requirement is
+    currently W.
+\end{itemize}
+All priorities in Tables~\ref{tab:prioritization-coordinator}--\ref{tab:prioritization-nfr}
+were last decided on 2026-10-16.
 
-\subsubsection*{Component Name}
-\begin{table}[H]
+% One row of a prioritization table.
+\newcommand{\priorityrow}[4]{\hyperref[#1]{#1} & #2 & #3 & #4 \\ \hline}
+\newcommand{\priorityhead}{\hline \textbf{ID} & \textbf{Requirement} &
+  \textbf{Priority} & \textbf{Reasoning} \\ \hline}
+
+\begin{table}[htbp]
 \centering
-\begin{tabular}{|l|p{3.5cm}|c|p{5cm}|l|}
-\hline
-\textbf{ID} & \textbf{Requirement Name} & \textbf{Priority} & \textbf{Reasoning} & \textbf{Date} \\
-\hline
-\hyperref[FR.S.1.1]{FR.S.1.1} & Name & M & Reasoning & YYYY-MM-DD \\
-\hline
-\hyperref[FR.S.1.2]{FR.S.1.2} & Name & S & Reasoning & YYYY-MM-DD \\
-\hline
-\end{tabular}
-\caption{Prioritization of Component Name requirements}
-\label{tab:prioritization-component}
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{FR.S.1.1}{Provide local partition}{M}{Each node must load its own partition for a split model to run at all.}
+\priorityrow{FR.S.1.2}{Collect device metrics}{S}{Feeds failure detection and the dashboard, but inference runs without it.}
+\priorityrow{FR.S.1.3}{Collect network metrics}{S}{Same as FR.S.1.2, for connections between nodes.}
+\priorityrow{FR.S.1.4}{Discover devices}{M}{A cluster cannot be formed without finding the other nodes.}
+\priorityrow{FR.S.1.5}{Neighbour info to Tensor I/O}{M}{Each node must know where to send its output tensors.}
+\end{tabularx}
+\caption{Prioritization of Coordinator requirements on all nodes}
+\label{tab:prioritization-coordinator}
 \end{table}
 
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{FR.S.1.6}{Send partitions}{M}{Distributing partitions is the core of model parallelization.}
+\priorityrow{FR.S.1.7}{Monitor cluster}{S}{Needed for the dashboard and failure detection, not for inference.}
+\priorityrow{FR.S.1.8}{Inputs to Model Partitioner}{M}{The Model Partitioner needs the available nodes and their memory to produce a valid scheme.}
+\priorityrow{FR.S.1.9}{OpenAI-compatible API}{M}{The only way users submit prompts.}
+\priorityrow{FR.S.1.10}{Detect failing followers}{M}{Dynamic allocation cannot react to failures it does not detect.}
+\priorityrow{FR.S.1.11}{Rebuild on failure or leave}{M}{Core of the Dynamic Allocation goal.}
+\priorityrow{FR.S.1.12}{Rebuild on join}{S}{A join only adds capacity; the cluster keeps working without it.}
+\priorityrow{FR.S.1.13}{Retry after rebuild}{S}{Improves resilience, but the user can resubmit a failed request.}
+\priorityrow{FR.S.1.14}{Concurrent requests}{C}{Concurrent Inference is a stretch goal. C means serving requests concurrently, not only accepting and queueing them.}
+\priorityrow{FR.S.1.15}{Send cluster graph}{M}{Followers must know the pipeline order to connect to each other.}
+\priorityrow{FR.S.1.16}{Web UI data and control}{M}{The Web UI is how users create and inspect clusters.}
+\priorityrow{FR.S.1.17}{Wait for confirmations}{M}{Required to keep untrusted devices out of a cluster (NFR.S.12).}
+\priorityrow{FR.S.1.18}{Selected followers only}{M}{Same as FR.S.1.17.}
+\end{tabularx}
+\caption{Prioritization of Coordinator requirements on the leader node}
+\label{tab:prioritization-leader}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{FR.S.1.19}{Accept assignments}{M}{A follower must accept its partition to take part.}
+\priorityrow{FR.S.1.20}{Ask user to confirm}{M}{Required to keep untrusted devices out of a cluster (NFR.S.12).}
+\priorityrow{FR.S.1.21}{Confirmation required}{M}{Same as FR.S.1.20.}
+\priorityrow{FR.S.1.22}{No reconfirm on rebuild}{S}{Avoids interrupting a rebuild, but the user could confirm again by hand.}
+\priorityrow{FR.S.1.23}{Report metrics}{S}{Same as FR.S.1.2.}
+\priorityrow{FR.S.1.24}{Detect leader failure}{S}{Without it, followers keep holding resources after the leader fails, but no data is lost.}
+\priorityrow{FR.S.1.25}{Shut down on leader failure}{S}{Same as FR.S.1.24.}
+\end{tabularx}
+\caption{Prioritization of Coordinator requirements on follower nodes}
+\label{tab:prioritization-follower}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{FR.S.2.1}{Fit in memory}{M}{A partition that does not fit crashes the node.}
+\priorityrow{FR.S.2.2}{Report infeasible split}{M}{The user must know when the cluster cannot hold the model.}
+\priorityrow{FR.S.2.3}{Equivalent to original}{M}{A split that changes the model produces wrong output.}
+\priorityrow{FR.S.2.4}{Size by capability}{S}{Improves speed; a split based on memory alone still works.}
+\end{tabularx}
+\caption{Prioritization of Model Partitioner requirements}
+\label{tab:prioritization-partitioner}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{FR.S.3.1}{Load partition}{M}{Each node must hold its layers in GPU-accessible memory to run them.}
+\priorityrow{FR.S.3.2}{Run incoming tensors}{M}{Core of model parallelization.}
+\priorityrow{FR.S.3.3}{Send output tensors}{M}{Core of model parallelization.}
+\priorityrow{FR.S.3.4}{Measure performance}{S}{Same as FR.S.1.2.}
+\priorityrow{FR.S.3.5}{Concurrent requests}{C}{Concurrent Inference is a stretch goal.}
+\end{tabularx}
+\caption{Prioritization of Inference Engine requirements}
+\label{tab:prioritization-engine}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{FR.S.4.1}{Connect to neighbours}{M}{Tensors cannot pass between nodes without a connection.}
+\priorityrow{FR.S.4.2}{Adaptive compression}{C}{An optimization; tensors can be sent uncompressed.}
+\priorityrow{FR.S.4.3}{Receive tensors}{M}{Core of model parallelization. Decompression applies only if FR.S.4.2 is implemented.}
+\priorityrow{FR.S.4.4}{Send tensors}{M}{Same as FR.S.4.3.}
+\priorityrow{FR.S.4.5}{Measure network}{S}{Same as FR.S.1.3.}
+\priorityrow{FR.S.4.6}{Request association}{C}{Only needed when requests are served concurrently.}
+\end{tabularx}
+\caption{Prioritization of Tensor I/O requirements}
+\label{tab:prioritization-tensor-io}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{FR.S.5.1}{Scan for devices}{M}{Users must see available devices to build a cluster.}
+\priorityrow{FR.S.5.2}{Select devices}{M}{Users choose which devices to trust (NFR.S.12).}
+\priorityrow{FR.S.5.3}{Select model file}{M}{There is nothing to run without a model.}
+\priorityrow{FR.S.5.4}{Infeasible split error}{M}{The user must know why a cluster cannot start.}
+\priorityrow{FR.S.5.5}{Display metrics}{S}{Supports understandability (NFR.S.1), not inference.}
+\priorityrow{FR.S.5.6}{Highlight bottlenecks}{C}{Useful, but users can read bottlenecks from the metrics in FR.S.5.5.}
+\priorityrow{FR.S.5.7}{Invite prompt}{M}{Same as FR.S.1.20.}
+\end{tabularx}
+\caption{Prioritization of Web UI requirements}
+\label{tab:prioritization-web-ui}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
+\priorityhead
+\priorityrow{NFR.S.1}{Understandability}{S}{Matters for adoption, but the system works without it.}
+\priorityrow{NFR.S.2}{Controllability}{S}{Same as NFR.S.1.}
+\priorityrow{NFR.S.3}{Installability}{S}{Users can build from source until installers exist.}
+\priorityrow{NFR.S.4}{Model size}{M}{The primary metric of the Improved Local Performance goal.}
+\priorityrow{NFR.S.5}{Scalability}{C}{Depends on concurrent requests, a stretch goal.}
+\priorityrow{NFR.S.6}{Intelligence}{M}{A split model that answers worse defeats the purpose of Lake.}
+\priorityrow{NFR.S.7}{Consistency}{C}{Cosmetic.}
+\priorityrow{NFR.S.8}{Reject bad model files}{M}{Prevents crashes and misleading output from a corrupted file.}
+\priorityrow{NFR.S.9}{Packet loss}{S}{The transport protocol already handles most loss and corruption.}
+\priorityrow{NFR.S.10}{No stored request data}{M}{Privacy is a primary reason to use Lake.}
+\priorityrow{NFR.S.11}{Data stays in cluster}{M}{Same as NFR.S.10.}
+\priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
+\priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimization goal.}
+\priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
+\priorityrow{NFR.S.15}{GPU vendors}{S}{Each vendor needs its own backend; Lake is usable with any one of them.}
+\end{tabularx}
+\caption{Prioritization of non-functional requirements}
+\label{tab:prioritization-nfr}
+\end{table}
+
+\FloatBarrier
+
 \subsection{Verification and Acceptance Criteria}\label{subsec:verification-and-acceptance-criteria}
-\plt{How each class of requirement will be shown to be satisfied: unit and
-integration tests, measurements, user studies, inspections. Make the criteria
-concrete enough that the V\&V Plan can be derived from them. Every requirement
-in S.2 should map to at least one criterion here.}
+\plt{The Environmental Requirements and the Safety and Security Requirements
+are added to the groups below once those sections are final.}
 
-\noindent\textbf{Validation Overview:}
+% Link to a requirement by its label.
+\newcommand{\req}[1]{\hyperref[#1]{#1}}
 
-\noindent\textbf{Verification Approach by Requirement Class:}
+Named values such as \textit{HEALTH\_INTERVAL} are defined in the
+\hyperref[app:constants]{Symbolic Constants} appendix. The detailed test
+cases for each group are given in the V\&V Plan.
+
+\subsubsection{Validation}
+
+Validation checks that \progname{} is the right system for its stakeholders,
+measured against the goals in the Problem Statement. The team demonstrates the
+system at the proof of concept, Revision 0 and final demonstrations, and the
+teaching assistant and other reviewers judge it against these goals:
 \begin{itemize}
-    \item \textbf{Class of requirements} -- How it will be verified and what counts as acceptance.
+  \item \textbf{Model Parallelization}: a model split across two or more
+    nodes produces coherent output (groups 2 and 3 below).
+  \item \textbf{Improved Local Performance}: the cluster runs a model that no
+    single node can hold (group 3).
+  \item \textbf{Cross-Platform Optimization}: a cluster mixing operating
+    systems runs a model (group 12).
+  \item \textbf{Dynamic Allocation}: the cluster keeps serving requests after
+    nodes join and leave, and the reallocation time is recorded (group 6).
 \end{itemize}
+Users who are not on the team also try the system in the usability study
+(group 10), to confirm that it is understandable and useful to them.
+
+\subsubsection{Verification}
+
+Each group below lists the requirements it covers, how they are verified, and
+what counts as acceptance. Every requirement in S.2 belongs to at least one
+group.
+
+\begingroup
+\raggedright
+\begin{enumerate}
+  \item \textbf{Partitioning.} \req{FR.S.1.8}, \req{FR.S.2.1},
+    \req{FR.S.2.2}, \req{FR.S.2.4}, \req{FR.S.5.4}.\\
+    \textit{Method:} unit and property-based tests of the Model Partitioner on
+    generated clusters and models; a Web UI test with a model too large for
+    the selected devices.\\
+    \textit{Acceptance:} every scheme produced is valid by
+    Definition~S.9.2.2, failure is reported exactly when no valid scheme
+    exists, and the Web UI shows the error. For \req{FR.S.2.4}, until its
+    definition of capability is made measurable: of two nodes with equal
+    memory, the one with the higher measured throughput never receives fewer
+    layers.
+
+  \item \textbf{Inference correctness.} \req{FR.S.1.1}, \req{FR.S.1.5},
+    \req{FR.S.1.6}, \req{FR.S.1.15}, \req{FR.S.1.19}, \req{FR.S.2.3},
+    \req{FR.S.3.1}--\req{FR.S.3.3}, \req{FR.S.4.1}, \req{FR.S.4.3},
+    \req{FR.S.4.4}, \req{NFR.S.6}.\\
+    \textit{Method:} an integration test in continuous integration that
+    splits a small model across two processes and compares the output with an
+    unsplit run of the same model; benchmark and perplexity runs on team
+    hardware.\\
+    \textit{Acceptance:} on a single platform, the split model produces the
+    same tokens as the unsplit model under greedy decoding. Across platforms,
+    and on every benchmark, the split model scores at least
+    \textit{BENCH\_RATIO} of the unsplit model's score.
+
+  \item \textbf{Model capacity.} \req{NFR.S.4}.\\
+    \textit{Method:} a system test on team hardware with a model whose memory
+    need exceeds the free memory of the largest node.\\
+    \textit{Acceptance:} the cluster runs the model and meets the acceptance
+    criteria of group 2.
+
+  \item \textbf{Cluster formation and trust.} \req{FR.S.1.4},
+    \req{FR.S.1.17}, \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21},
+    \req{FR.S.5.1}--\req{FR.S.5.3}, \req{FR.S.5.7}, \req{NFR.S.12}.\\
+    \textit{Method:} an integration test on a local network with at least
+    three devices running \progname{}: one selected device that confirms,
+    one that declines, and one that is not selected. Traffic is captured on
+    the network.\\
+    \textit{Acceptance:} all three devices are discovered and listed;
+    inference does not start until every selected device has confirmed; the
+    declining and unselected devices never receive a partition or a tensor.
+
+  \item \textbf{Monitoring.} \req{FR.S.1.2}, \req{FR.S.1.3}, \req{FR.S.1.7},
+    \req{FR.S.1.16}, \req{FR.S.1.23}, \req{FR.S.3.4}, \req{FR.S.4.5},
+    \req{FR.S.5.5}.\\
+    \textit{Method:} an integration test that records when each metric
+    report is sent and received.\\
+    \textit{Acceptance:} consecutive reports arrive every
+    \textit{HEALTH\_INTERVAL}, within \textit{INTERVAL\_TOL}, and the Web UI
+    shows the reported values for the cluster, each node and each
+    connection.
+
+  \item \textbf{Dynamic allocation.} \req{FR.S.1.10}--\req{FR.S.1.13},
+    \req{FR.S.1.22}, \req{FR.S.1.24}, \req{FR.S.1.25}.\\
+    \textit{Method:} fault-injection system tests that stop a follower during
+    a request, throttle a follower below \textit{FAIL\_THRESHOLD} of its usual
+    throughput, add a node while idle and while generating, and stop the
+    leader.\\
+    \textit{Acceptance:} the system moves between states as in the
+    allocation state machine (S.9.3); a retried request completes and meets
+    the criteria of group 2; a rejoining node is not asked to confirm again;
+    followers shut down within \textit{LEADER\_TIMEOUT} plus
+    \textit{HEALTH\_INTERVAL} of the leader stopping. The reallocation time is
+    recorded for the Performance Report.
+
+  \item \textbf{Fault tolerance.} \req{NFR.S.8}, \req{NFR.S.9}.\\
+    \textit{Method:} loading truncated, corrupted and non-GGUF files; running
+    inference with network emulation that corrupts packets and drops up to
+    \textit{MAX\_LOSS} of them.\\
+    \textit{Acceptance:} bad files are rejected with a message before any
+    partition is sent; output under packet loss is identical to output
+    without it.
+
+  \item \textbf{Privacy.} \req{NFR.S.10}, \req{NFR.S.11}.\\
+    \textit{Method:} after a set of requests, every file \progname{} wrote is
+    searched for the prompts and responses; all network traffic from every
+    node is captured during a session, including while idle.\\
+    \textit{Acceptance:} no request data remains on disk after its request
+    completes, and every packet \progname{} sends goes to a node of the
+    cluster or to the client that made the request. This covers request
+    data, telemetry and user data alike.
+
+  \item \textbf{API.} \req{FR.S.1.9}.\\
+    \textit{Method:} requests through the official OpenAI client library and
+    through a third-party tool such as OpenCode.\\
+    \textit{Acceptance:} chat completion requests, both streamed and not
+    streamed, succeed and their responses are parsed without errors.
+
+  \item \textbf{Usability.} \req{NFR.S.1}--\req{NFR.S.3}, \req{FR.S.5.6}.\\
+    \textit{Method:} a task-based study with at least \textit{TEST\_USERS}
+    people who have not used \progname{}, plus an install test on each
+    operating system. For \req{FR.S.5.6}, one node is throttled during the
+    study.\\
+    \textit{Acceptance:} within \textit{UI\_TASK\_TIME} of first seeing the
+    interface, each participant can create a cluster and can name the
+    participating devices, the token throughput and the bottleneck; the
+    throttled node is highlighted; installation takes at most
+    \textit{INSTALL\_CLICKS} clicks on Windows and macOS, and one package
+    manager command on Linux.
+
+  \item \textbf{Look and feel.} \req{NFR.S.7}.\\
+    \textit{Method:} inspection of the Web UI source.\\
+    \textit{Acceptance:} until the requirement is made measurable, every
+    color and font used comes from the Web UI's theme definition.
+
+  \item \textbf{Compatibility.} \req{NFR.S.13}--\req{NFR.S.15}.\\
+    \textit{Method:} continuous integration builds and unit tests on Windows,
+    macOS and Linux runners; system tests on team devices covering x86\_64 and
+    ARM processors and NVIDIA, AMD and Apple GPUs.\\
+    \textit{Acceptance:} every build and unit test passes on each runner, and
+    the group 2 criteria hold on each processor and GPU combination tested.
+
+  \item \textbf{Concurrent requests.} \req{FR.S.1.14}, \req{FR.S.3.5},
+    \req{FR.S.4.6}, \req{NFR.S.5}.\\
+    \textit{Method:} load tests with increasing numbers of concurrent
+    requests on clusters of increasing size.\\
+    \textit{Acceptance:} no tokens from one request appear in another, and
+    the number of concurrent requests served with at most
+    \textit{MAX\_DEGRADATION} loss of per-request throughput grows in
+    proportion to the number of nodes.
+
+  \item \textbf{Tensor compression.} \req{FR.S.4.2}.\\
+    \textit{Method:} throughput measurements with adaptive compression on and
+    off, under several network speeds.\\
+    \textit{Acceptance:} until the requirement is made measurable, throughput
+    with adaptive compression is never lower than with compression off.
+\end{enumerate}
+\endgroup
 
 \subsection{Formalizations}\label{subsec:formalizations}
 
@@ -1717,6 +2020,7 @@ one source is cited.}
 \renewcommand{\thesubsection}{\thesection.\arabic{subsection}}
 \renewcommand{\theHsubsection}{\thesection.\arabic{subsection}}
 \newpage
+<<<<<<< HEAD
 \section{Appendix --- User Interview}\label{app:interview}
 
 The questions below were sent, on October 16, 2026, to an AI developer at an
@@ -1772,6 +2076,48 @@ Section~\ref{subsubsec:g7-sources}.
     background service with a pause switch. A small admin page for machine
     health and timing. No automatic updates.
 \end{enumerate}
+=======
+\section{Appendix --- Symbolic Constants}
+\label{app:constants}
+
+Table~\ref{tab:constants} gives the value of each named constant used in
+this document. The values are initial estimates and are expected to change
+as testing gives better data.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Symbolic constants}
+\label{tab:constants}
+\begin{tabularx}{\textwidth}{|l|l|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Name} & \textbf{Value} & \textbf{Description} \\
+\hline
+\textit{HEALTH\_INTERVAL} & 5 s & Time between health and performance reports. Used in \req{FR.S.1.2}, \req{FR.S.1.3}, \req{FR.S.1.23}, \req{FR.S.3.4}, \req{FR.S.4.5}. \\
+\hline
+\textit{INTERVAL\_TOL} & 1 s & Allowed deviation from \textit{HEALTH\_INTERVAL} when verifying reports. Used in S.8 group 5. \\
+\hline
+\textit{LEADER\_TIMEOUT} & 60 s & Time without a health query after which a follower assumes the leader has failed. Used in \req{FR.S.1.24}. \\
+\hline
+\textit{FAIL\_THRESHOLD} & 50\% & Fraction of a node's usual token throughput below which it is treated as failing. Used in \req{FR.S.1.10}. \\
+\hline
+\textit{UI\_TASK\_TIME} & 2 min & Time a new user may take to complete a usability task. Used in \req{NFR.S.1}, \req{NFR.S.2}. \\
+\hline
+\textit{INSTALL\_CLICKS} & 10 & Maximum clicks to install \progname{} on Windows or macOS. Used in \req{NFR.S.3}. \\
+\hline
+\textit{TEST\_USERS} & 5 & Minimum number of participants in the usability study. Used in S.8 group 10. \\
+\hline
+\textit{MAX\_DEGRADATION} & 20\% & Maximum loss of per-request throughput when serving concurrent requests. Used in \req{NFR.S.5}. \\
+\hline
+\textit{BENCH\_RATIO} & 95\% & Minimum benchmark score of a split model, relative to the unsplit model. Used in \req{NFR.S.6}. \\
+\hline
+\textit{MAX\_LOSS} & 10\% & Packet loss the system must tolerate while still producing correct output. Used in \req{NFR.S.9}. \\
+\hline
+\textit{CONTEXT\_MAX} & 4096 tokens & Longest context (prompt and response) a session can use. Each node reserves KV cache for this many tokens. Used in S.5, S.9. \\
+\hline
+\end{tabularx}
+\end{table}
+>>>>>>> 8bfac0f (docs(SRS): add S.7 prioritization and S.8 verification criteria)
 
 \newpage
 \section{Appendix --- Generative AI Use Disclosure}
