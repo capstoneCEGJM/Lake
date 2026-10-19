@@ -148,7 +148,7 @@ team and shared with us by our \gl[ta]{teaching assistant}.
 \hline
 Glossary (E.1) moved to the front of the document & Terms and acronyms must be defined before first use, and information should live in one place. E.1 now points here. \\
 \hline
-Requirement tables added to each \gl[pegs]{PEGS} chapter & Meyer's template describes requirements in prose. Labelled tables of functional (FR) and non-functional (NFR) requirements give each requirement an ID that can be prioritized, traced and verified. \\
+Requirement tables added to each \gl[pegs]{PEGS} chapter & Meyer's template describes requirements in prose. Labelled tables of functional (FR) and non-functional (NFR) requirements give each requirement an ID that can be prioritised, traced and verified. \\
 \hline
 Added G.8 User Profiles & Meyer lists stakeholders (G.7) but has no place for the distinct characteristics of each user group. \\
 \hline
@@ -853,7 +853,7 @@ the System chapter record which of these may change.
 \begin{itemize}
     \item \emph{No training or fine-tuning.} Lake runs pre-trained
     \gl{transformer} models that ggml \citep{Ggml} supports. Lake does not
-    train, fine-tune, \gl[quantization]{quantize}, or otherwise modify a model,
+    train, fine-tune, \gl[quantization]{quantise}, or otherwise modify a model,
     and does not change the quality of its output.
     \item \emph{Trusted network and devices.} In the first release, traffic
     between nodes is not encrypted and devices are not authenticated beyond
@@ -872,7 +872,7 @@ the System chapter record which of these may change.
     models that would not otherwise fit.
     \item \emph{No model hosting.} Lake does not download or distribute
     model \gl{weights}. Users supply a model file under that model's own
-    license.
+    licence.
 \end{itemize}
 
 \subsection{Stakeholders and Requirements Sources}\label{subsec:stakeholders-and-requirements-sources}
@@ -1100,8 +1100,8 @@ Template).
     \item \textbf{\gl[deviceowner]{Device owners}} -- Individuals who contribute one or more \gl[node]{nodes} towards the device pool.
     \item \textbf{Operating systems and drivers} -- Windows, macOS, and Linux operating systems that have the supported drivers to facilitate inference requests. Android and iOS operating system support is a stretch goal.
     \item \textbf{Network equipment} -- Routers, switches, Thunderbolt cables, and any other hardware necessary to connect the nodes to the network. Connectivity via Wi-Fi is a stretch goal.
-    \item \textbf{Model} -- Pre-trained and open-source model \gl{weights} that are permitted to be downloaded and utilized by the Lake network via \gl[partitioning]{model layer partitioning}.
-    \item \textbf{External \gl[api]{API} consumers} -- Other services that utilize the Lake API to serve inference requests. This acts as the main interface for consumers to use Lake, such as coding agent harnesses (e.g. Claude Code, Codex, Pi).
+    \item \textbf{Model} -- Pre-trained and open-source model \gl{weights} that are permitted to be downloaded and utilised by the Lake network via \gl[partitioning]{model layer partitioning}.
+    \item \textbf{External \gl[api]{API} consumers} -- Other services that utilise the Lake API to serve inference requests. This acts as the main interface for consumers to use Lake, such as coding agent harnesses (e.g. Claude Code, Codex, Pi).
  
 \end{itemize}
 
@@ -1111,7 +1111,7 @@ Template).
     \item \textbf{Device hardware} -- Each node should have a sufficient \gl[cpu]{CPU}, \gl[gpu]{GPU}, memory, and storage such that its assigned model \gl[layer]{layers}, \gl[kvcache]{KV cache}, and other Lake software components can fit and run within the device, such that distributed inference has both a higher \gl[throughput]{token throughput} and lower \gl{latency} than an equivalent single-device inference.
     \item \textbf{Network communication} -- Network communication, whether wired or wireless, should have a sufficiently high bandwidth and low latency. Inter-node communication overhead may make distributed inference slower than single-device inference.
     \item \textbf{Platform compatibility} -- Nodes within the Lake network must operate on Windows, macOS, and Linux (as well as Android and iOS as stretch goals) as hardware acceleration and inference platforms are limited by the available drivers on these operating systems.
-    \item \textbf{API compatibility} -- Lake must implement a standardized \gl[openaiapi]{OpenAI API} spec such that existing external clients can easily utilize Lake, \citep{OpenAIAPI}, as specified in Section S.3.
+    \item \textbf{API compatibility} -- Lake must implement a standardised \gl[openaiapi]{OpenAI API} spec such that existing external clients can easily utilise Lake, \citep{OpenAIAPI}, as specified in Section S.3.
     \item \textbf{Model architecture} -- Only supported \gl[llm]{LLM} architectures that Lake's model layer partitioning supports can be used.
 \end{itemize}
 
@@ -1156,7 +1156,7 @@ Template).
 
 \noindent\textbf{Legal and Regulatory Factors:}
 \begin{itemize}
-    \item \textbf{Software licensing} -- Lake is available under the GNU \gl[gpl]{GPL} v3.0 license \citep{GPLv3}. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
+    \item \textbf{Software licensing} -- Lake is available under the GNU \gl[gpl]{GPL} v3.0 licence \citep{GPLv3}. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
     \item \textbf{Model licensing} -- Pretrained LLMs used for inference are subject to their respective licenses. Lake must be compliant with these licenses for its use and distribution.
 \end{itemize}
 
@@ -1346,7 +1346,7 @@ Template).
 \begin{itemize}
 	\item \reqlabel{FR.S.4.1}\textbf{FR.S.4.1} The system shall establish connections with neighbouring nodes' Tensor I/O components.
 	\item \reqlabel{FR.S.4.2}\textbf{FR.S.4.2} The system shall dynamically choose the compression level of
-		outgoing tensors to maximize throughput based on available \gl[cpu]{CPU}-time and network throughput.
+		outgoing tensors to maximise throughput based on available \gl[cpu]{CPU}-time and network throughput.
 	\item \reqlabel{FR.S.4.3}\textbf{FR.S.4.3} The system shall accept input tensors from the upstream node, decompress them,
 		and provide them to the Inference Engine.
 	\item \reqlabel{FR.S.4.4}\textbf{FR.S.4.4} The system shall accept output tensors from the Inference Engine, compress
@@ -2685,8 +2685,8 @@ $\mathit{dev}(P)$.
 		in other formats can be converted to GGUF so there is little reason for Lake to support them directly.
 	\item \label{UC.3}\textbf{UC.3} A primary goal of Lake is privacy (see \hyperref[NFR.S.11]{NFR.S.11}),
 		so modifications that would compromise privacy like incorporating cloud-based services are unlikely.
-	\item \label{UC.4}\textbf{UC.4} Even though one of Lake's goals is to run larger models, integrating \gl{quantization}
-		tools into Lake is unlikely. Lake's scope is focused on distributed inference, and quantization tools
+	\item \label{UC.4}\textbf{UC.4} Even though one of Lake's goals is to run larger models, integrating \gl[quantization]{quantisation}
+		tools into Lake is unlikely. Lake's scope is focused on distributed inference, and quantisation tools
 		would better fit in the scope of an independent project.
 \end{itemize}
 
