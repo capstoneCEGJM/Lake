@@ -1211,16 +1211,19 @@ Template).
 		that would give insight into what the data sent in the request might have been.}
 		after the request has completed.
 	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send any data to
-		any destination outside the cluster, with one exception: the response
-		returned to the client that made the request. This covers request data,
-		usage statistics, crash and diagnostic reports, update checks, and any
-		other telemetry. Health and performance reports between nodes of the
-		cluster (\req{FR.S.1.23}) stay inside the cluster and are allowed.
-		\emph{Rationale:} the developer interviewed in
+		any destination outside the cluster, with two exceptions: the response
+		returned to the client that made the request, and the discovery and
+		invitation messages sent to devices on the same local network
+		(\req{FR.S.1.4}, \req{FR.S.5.1}, \req{FR.S.1.20}). The prohibition
+		covers request data, usage statistics, crash and diagnostic reports,
+		update checks, and any other telemetry. Health and performance reports
+		between nodes of the cluster (\req{FR.S.1.23}) stay inside the cluster
+		and are allowed. \emph{Rationale:} the developer interviewed in
 		Section~\ref{subsubsec:g7-sources} runs models locally because his
-		firm's data is export-controlled, and asked that Lake send nothing home,
-		not even usage or crash reports (Appendix~\ref{app:interview}). This
-		requirement realises \req{NFR.G.4.1}.
+		firm's data is export-controlled, and asked that anything like Lake run
+		fully offline with no telemetry and no automatic updates
+		(Appendix~\ref{app:interview}). This requirement realises
+		\req{NFR.G.4.1}.
 	\item \label{NFR.S.12}\textbf{NFR.S.12} The system shall not include untrusted devices in
 		a cluster. Satisfied by \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18},
 		\hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, and \hyperref[FR.S.5.7]{FR.S.5.7}.
@@ -2165,14 +2168,15 @@ group.
     \textit{Method:} after a set of requests, every file \progname{} wrote,
     including diagnostic logs, is searched for the prompts and responses; all
     network traffic from every node is captured through a session that
-    includes requests, a period with no requests, and a check for updates
-    (or whatever the software offers in its place).\\
+    includes requests, a period with no requests and, where the release can
+    check for updates, one such check.\\
     \textit{Acceptance:} no request data remains on disk after its request
     completes; logs contain no prompts, responses, tensor data or KV cache
     content; and every packet \progname{} sends, in every part of the
-    capture, including the idle period and the update check, is addressed to
-    a node of the cluster or to the client that made the request. A single
-    packet to any other destination fails the test.
+    capture, including the idle period and any update check, is addressed to
+    a node of the cluster, to a device on the local network being discovered
+    or invited, or to the client that made the request. A single packet to
+    any other destination fails the test.
 
   \item \textbf{API.} \req{FR.S.1.9}, \req{NFR.E.3}.\\
     \textit{Method:} requests through the official OpenAI client library and
