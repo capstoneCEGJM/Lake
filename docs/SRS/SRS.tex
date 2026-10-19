@@ -36,6 +36,7 @@
 
 \input{../Comments.text}
 \input{../Common.text}
+\usepackage{doi}      % hyperlink DOI fields in the bibliography
 
 % ---------------------------------------------------------------------------
 % PEGS chapter macro. Meyer's template numbers subsections as G.1, E.2, S.3,
@@ -928,7 +929,7 @@ Template).
 
 \noindent\textbf{Legal and Regulatory Factors:}
 \begin{itemize}
-    \item \textbf{Software licensing} -- Lake is available under the GNU GPL v3.0 license \citep{GPU2007}. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
+    \item \textbf{Software licensing} -- Lake is available under the GNU GPL v3.0 license \citep{GPLv3}. All dependencies used in Lake must be compliant and compatible with Lake's intended use and distribution.
     \item \textbf{Model licensing} -- Pretrained LLMs used for inference are subject to their respective licenses. Lake must be compliant with these licenses for its use and distribution.
 \end{itemize}
 
@@ -978,7 +979,7 @@ Template).
 		but the following responsibilities are only run on the leader node:
 		\begin{itemize}
 			\item Providing an OpenAI-API compatible API to the user for use with tools like
-				\href{https://opencode.ai/}{OpenCode}.
+				OpenCode \citep{OpenCode}.
 			\item Tracking cluster health, and detecting node failures.
 			\item Notifying nodes of partitioning changes.
 			\item Rebuilding the cluster and saving in-progress requests
@@ -997,13 +998,13 @@ Template).
 	\item \textbf{Inference Engine} --
 		This component is the high-performance inference engine running on each device. It will handle
 		execution of the given model partition for each device. It will call into
-		\href{https://github.com/ggml-org/ggml}{ggml} using the Rust-to-C FFI to control the execution of a
+		ggml \citep{Ggml} using the Rust-to-C FFI to control the execution of a
 		device's model partition.
 
 	\item \textbf{Tensor I/O} --
 		This component handles the compressing, sending, receiving, and decompressing of tensors between devices.
-		It will leverage \href{https://grpc.io/}{gRPC} for high-performance communication, with the potential
-		to use a custom solution should \href{https://grpc.io/}{gRPC} fail to meet our requirements in practice.
+		It will leverage gRPC \citep{GRPC} for high-performance communication, with the potential
+		to use a custom solution should gRPC fail to meet our requirements in practice.
 
 	\item \textbf{Web UI} --
 		This component handles displaying cluster information and structure to the user, as well as allowing user
@@ -1139,7 +1140,7 @@ Template).
 	\item \label{FR.S.5.2}\textbf{FR.S.5.2} The system shall allow a user to select connected devices to create
 		a cluster. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 	\item \label{FR.S.5.3}\textbf{FR.S.5.3} The system shall allow a user to select an input
-		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file.
+		GGUF file \citep{GGUF}.
 		Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 	\item \label{FR.S.5.4}\textbf{FR.S.5.4} The system shall display an error to the user if partitioning the selected
 		input file is infeasible given the selected devices. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
@@ -1181,8 +1182,8 @@ Template).
 	\item \label{NFR.S.6}\textbf{NFR.S.6} \textbf{Intelligence:} The partitioned model must score at least 95\% as well
 		as the same model running on one machine using relevant
 		benchmarks\footnote{Relevant benchmarks are entirely dependent on what types of model are being tested.
-		Example benchmarks: \href{https://github.com/swe-bench/SWE-bench}{SWE-bench},
-		\href{https://epoch.ai/frontiermath}{FrontierMath}}. Satisfied by \hyperref[FR.S.2.3]{FR.S.2.3}.
+		Example benchmarks: SWE-bench \citep{SWEbench} and
+		FrontierMath \citep{FrontierMath}.}. Satisfied by \hyperref[FR.S.2.3]{FR.S.2.3}.
 \end{itemize}
 
 \paragraph{Look and Feel}
@@ -1194,7 +1195,7 @@ Template).
 \paragraph{Fault-Tolerance}
 \begin{itemize}
 	\item \label{NFR.S.8}\textbf{NFR.S.8} The system shall reject invalid or corrupted
-		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} files, and notify the user of the
+		GGUF files \citep{GGUF}, and notify the user of the
 		issue.
 	\item \label{NFR.S.9}\textbf{NFR.S.9} The system shall produce correct results in the face of network packet
 		corruption and dropping up to 10\% packet loss. Partially satisfies hazard H3-1 from the Hazard Analysis.
@@ -1226,12 +1227,12 @@ Lake requires the following interfaces:
 \begin{itemize}
     \item \textbf{OpenAI compatible API} -- An HTTP server, following the OpenAI API structure.
 		This will be the API used to interact with the user, via third-party tools of the user's
-		choice that accept the OpenAI API (e.g. \href{https://opencode.ai/}{OpenCode}).
+		choice that accept the OpenAI API (e.g. OpenCode \citep{OpenCode}).
 	\item \textbf{GGUF input model} -- An input file using the
-		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file format. This contains
+		GGUF file format \citep{GGUF}. This contains
 		the model Lake will partition and run.
 	\item \textbf{Rust-to-C FFI} -- The Rust-to-C foreign function interface will be used to call
-		\href{https://github.com/ggml-org/ggml}{ggml} from the Inference Engine.
+		ggml \citep{Ggml} from the Inference Engine.
 	\item \textbf{gRPC between nodes} -- A gRPC-based API used to communicate between nodes.
 	\item \textbf{REST API between Coordinator and Web UI} -- A REST API for communication between the
 		leader Coordinator and the Web UI.
@@ -1241,7 +1242,7 @@ Lake requires the following interfaces:
 \begin{enumerate}
 	\item User opens Lake client instances on all participating machines.
     \item User creates a Lake cluster using the UI on one of the devices, and provides a
-		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file. This
+		GGUF file \citep{GGUF}. This
 		device becomes the leader node.
 	\item Leader node checks connectivity with follower nodes, and collects performance
 		metrics for each node.
@@ -1278,7 +1279,7 @@ Lake requires the following interfaces:
 	\item \textbf{Connection between two nodes is lost} -- The nodes in question attempt to
 		re-establish a connection. If this fails, the leader must rebuild the cluster, excluding
 		the failed link. Associated with hazard H4-1 in the Hazard Analysis.
-	\item \textbf{Input \href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF}
+	\item \textbf{Input GGUF
 		file is corrupted or fails to load} --
 		Refuse to begin inference, and inform the user of the corrupted or faulty file.
 	\item \textbf{A request is made with a larger prompt than the cluster has memory for} --
@@ -2665,10 +2666,8 @@ which. Use the landscape environment below for a wide figure.}
 
 % ===========================================================================
 \newpage
-\plt{Cite sources with \texttt{\textbackslash citep\{key\}} or
-\texttt{\textbackslash citet\{key\}}; entries live in
-\texttt{refs/References.bib}. The References section appears once at least
-one source is cited.}
+\phantomsection
+\addcontentsline{toc}{section}{References}
 
 \bibliographystyle{plainnat}
 \bibliography{../../refs/References}
