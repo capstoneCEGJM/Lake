@@ -1313,7 +1313,8 @@ extensions can reference its steps.}
 have, \textbf{C} could have, \textbf{W} won't have (this release). They are
 assigned with the following rules:
 \begin{itemize}
-  \item \textbf{M}: needed to meet a goal in the Problem Statement.
+  \item \textbf{M}: needed to meet one of the goals in
+    Section~\ref{subsec:expected-benefits}, including concurrent inference.
   \item \textbf{S}: improves a core goal, but the system still meets that goal
     without it.
   \item \textbf{C}: belongs to a stretch goal in the Problem Statement, or is
@@ -1357,7 +1358,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.1.11}{Rebuild on failure or leave}{M}{Core of the Dynamic Allocation goal.}
 \priorityrow{FR.S.1.12}{Rebuild on join}{S}{A join only adds capacity; the cluster keeps working without it.}
 \priorityrow{FR.S.1.13}{Retry after rebuild}{S}{Improves resilience, but the user can resubmit a failed request.}
-\priorityrow{FR.S.1.14}{Concurrent requests}{C}{Concurrent Inference is a stretch goal. C means serving requests concurrently, not only accepting and queueing them.}
+\priorityrow{FR.S.1.14}{Concurrent requests}{M}{Required by the concurrent inference goal. This means serving requests concurrently, not only accepting and queueing them.}
 \priorityrow{FR.S.1.15}{Send cluster graph}{M}{Followers must know the pipeline order to connect to each other.}
 \priorityrow{FR.S.1.16}{Web UI data and control}{M}{The Web UI is how users create and inspect clusters.}
 \priorityrow{FR.S.1.17}{Wait for confirmations}{M}{Required to keep untrusted devices out of a cluster (NFR.S.12).}
@@ -1407,7 +1408,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.3.2}{Run incoming tensors}{M}{Core of model parallelization.}
 \priorityrow{FR.S.3.3}{Send output tensors}{M}{Core of model parallelization.}
 \priorityrow{FR.S.3.4}{Measure performance}{S}{Same as FR.S.1.2.}
-\priorityrow{FR.S.3.5}{Concurrent requests}{C}{Concurrent Inference is a stretch goal.}
+\priorityrow{FR.S.3.5}{Concurrent requests}{M}{Same as FR.S.1.14; each node must process tensors from several requests.}
 \end{tabularx}
 \caption{Prioritization of Inference Engine requirements}
 \label{tab:prioritization-engine}
@@ -1423,7 +1424,7 @@ were last decided on 2026-10-16.
 \priorityrow{FR.S.4.3}{Receive tensors}{M}{Core of model parallelization. Decompression applies only if FR.S.4.2 is implemented.}
 \priorityrow{FR.S.4.4}{Send tensors}{M}{Same as FR.S.4.3.}
 \priorityrow{FR.S.4.5}{Measure network}{S}{Same as FR.S.1.3.}
-\priorityrow{FR.S.4.6}{Request association}{C}{Only needed when requests are served concurrently.}
+\priorityrow{FR.S.4.6}{Request association}{M}{Without it, tensors from concurrent requests mix and outputs interfere.}
 \end{tabularx}
 \caption{Prioritization of Tensor I/O requirements}
 \label{tab:prioritization-tensor-io}
@@ -1455,7 +1456,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.2}{Controllability}{S}{Same as NFR.S.1.}
 \priorityrow{NFR.S.3}{Installability}{S}{Users can build from source until installers exist.}
 \priorityrow{NFR.S.4}{Model size}{M}{The primary metric of the Improved Local Performance goal.}
-\priorityrow{NFR.S.5}{Scalability}{C}{Depends on concurrent requests, a stretch goal.}
+\priorityrow{NFR.S.5}{Scalability}{M}{The measure of the concurrent inference goal (NFR.G.4.6).}
 \priorityrow{NFR.S.6}{Intelligence}{M}{A split model that answers worse defeats the purpose of Lake.}
 \priorityrow{NFR.S.7}{Consistency}{C}{Cosmetic.}
 \priorityrow{NFR.S.8}{Reject bad model files}{M}{Prevents crashes and misleading output from a corrupted file.}
@@ -1465,7 +1466,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
 \priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimization goal.}
 \priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
-\priorityrow{NFR.S.15}{GPU vendors}{S}{Each vendor needs its own backend; Lake is usable with any one of them.}
+\priorityrow{NFR.S.15}{GPU vendors}{M}{Same as NFR.S.13; the Problem Statement supports NVIDIA, AMD and Apple GPUs.}
 \end{tabularx}
 \caption{Prioritization of non-functional requirements}
 \label{tab:prioritization-nfr}
@@ -1538,6 +1539,8 @@ teaching assistant and other reviewers judge it against these goals:
     systems runs a model (group 12).
   \item \textbf{Dynamic Allocation}: the cluster keeps serving requests after
     nodes join and leave, and the reallocation time is recorded (group 6).
+  \item \textbf{Concurrent Inference}: the cluster serves at least two users
+    at once without their outputs interfering (group 13).
 \end{itemize}
 A few people who are not on the team also try the system in the usability
 session (group 10), to confirm that it is understandable to new users.
@@ -1694,8 +1697,9 @@ group.
     \req{FR.S.4.6}, \req{NFR.S.5}.\\
     \textit{Method:} load tests with increasing numbers of concurrent
     requests on clusters of increasing size.\\
-    \textit{Acceptance:} no tokens from one request appear in another, and
-    the number of concurrent requests served with at most
+    \textit{Acceptance:} every cluster serves at least two requests at the
+    same time; no tokens from one request appear in another; and the number
+    of concurrent requests served with at most
     \textit{MAX\_DEGRADATION} loss of per-request throughput grows in
     proportion to the number of nodes.
 
