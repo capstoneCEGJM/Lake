@@ -427,8 +427,8 @@ chapter (Section~\ref{sec:srs-E}).
 
 \gl[llm]{LLMs} have become an everyday tool, and almost everyone
 who uses one does so through a commercial provider's web interface or
-application programming interface (\gl[api]{API}). The alternative is to run an open
-model on your own machine, which keeps your data at home but limits you to
+application programming interface (\gl[api]{API}). The alternative is to run an
+open model on your own machine, which keeps your data at home but limits you to
 whatever fits in one device's memory. Most households, offices, and labs
 already own several computers, and most of them sit idle most of the time.
 
@@ -456,8 +456,8 @@ outside the boundary.
 \subsection{Current Situation}\label{subsec:current-situation}
 
 Today there are two ways to use an LLM. The first is a hosted service from one
-of the major \gl{inference} providers. These give the best model quality, but every
-prompt leaves the premises, the cost grows with use, and the user has no
+of the major \gl{inference} providers. These give the best model quality, but
+every prompt leaves the premises, the cost grows with use, and the user has no
 control over how their data is handled. For a clinic or a law office this is
 often not acceptable at all.
 
@@ -470,16 +470,16 @@ the same desk.
 
 A few projects already spread a model over several machines: exo
 \citep{Exo}, prima.cpp \citep{PrimaCpp2025}, and the remote procedure call
-(\gl[rpc]{RPC}) backend of llama.cpp. They assign layers to devices once, when the
-model loads, and the assignment stays fixed for the \gl{session}. If a device drops off
-the network the session fails, and a device added later goes unused until
-everything is restarted. Lake builds on the same idea but makes the assignment
-something the system can change while it is running.
+(\gl[rpc]{RPC}) backend of llama.cpp. They assign layers to devices once, when
+the model loads, and the assignment stays fixed for the \gl{session}. If a
+device drops off the network the session fails, and a device added later goes
+unused until everything is restarted. Lake builds on the same idea but makes the
+assignment something the system can change while it is running.
 Table~\ref{tab:alternatives} summarises how Lake compares. Mixed operating
 systems are marked ``partly'' for the existing tools because exo runs on
-Apple silicon through Apple's MLX framework and only on the \gl[cpu]{CPU} on Linux, with no Windows build
-\citep{Exo}, and prima.cpp supports Linux and macOS \citep{PrimaCpp2025};
-only the llama.cpp RPC backend runs on all three.
+Apple silicon through Apple's MLX framework and only on the \gl[cpu]{CPU} on
+Linux, with no Windows build \citep{Exo}, and prima.cpp supports Linux and macOS
+\citep{PrimaCpp2025}; only the llama.cpp RPC backend runs on all three.
 
 \begin{table}[H]
 \centering
@@ -562,24 +562,24 @@ service with no changes on their side. The measure is an unmodified
 third-party client completing a session against Lake.
 
 \subsubsection*{Several users at once}
-While one request's \gl{token} is being computed on one \gl{node}, another request's
-token can be computed on the next, so a cluster can serve several users
-without each one waiting for the others. The measure is the number of
+While one request's \gl{token} is being computed on one \gl{node}, another
+request's token can be computed on the next, so a cluster can serve several
+users without each one waiting for the others. The measure is the number of
 requests the cluster can serve at once before any single request slows by
 more than the tolerance set in the Scalability requirement in
 Section~\ref{subsec:functionality}, and how that number grows with the
 number of nodes.
 
 \subsubsection*{Speed, where the split allows it}
-Response time and \gl[throughput]{throughput} (tokens per second) for a single request are
-secondary measures. A split model is not expected to beat a single device
-on a model that already fits on that device, since every token still passes
-through every layer in order. The gain is in capacity, and in throughput
+Response time and \gl[throughput]{throughput} (tokens per second) for a single
+request are secondary measures. A split model is not expected to beat a single
+device on a model that already fits on that device, since every token still
+passes through every layer in order. The gain is in capacity, and in throughput
 when several requests are served at once. The practitioner we interviewed (see
 Section~\ref{subsubsec:g7-sources}) expected the same: a split over an office
-network would likely be slower than one good \gl[gpu]{GPU} for live chat, but worth
-it for background work such as re-indexing documents, \gl[ocr]{OCR}, and overnight test
-runs, which is a use we had not considered.
+network would likely be slower than one good \gl[gpu]{GPU} for live chat, but
+worth it for background work such as re-indexing documents, \gl[ocr]{OCR}, and
+overnight test runs, which is a use we had not considered.
 
 \subsection{Functionality Overview}\label{subsec:functionality-overview}
 
@@ -587,8 +587,8 @@ This section is a capsule version of the System chapter. Each high-level
 requirement here maps to one or more of the components in
 Section~\ref{subsec:components} (the \gl[coordinator]{Coordinator}, the
 \gl[partitioner]{Model Partitioner}, the \gl[inferenceengine]{Inference Engine},
-\gl[tensorio]{Tensor I/O}, and the \gl[webui]{Web UI}) and to detailed requirements in
-Section~\ref{subsec:functionality}.
+\gl[tensorio]{Tensor I/O}, and the \gl[webui]{Web UI}) and to detailed
+requirements in Section~\ref{subsec:functionality}.
 
 \subsubsection{Functional Requirements}\label{subsubsec:g4-functional}
 
@@ -600,8 +600,8 @@ that realise it, so a change in either place can be traced to the other.
 \begin{itemize}
     \item \reqlabel{FR.G.4.1}\textbf{FR.G.4.1 Form a cluster with consent.}
     Lake runs on each device. From the web user interface (\gl[ui]{UI}) on one
-    device, which becomes the \gl[leader]{leader node}, the \gl{operator} sees the
-    other devices on the
+    device, which becomes the \gl[leader]{leader node}, the \gl{operator} sees
+    the other devices on the
     local network that are running Lake and chooses which to include. Each
     chosen device asks its owner to confirm before it joins, so no device
     takes part without consent. \emph{Realised by} \req{FR.S.1.4},
@@ -609,18 +609,18 @@ that realise it, so a change in either place can be traced to the other.
     \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{FR.S.5.7}, and
     \req{NFR.S.12}.
     \item \reqlabel{FR.G.4.2}\textbf{FR.G.4.2 Load and partition a model.}
-    The operator picks a model in \gl[gguf]{GGUF} format \citep{GGUF}, the file format
-    used by llama.cpp. Lake measures each node's memory, compute, and network
-    performance, decides which range of layers each node will hold, and has
-    each node load only that range. \emph{Realised by} \req{FR.S.5.3},
+    The operator picks a model in \gl[gguf]{GGUF} format \citep{GGUF}, the file
+    format used by llama.cpp. Lake measures each node's memory, compute, and
+    network performance, decides which range of layers each node will hold, and
+    has each node load only that range. \emph{Realised by} \req{FR.S.5.3},
     \req{FR.S.1.8}, \req{FR.S.2.1} to \req{FR.S.2.4}, \req{FR.S.1.6},
     \req{FR.S.1.19}, \req{FR.S.1.1}, \req{FR.S.3.1}, \req{NFR.S.4}, and
     \req{NFR.E.2}.
     \item \reqlabel{FR.G.4.3}\textbf{FR.G.4.3 Run inference across the
-    cluster.} A prompt enters at the first node, the \gl[activation]{activations}
-    pass from node to node in layer order, and generated tokens
-    \gl[streaming]{stream} back to the user one at a time. Each node keeps the
-    \gl[kvcache]{key-value (KV) cache} for its own
+    cluster.} A prompt enters at the first node, the
+    \gl[activation]{activations} pass from node to node in layer order, and
+    generated tokens \gl[streaming]{stream} back to the user one at a time. Each
+    node keeps the \gl[kvcache]{key-value (KV) cache} for its own
     layers, so nothing about the conversation has to be re-sent between
     tokens. Several requests can be in flight at once, each at a different
     node, and their state is kept apart. \emph{Realised by} \req{FR.S.1.5},
@@ -645,15 +645,15 @@ that realise it, so a change in either place can be traced to the other.
     \req{NFR.S.1}.
     \item \reqlabel{FR.G.4.6}\textbf{FR.G.4.6 Serve prompts through a standard
     API.} The leader node exposes an \gl[http]{HTTP} API in the OpenAI format
-    \citep{OpenAIAPI}, including streaming and \gl[toolcalling]{tool calling}, so any client
-    that can talk to a hosted provider can talk to Lake. \emph{Realised by}
-    \req{FR.S.1.9} and \req{NFR.E.3}.
+    \citep{OpenAIAPI}, including streaming and \gl[toolcalling]{tool calling},
+    so any client that can talk to a hosted provider can talk to Lake.
+    \emph{Realised by} \req{FR.S.1.9} and \req{NFR.E.3}.
 \end{itemize}
 
 Two of these carry most of the value: \req{FR.G.4.2} and \req{FR.G.4.4}.
-\gl[partitioning]{Partitioning} is what lets a model larger than any one device run at all,
-which is the primary goal of the project. Reallocation is what sets Lake
-apart from exo and the llama.cpp RPC backend, both of which fix the split
+\gl[partitioning]{Partitioning} is what lets a model larger than any one device
+run at all, which is the primary goal of the project. Reallocation is what sets
+Lake apart from exo and the llama.cpp RPC backend, both of which fix the split
 when the model loads. Without the first there is no product; without the
 second there is nothing a user could not already get elsewhere.
 
@@ -667,8 +667,8 @@ each names the detailed requirement that gives it a measurable target.
     \item \reqlabel{NFR.G.4.1}\textbf{NFR.G.4.1 Request data stays in the
     cluster.} No prompt, response, or intermediate data is sent to any device
     outside the cluster, none is kept after a request completes, and Lake
-    sends no \gl{telemetry}. This is the privacy benefit, and it is the reason an
-    organisation handling export-controlled or medical data could use Lake at
+    sends no \gl{telemetry}. This is the privacy benefit, and it is the reason
+    an organisation handling export-controlled or medical data could use Lake at
     all. \emph{Realised by} \req{NFR.S.10}, \req{NFR.S.11}, \req{NFR.S.12},
     and \req{NFR.E.5}.
     \item \reqlabel{NFR.G.4.2}\textbf{NFR.G.4.2 Runs on Windows, macOS, and
@@ -878,9 +878,9 @@ the System chapter record which of these may change.
 
 \begin{itemize}
     \item \emph{No training or fine-tuning.} Lake runs pre-trained
-    \gl{transformer} models that ggml \citep{Ggml} supports. Lake does not train,
-    fine-tune, \gl[quantization]{quantize}, or otherwise modify a model, and does not change the
-    quality of its output.
+    \gl{transformer} models that ggml \citep{Ggml} supports. Lake does not
+    train, fine-tune, \gl[quantization]{quantize}, or otherwise modify a model,
+    and does not change the quality of its output.
     \item \emph{Trusted network and devices.} In the first release, traffic
     between nodes is not encrypted and devices are not authenticated beyond
     the owner's confirmation. Privacy therefore means that data never leaves
@@ -897,7 +897,8 @@ the System chapter record which of these may change.
     up a model that already runs well on one device. The benefit is running
     models that would not otherwise fit.
     \item \emph{No model hosting.} Lake does not download or distribute
-    model \gl{weights}. Users supply a model file under that model's own license.
+    model \gl{weights}. Users supply a model file under that model's own
+    license.
 \end{itemize}
 
 \subsection{Stakeholders and Requirements Sources}\label{subsec:stakeholders-and-requirements-sources}
@@ -999,8 +1000,8 @@ in-house assistant for about two hundred staff, entirely on two GPU
 machines, because much of the firm's data is export-controlled and cannot go
 to a cloud provider. The
 interview confirmed the privacy benefit as the reason such organisations run
-locally at all, confirmed the \gl[openaiapi]{OpenAI-compatible API} as a must (with
-streaming, tool calling, and structured output), and confirmed the
+locally at all, confirmed the \gl[openaiapi]{OpenAI-compatible API} as a must
+(with streaming, tool calling, and structured output), and confirmed the
 bottleneck view in \hyperref[UC7]{UC7}. It corrected us in three places: a
 split over an office network is expected to be slower than one good GPU for
 live chat, so the honest pitch is capacity and background work rather than
@@ -1012,15 +1013,15 @@ second persona and the device-owner stakeholder.
 
 \paragraph{Regulation and guidance.} No law requires an organisation to run
 its models locally, but several make it the simplest way to comply. Canada's
-private-sector privacy law, \gl[pipeda]{PIPEDA} \citep{PIPEDA}, keeps an organisation
-accountable for personal information it passes to a third party. Export
-control regimes such as Canada's Controlled Goods Program under the Defence
-Production Act \citep{DPA1985, CGR2001} restrict who may examine or possess
-controlled technical data, which includes software and documentation, and
-this is the kind of rule that keeps the interviewee's firm off hosted
-services. \gl[nist]{NIST}'s generative AI profile \citep{NIST2024} lists data privacy,
-information integrity, and information security among the risks an operator
-of a generative model is expected to manage. These documents are the
+private-sector privacy law, \gl[pipeda]{PIPEDA} \citep{PIPEDA}, keeps an
+organisation accountable for personal information it passes to a third party.
+Export control regimes such as Canada's Controlled Goods Program under the
+Defence Production Act \citep{DPA1985, CGR2001} restrict who may examine or
+possess controlled technical data, which includes software and documentation,
+and this is the kind of rule that keeps the interviewee's firm off hosted
+services. \gl[nist]{NIST}'s generative AI profile \citep{NIST2024} lists data
+privacy, information integrity, and information security among the risks an
+operator of a generative model is expected to manage. These documents are the
 background for \hyperref[NFR.G.4.1]{NFR.G.4.1} and the no-telemetry
 expectation in Section~\ref{subsec:user-profiles}. Which of them bind a given
 deployment depends on who deploys Lake; the standards and licences that bind
@@ -1047,10 +1048,10 @@ structure follows.
 
 \subsection{User Profiles}\label{subsec:user-profiles}
 
-The Environment chapter distinguishes three roles: the \gl[inferenceuser]{inference
-user} who sends prompts, the Lake operator who sets up and runs the cluster, and
-the \gl[deviceowner]{device owner} who contributes a machine. The personas below
-represent the
+The Environment chapter distinguishes three roles: the
+\gl[inferenceuser]{inference user} who sends prompts, the Lake operator who sets
+up and runs the cluster, and the \gl[deviceowner]{device owner} who contributes
+a machine. The personas below represent the
 three direct user groups from Table~\ref{tab:stakeholders} and show how those
 roles land on real people. They are composites, not individuals.
 
@@ -2287,8 +2288,9 @@ cases for each group are given in the \gl[vv]{V\&V} Plan.
 
 Validation checks that \progname{} is the right system for its stakeholders,
 measured against the goals in the Problem Statement. The team demonstrates the
-system at the \gl[poc]{proof of concept}, Revision 0 and final demonstrations, and
-the \gl[ta]{teaching assistant} and other reviewers judge it against these goals:
+system at the \gl[poc]{proof of concept}, Revision 0 and final demonstrations,
+and the \gl[ta]{teaching assistant} and other reviewers judge it against these
+goals:
 \begin{itemize}
   \item \textbf{Model Parallelization}: a model split across two or more
     nodes produces coherent output (groups 2 and 3 below).
@@ -2340,8 +2342,8 @@ group.
     unsplit run of the same model; benchmark and \gl{perplexity} runs on team
     hardware.\\
     \textit{Acceptance:} on a single platform, the split model produces the
-    same tokens as the unsplit model under \gl[greedy]{greedy decoding}. Across platforms,
-    and on every benchmark, the split model scores at least
+    same tokens as the unsplit model under \gl[greedy]{greedy decoding}. Across
+    platforms, and on every benchmark, the split model scores at least
     \textit{BENCH\_RATIO} of the unsplit model's score.
 
   \item \textbf{Model capacity.} \req{NFR.S.4}.\\
@@ -2472,8 +2474,9 @@ group.
     integration; an automated audit of dependency licences; a review of the
     licence of each model used in testing and demonstrations.\\
     \textit{Acceptance:} every merged pull request passes the linting and
-    formatting stage; no dependency has a licence incompatible with \gl[gpl]{GPL} v3.0;
-    every model used is permitted for that use by its licence.
+    formatting stage; no dependency has a licence incompatible with
+    \gl[gpl]{GPL} v3.0; every model used is permitted for that use by its
+    licence.
 \end{enumerate}
 \endgroup
 
