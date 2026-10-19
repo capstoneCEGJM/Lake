@@ -376,38 +376,52 @@ that realise it, so a change in either place can be traced to the other.
     which becomes the leader node, the operator sees the other devices on the
     local network that are running Lake and chooses which to include. Each
     chosen device asks its owner to confirm before it joins, so no device
-    takes part without consent. \emph{Realised by} \hyperref[FR.S.1.4]{FR.S.1.4}, \hyperref[FR.S.5.1]{FR.S.5.1}, \hyperref[FR.S.5.2]{FR.S.5.2}, \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18}, \hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, \hyperref[FR.S.5.7]{FR.S.5.7}, and \hyperref[NFR.S.12]{NFR.S.12}.
+    takes part without consent. \emph{Realised by} \req{FR.S.1.4},
+    \req{FR.S.5.1}, \req{FR.S.5.2}, \req{FR.S.1.16}, \req{FR.S.1.17},
+    \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{FR.S.5.7}, and
+    \req{NFR.S.12}.
     \item \label{FR.G.4.2}\textbf{FR.G.4.2 Load and partition a model.}
     The operator picks a model in GGUF format \citep{GGUF}, the file format
     used by llama.cpp. Lake measures each node's memory, compute, and network
     performance, decides which range of layers each node will hold, and has
-    each node load only that range. \emph{Realised by} \hyperref[FR.S.5.3]{FR.S.5.3}, \hyperref[FR.S.1.8]{FR.S.1.8}, \hyperref[FR.S.2.1]{FR.S.2.1} to \hyperref[FR.S.2.4]{FR.S.2.4}, \hyperref[FR.S.1.6]{FR.S.1.6}, \hyperref[FR.S.1.19]{FR.S.1.19}, and \hyperref[FR.S.3.1]{FR.S.3.1}.
+    each node load only that range. \emph{Realised by} \req{FR.S.5.3},
+    \req{FR.S.1.8}, \req{FR.S.2.1} to \req{FR.S.2.4}, \req{FR.S.1.6},
+    \req{FR.S.1.19}, \req{FR.S.1.1}, \req{FR.S.3.1}, \req{NFR.S.4}, and
+    \req{NFR.E.2}.
     \item \label{FR.G.4.3}\textbf{FR.G.4.3 Run inference across the
     cluster.} A prompt enters at the first node, the activations pass from
     node to node in layer order, and generated tokens stream back to the user
     one at a time. Each node keeps the key-value (KV) cache for its own
     layers, so nothing about the conversation has to be re-sent between
     tokens. Several requests can be in flight at once, each at a different
-    node, and their state is kept apart. \emph{Realised by} \hyperref[FR.S.3.2]{FR.S.3.2}, \hyperref[FR.S.3.3]{FR.S.3.3}, \hyperref[FR.S.4.1]{FR.S.4.1}, \hyperref[FR.S.4.3]{FR.S.4.3}, \hyperref[FR.S.4.4]{FR.S.4.4}, and, for concurrent requests, \hyperref[FR.S.1.14]{FR.S.1.14}, \hyperref[FR.S.3.5]{FR.S.3.5}, \hyperref[FR.S.4.6]{FR.S.4.6}, and \hyperref[NFR.S.5]{NFR.S.5}.
+    node, and their state is kept apart. \emph{Realised by} \req{FR.S.1.5},
+    \req{FR.S.1.15}, \req{FR.S.4.1}, \req{FR.S.4.3}, \req{FR.S.3.2},
+    \req{FR.S.3.3}, \req{FR.S.4.4}, and, for concurrent requests,
+    \req{FR.S.1.14}, \req{FR.S.3.5}, \req{FR.S.4.6}, and \req{NFR.S.5}.
     \item \label{FR.G.4.4}\textbf{FR.G.4.4 Reallocate when the cluster
     changes.} When a node leaves, fails, or joins, the leader re-partitions
     the model across the nodes that remain and resumes serving, retrying any
     request that was in progress. If the cluster no longer has enough memory
-    for the model, the user is told why rather than left with a hung session. \emph{Realised by} \hyperref[FR.S.1.10]{FR.S.1.10} to \hyperref[FR.S.1.13]{FR.S.1.13}, \hyperref[FR.S.1.22]{FR.S.1.22}, \hyperref[FR.S.2.2]{FR.S.2.2}, and \hyperref[FR.S.5.4]{FR.S.5.4}.
+    for the model, the user is told why rather than left with a hung session.
+    \emph{Realised by} \req{FR.S.1.10} to \req{FR.S.1.13}, \req{FR.S.1.22},
+    \req{FR.S.2.2}, and \req{FR.S.5.4}.
     \item \label{FR.G.4.5}\textbf{FR.G.4.5 Measure performance.} Lake
     records compute time on each node and transfer time between nodes. These
     measurements drive the partitioner and are shown in the web UI, which
     highlights the node or link that is the bottleneck and compares the
     cluster against the single best machine in it, so the operator can see
-    whether pooling is paying off. \emph{Realised by} \hyperref[FR.S.1.2]{FR.S.1.2}, \hyperref[FR.S.1.3]{FR.S.1.3}, \hyperref[FR.S.1.7]{FR.S.1.7}, \hyperref[FR.S.1.23]{FR.S.1.23}, \hyperref[FR.S.3.4]{FR.S.3.4}, \hyperref[FR.S.4.5]{FR.S.4.5}, \hyperref[FR.S.5.5]{FR.S.5.5}, \hyperref[FR.S.5.6]{FR.S.5.6}, and \hyperref[NFR.S.1]{NFR.S.1}.
+    whether pooling is paying off. \emph{Realised by} \req{FR.S.1.2},
+    \req{FR.S.1.3}, \req{FR.S.3.4}, \req{FR.S.4.5}, \req{FR.S.1.23},
+    \req{FR.S.1.7}, \req{FR.S.1.16}, \req{FR.S.5.5}, \req{FR.S.5.6}, and
+    \req{NFR.S.1}.
     \item \label{FR.G.4.6}\textbf{FR.G.4.6 Serve prompts through a standard
     API.} The leader node exposes an HTTP API in the OpenAI format
     \citep{OpenAIAPI}, including streaming and tool calling, so any client
-    that can talk to a hosted provider can talk to Lake. \emph{Realised by} \hyperref[FR.S.1.9]{FR.S.1.9} and \hyperref[NFR.E.3]{NFR.E.3}.
+    that can talk to a hosted provider can talk to Lake. \emph{Realised by}
+    \req{FR.S.1.9} and \req{NFR.E.3}.
 \end{itemize}
 
-Two of these carry most of the value: \hyperref[FR.G.4.2]{FR.G.4.2}
-and \hyperref[FR.G.4.4]{FR.G.4.4}.
+Two of these carry most of the value: \req{FR.G.4.2} and \req{FR.G.4.4}.
 Partitioning is what lets a model larger than any one device run at all,
 which is the primary goal of the project. Reallocation is what sets Lake
 apart from exo and the llama.cpp RPC backend, both of which fix the split
@@ -426,30 +440,34 @@ each names the detailed requirement that gives it a measurable target.
     outside the cluster, none is kept after a request completes, and Lake
     sends no telemetry. This is the privacy benefit, and it is the reason an
     organisation handling export-controlled or medical data could use Lake at
-    all. \emph{Realised by} \hyperref[NFR.S.10]{NFR.S.10}, \hyperref[NFR.S.11]{NFR.S.11}, \hyperref[NFR.S.12]{NFR.S.12}, and \hyperref[NFR.E.5]{NFR.E.5}.
+    all. \emph{Realised by} \req{NFR.S.10}, \req{NFR.S.11}, \req{NFR.S.12},
+    and \req{NFR.E.5}.
     \item \label{NFR.G.4.2}\textbf{NFR.G.4.2 Runs on Windows, macOS, and
     Linux.} Each is a supported platform for any node, and one cluster can
     mix all three. This is the cross-platform goal from the Problem
-    Statement. \emph{Realised by} \hyperref[NFR.S.3]{NFR.S.3}, \hyperref[NFR.S.13]{NFR.S.13} to \hyperref[NFR.S.15]{NFR.S.15}, and \hyperref[NFR.E.1]{NFR.E.1}.
+    Statement. \emph{Realised by} \req{NFR.S.3}, \req{NFR.S.13} to
+    \req{NFR.S.15}, and \req{NFR.E.1}.
     \item \label{NFR.G.4.3}\textbf{NFR.G.4.3 The split does not change the
     model.} A model run through Lake produces output of the same quality as
-    the same model run on one machine, within the tolerance set by NFR.S.6.
-    Users
-    would not trust a system that made their model worse. \emph{Realised by} \hyperref[NFR.S.6]{NFR.S.6}, \hyperref[FR.S.2.3]{FR.S.2.3}, and \hyperref[NFR.E.4]{NFR.E.4}.
+    the same model run on one machine, within the tolerance set by
+    \req{NFR.S.6}. Users would not trust a system that made their model worse.
+    \emph{Realised by} \req{NFR.S.6}, \req{FR.S.2.3}, and \req{NFR.E.4}.
     \item \label{NFR.G.4.4}\textbf{NFR.G.4.4 License compliance.} Lake
     respects the licenses of the software it builds on and of the models it
-    runs, as set out in Section~\ref{subsec:standards}. \emph{Realised by} \hyperref[NFR.E.7]{NFR.E.7} and \hyperref[NFR.E.8]{NFR.E.8}.
+    runs, as set out in Section~\ref{subsec:standards}. \emph{Realised by}
+    \req{NFR.E.7} and \req{NFR.E.8}.
     \item \label{NFR.G.4.5}\textbf{NFR.G.4.5 Installable without expert
     help.} A user can install Lake on each supported platform from an
     installer or a single package-manager command, without building from
     source or editing configuration files. Both the home user and the
     organisation in Section~\ref{subsec:user-profiles} said they would not
-    deploy a tool that needs more than that. \emph{Realised by} \hyperref[NFR.S.3]{NFR.S.3}.
+    deploy a tool that needs more than that. \emph{Realised by} \req{NFR.S.3}
+    and \req{NFR.E.1}.
     \item \label{NFR.G.4.6}\textbf{NFR.G.4.6 Serves more users as nodes
     are added.} The number of requests a cluster can serve at once without
     any one of them slowing beyond a set tolerance grows with the number of
     nodes. This is the measure behind the concurrent inference goal.
-    \emph{Realised by} \hyperref[NFR.S.5]{NFR.S.5}.
+    \emph{Realised by} \req{NFR.S.5}.
 \end{itemize}
 
 Privacy and fidelity matter most. A local inference tool that leaked data or
@@ -908,7 +926,7 @@ Template).
     \item \textbf{Resource usage} -- Device owners' CPU/GPU, memory, and disk usage will increase while the device is part of the Lake network, potentially making the device too resource constrained to multi-task or perform other activities. When not in use, any cached data or the stored layers can continue to utilize disk space.
     \item \textbf{Energy usage} -- Devices will consume more power, increasing energy usage, heat generated, fan usage, and decreasing battery life if unplugged.
     \item \textbf{Network bandwidth usage} -- The Lake network may utilize a large amount of a network's bandwidth, inhibiting other devices or processes from accessing the network.
-    \item \textbf{Logged data} -- During inference, logs and other diagnostic information can be stored and persist on the node's disk. Logs must exclude sensitive request data as specified in SR5-2.
+    \item \textbf{Logged data} -- During inference, logs and other diagnostic information can be stored and persist on the node's disk. Logs must exclude sensitive request data as specified in \req{SR5-2}.
     \item \textbf{Access to inference} -- Users can gain access to inference that they previously would not be able to get within a single device or with a paid service.
 \end{itemize}
 
@@ -947,15 +965,15 @@ Template).
     \hline
     \textbf{Label} & \textbf{Requirement} \\
     \hline
-    \label{NFR.E.1}NFR.E.1 & The system shall be installable and usable on the supported platforms of Windows, macOS, and Linux, and Android/iOS as a stretch goal. Related to NFR.S.3 and NFR.S.13. \\
+    \label{NFR.E.1}NFR.E.1 & The system shall be installable and usable on the supported platforms of Windows, macOS, and Linux, and Android/iOS as a stretch goal. Related to \req{NFR.S.3} and \req{NFR.S.13}. \\
     \hline
-    \label{NFR.E.2}NFR.E.2 & The system shall perform model layer partitioning to distribute model inference across various supported devices. Related to SR1-1 and SR1-2.\\
+    \label{NFR.E.2}NFR.E.2 & The system shall perform model layer partitioning to distribute model inference across various supported devices. Related to \req{SR1-1} and \req{SR1-2}.\\
     \hline
-    \label{NFR.E.3}NFR.E.3 & The system shall follow the OpenAI API specification for its request and response API service. Related to FR.S.1.9. \\
+    \label{NFR.E.3}NFR.E.3 & The system shall follow the OpenAI API specification for its request and response API service. Related to \req{FR.S.1.9}. \\
     \hline
     \label{NFR.E.4}NFR.E.4 & The system shall not modify the underlying model weights during model layer partitioning. \\
     \hline
-    \label{NFR.E.5}NFR.E.5 & The system shall contain all inference requests within the Lake network and not send any requests to 3rd-party services. Related to NFR.S.11.\\
+    \label{NFR.E.5}NFR.E.5 & The system shall contain all inference requests within the Lake network and not send any requests to 3rd-party services. Related to \req{NFR.S.11}.\\
     \hline
     \label{NFR.E.6}NFR.E.6 & The system shall adhere to all codebase formatting and linting conventions. \\
     \hline
@@ -1438,7 +1456,7 @@ network in advance.
 \end{itemize}
 
 \noindent\textbf{Justification:} Consent is a stated requirement of the
-first goal (\hyperref[FR-G4-1-1]{FR-G4-1-1}), and the owner is a direct
+first goal (\req{FR.G.4.1}), and the owner is a direct
 stakeholder who may not be the person running the cluster.
 
 % ---------------------------------------------------------------------------
@@ -2644,15 +2662,15 @@ document will be kept in sync with the Hazard Analysis, V\&V Plan and design.}
     \item \label{SR0-2}\textbf{SR0-2} -- The system shall only route inference requests to nodes that currently have a confirmed model layer partition.
     \item \label{SR1-1}\textbf{SR1-1} -- The system shall assign at least two nodes for model layer partitioning during distributed inference.
     \item \label{SR1-2}\textbf{SR1-2} -- The system shall ensure all model layers are assigned to a node, and that each device configured to run model layers receives a non-zero model layer partition assignment.
-    \item \label{SR1-3}\textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a configured safety margin. Related SRS requirements: FR.S.2.1, FR.S.2.2.
-    \item \label{SR2-1}\textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered within the configured recovery limits, the system must report to the API that the request has failed. Related SRS requirements: FR.S.1.10, FR.S.1.11, FR.S.1.13.
+    \item \label{SR1-3}\textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a configured safety margin. Related SRS requirements: \req{FR.S.2.1}, \req{FR.S.2.2}.
+    \item \label{SR2-1}\textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered within the configured recovery limits, the system must report to the API that the request has failed. Related SRS requirements: \req{FR.S.1.10}, \req{FR.S.1.11}, \req{FR.S.1.13}.
     \item \label{SR3-1}\textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests.
-    \item \label{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the coordinator so the inference request can recover, subject to SR5-2.
+    \item \label{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the coordinator so the inference request can recover, subject to \req{SR5-2}.
     \item \label{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy.
-    \item \label{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria are not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown. Related SRS requirements: FR.S.1.24 and FR.S.1.25.
+    \item \label{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria are not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown. Related SRS requirements: \req{FR.S.1.24} and \req{FR.S.1.25}.
     \item \label{SR4-3}\textbf{SR4-3} -- The system shall utilize configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance.
-    \item \label{SR5-1}\textbf{SR5-1} -- The system shall require user approval on the leader node to authorize a follower node, and user confirmation on the follower node to confirm the authorization before it can participate in the Lake network. Related SRS requirements: FR.S.1.17, FR.S.1.18, FR.S.1.20, FR.S.1.21, NFR.S.12.
-    \item \label{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, and KV cache content in diagnostic logs. Related SRS requirements: NFR.S.10.
+    \item \label{SR5-1}\textbf{SR5-1} -- The system shall require user approval on the leader node to authorize a follower node, and user confirmation on the follower node to confirm the authorization before it can participate in the Lake network. Related SRS requirements: \req{FR.S.1.17}, \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{NFR.S.12}.
+    \item \label{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, and KV cache content in diagnostic logs. Related SRS requirements: \req{NFR.S.10}.
 \end{itemize}
 
 % ===========================================================================
