@@ -52,9 +52,10 @@ and model capacity while operating on private, self-owned infrastructure.
 In the core project, privacy means that prompts, responses and model data stay on
 devices within the user's own local network and are never sent to an external AI
 provider. The core project does not encrypt traffic between devices or authenticate
-devices before they join (see Section 3.4). Users must therefore run Lake only on
-devices they trust, connected by a local network they control, since other devices
-on that network could read the traffic between devices.
+devices before they join (see Section~\ref{sec:privacy-security}). Users
+must therefore run Lake only on devices they trust, connected by a local
+network they control, since other devices on that network could read the
+traffic between devices.
 
 \subsection{Inputs and Outputs}
 
@@ -132,6 +133,17 @@ The system is able to operate across different operating systems and platforms (
 \subsection{Dynamic Allocation}
 In the case goal 2.2 can be achieved (model parallelization), the system can dynamically allocate the parallelized model across the pool of available devices. This can be done when a device joins or leaves the network, given that there are sufficient pooled resources to run the model. This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network. The success of the goal will be evaluated by verifying that the distributed model can serve requests after model layers are reassigned, as well as measuring the reallocation time.
 
+\subsection{Concurrent Inference}\label{sec:concurrent-inference}
+The system serves requests from several users at the same time instead of one
+after another. This is a main advantage of splitting a model, since each
+device can work on a different request. Each request keeps its own state so
+outputs do not interfere. Success will be measured by how many requests can
+run at once before any slows by more than \textit{MAX\_DEGRADATION} from its
+throughput when run alone, and how that number grows with the number of
+devices. The goal is met when at least \textit{MIN\_CONCURRENT} requests run
+at once within this tolerance and the number grows linearly with devices.
+Both values are defined in the symbolic constants appendix of the SRS.
+
 \section{Stretch Goals}
 
 \subsection{Wired and Wireless Connections}
@@ -140,10 +152,7 @@ The system can operate via both wired and wireless connection (v0: wired, v1+: w
 \subsection{Extended Cross-Platform Support for Smartphones}
 iOS and Android inference is commonly supported by inference engines, but practical feasibility of distributing inference to smartphones remains unknown, due to the limitations of smartphone hardware.
 
-\subsection{Concurrent Inference}
-The distributed system can serve inference to at least two concurrent users at the same time, rather than completing singular requests sequentially. Each request must keep its own state so user outputs do not interfere with one another. This would improve aggregate throughput and observed latency when multiple users are using the model.
-
-\subsection{Privacy and Security}
+\subsection{Privacy and Security}\label{sec:privacy-security}
 Communication between devices is encrypted, protecting requests and intermediate data from other devices that may be observing the network. Devices can also authenticate before joining the network cluster, protecting data in transit and ensuring only trusted devices are utilized. This goal removes the need for the trusted-network assumption in Section 1.1, making Lake suitable for networks that untrusted devices also use.
 
 \section{Custom Documents (CDs)}
