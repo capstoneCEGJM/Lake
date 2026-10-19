@@ -55,16 +55,93 @@ October 14, 2026 & All & Initial revision \\
 
 \pagenumbering{arabic}
 
-\wss{You are free to modify this template.}
-
 \section{Introduction}
 
-\wss{You can include your definition of what a hazard is here.}
+This document is the hazard analysis for \progname{}. \progname{} splits a
+large language model (LLM) into blocks of layers and runs each block on a
+different device on a local network, so that the devices can run a model
+together that none of them could run alone. The leader node's coordinator assigns
+blocks of layers to the devices and accepts prompts from the user. Each
+follower node runs its block and passes the result on to the next
+device.
+
+\subsection{Definition of a Hazard}
+
+For this document, a hazard is a state or condition of \progname{}
+that, combined with conditions in its environment that the system does not
+control, can lead to one of the losses listed in
+Section~\ref{SecLosses}. Examples of such conditions are a device losing
+power, a congested network, or an untrusted device on the same network. For
+example, a device being assigned more layers than its memory can hold is a
+hazard, and the crashes that follow are the loss. A failure mode is a
+specific way a component can fail, and it can create a hazard.
+
+\progname{} has almost no potential for physical harm, so its hazards are
+mainly about privacy, security, the correctness and availability of
+responses, and the effect of the system on the user's own devices.
 
 \section{Scope and Purpose of Hazard Analysis}
 
-\wss{You should say what \textbf{loss} could be incurred because of the
-hazards.}
+\subsection{Purpose}
+
+The purpose of this analysis is to find the ways \progname{} can cause a loss
+while the project is still in the requirements phase, when a hazard can be
+removed by changing a requirement instead of the code. Each hazard found in
+the FMEA leads to a safety or security requirement, which is added to the SRS
+and then verified through the V\&V Plan.
+
+\subsection{Scope}
+
+\noindent\textbf{In scope:}
+\begin{itemize}
+  \item The software components of \progname{}: the coordinator, the model
+    partitioner, the inference engine on each device, the communication
+    between devices, and the user interface.
+  \item The interaction of these components with the user's devices, the
+    local network that connects them, and the model files that are loaded.
+\end{itemize}
+
+\noindent\textbf{Out of scope:}
+\begin{itemize}
+  \item The content the model generates. Harmful, biased or false
+    text produced by a correctly running model is a property of the model,
+    which the user chooses and \progname{} treats as an input. Incorrect
+    output caused by \progname{} itself is in scope.
+  \item Defects in the operating system, drivers or GPU hardware. These are
+    outside \progname{}'s control, so this analysis does not try to prevent
+    them. It does cover their effects, such as a device crashing partway
+    through a request, because \progname{} must respond to them.
+  \item Attackers outside the local network, and physical access to a
+    device. \progname{} is not exposed to the internet, and a person with
+    physical access to a device already controls everything on it.
+\end{itemize}
+
+\subsection{Losses}
+\label{SecLosses}
+
+The hazards in this document can lead to the losses below.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}p{3.4cm}X}
+\toprule
+\textbf{ID} & \textbf{Loss} & \textbf{Description}\\
+\midrule
+L1 & Loss of privacy or security & Prompts, responses or data passed between
+  devices are seen by a person or device that is not meant to see them, or an
+  untrusted device gives an attacker access to data or code on the user's
+  devices.\\
+L2 & Loss of output integrity & The user receives a wrong or incoherent
+  response because of \progname{}, for example from data corrupted between
+  devices or a wrong assignment of layers, without knowing that it is
+  wrong.\\
+L3 & Loss of availability & A request fails or never completes, or a session
+  is lost partway through generating a response.\\
+L4 & Harm to the user's devices or work & \progname{} uses so much memory,
+  processing time or power on a device that the user's other applications
+  crash, unsaved work is lost, or the device itself crashes or freezes.\\
+\bottomrule
+\end{tabularx}
+\end{center}
 
 \section{System Boundaries and Components}
 
