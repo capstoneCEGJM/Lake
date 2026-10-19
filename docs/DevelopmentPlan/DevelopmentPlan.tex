@@ -52,7 +52,7 @@ for the project live in the
 (\url{https://github.com/capstoneCEGJM/Lake}). The plan covers how the project
 will be conducted.
 The first sections deal with confidentiality, intellectual property and
-licensing, followed by how the team is going to be organized for the duration
+licensing, followed by how the team is going to be organised for the duration
 of the project. Section~\ref{SecDecomp} breaks down
 the work and lays out the schedule, Section~\ref{SecPoC} describes the proof of
 concept, and Section~\ref{SecTech} lists the expected technology. The plan
@@ -176,7 +176,7 @@ to use.
 
 Issues will be used to track action items, and occasionally for design decisions that require
 deliberation. When creating an issue, a description should be included providing all the information
-required to address the issue. In addition, the issue may be labeled with one or more relevant
+required to address the issue. In addition, the issue may be labelled with one or more relevant
 tag(s) if applicable. The available tags are as follows: \verb|bug|, \verb|feature|, \verb|decision|,
 \verb|improvement|, \verb|priority: high|, \verb|priority: low|. Pull requests should be associated
 with an issue, and may close said issue by including a close tag.
@@ -189,7 +189,7 @@ of these issues easier and faster.
 
 \subsection{CI/CD}
 
-CI/CD will utilize GitHub Actions, will be required to pass for a PR to be merged, and will
+CI/CD will utilise GitHub Actions, will be required to pass for a PR to be merged, and will
 consist of the following stages:
 \begin{itemize}
 	\item PDF building and publishing
@@ -220,7 +220,7 @@ documentation.
 Each deliverable in Table~\ref{TblSchedule} gets its own GitHub milestone,
 with the due date set to the internal deadline rather than the course
 deadline. That way the board always reflects the date being worked
-toward. Lecture and TA meeting issues are kept in separate projects, as noted
+towards. Lecture and TA meeting issues are kept in separate projects, as noted
 in the Workflow Plan, so this board only holds project work.
 
 \subsection{Breaking Down Work}
@@ -407,8 +407,8 @@ will be discussed with the TA afterward. The current fallback ideas are:
   \item If a custom split on top of ggml cannot be made to work, build Lake's
     coordination and allocation on llama.cpp's remote procedure call (RPC)
     backend instead.
-  \item If network overhead is too high, move the performance goal toward
-    models that do not fit on one device and toward several requests at once,
+  \item If network overhead is too high, move the performance goal towards
+    models that do not fit on one device and towards several requests at once,
     since splitting still helps there.
   \item If splits across platforms produce bad output, limit Rev~0 to the
     platform combinations that work and make the rest a stretch goal.
@@ -457,7 +457,7 @@ Wi-Fi.
 \subsection{Inference and Models}
 
 The model math itself will run on ggml, the tensor library underneath
-llama.cpp. The library already has fast quantized kernels for both x86 and
+llama.cpp. The library already has fast quantised kernels for both x86 and
 ARM, plus GPU backends such as Metal and CUDA, which covers every target
 platform. Lake's own code handles the splitting, networking and profiling
 around it. The catch is that ggml's API is low-level and changes often, so
@@ -465,7 +465,7 @@ ggml will be pinned to a specific version.
 
 Another option considered was ONNX with ONNX Runtime. ONNX models are
 portable, and standard tools can cut an ONNX graph into subgraphs, which would
-suit layer splitting. The deciding factor for ggml was that quantized versions of popular open
+suit layer splitting. The deciding factor for ggml was that quantised versions of popular open
 models are much more widely available as GGUF files. ONNX Runtime stays
 as the backup if ggml's API proves too hard to work with.
 
@@ -473,7 +473,7 @@ Lake is meant to be model agnostic. Any pre-trained transformer LLM that ggml
 supports should work, rather than one specific model, and no model will be
 trained or fine-tuned. Small models are used during development because they
 load quickly, and larger ones are used later to test running a model that does
-not fit on one device. Weights are stored as 4-bit quantized GGUF files, which
+not fit on one device. Weights are stored as 4-bit quantised GGUF files, which
 are roughly a third of the size of 16-bit weights. Each device memory-maps the
 file and reads only its own layers. Weights are downloaded under each model's
 own license and are not committed to the repository.
@@ -598,12 +598,12 @@ Proposed changes in the document are reviewed through pull requests, and the bra
 
     It is also important to establish an agreement in confidential information, IP, and licensing before a project is begun, as any amendments to it once it has been started may pose difficulties, especially once previous releases or proof of concepts have been created.
 
-    Additionally, this project introduces many technical risks that can affect the feasibility and utility of the completed product (e.g. the feasibility and performance costs of distributing inference), and a discussion of risks and success criteria in the proof of concept demo help ensure that project risk is minimized as early as possible. 
+    Additionally, this project introduces many technical risks that can affect the feasibility and utility of the completed product (e.g. the feasibility and performance costs of distributing inference), and a discussion of risks and success criteria in the proof of concept demo help ensure that project risk is minimised as early as possible. 
 
     \item In your opinion, what are the advantages and disadvantages of using
     CI/CD?
 
-    CI/CD benefits a team environment by standardizing coding practices, ensuring lints, formatters, and tests are all met/passing before they are merged into the main branch. Automated tests also benefit by running in a reproducible and clean environment, including cross-platform tests that are important to ensure functionality across devices. The CI/CD can also be configured to automatically create artifacts (e.g. test builds), which can be used for additional validation, including performance benchmarking, or end-to-end regression testing.
+    CI/CD benefits a team environment by standardising coding practices, ensuring lints, formatters, and tests are all met/passing before they are merged into the main branch. Automated tests also benefit by running in a reproducible and clean environment, including cross-platform tests that are important to ensure functionality across devices. The CI/CD can also be configured to automatically create artefacts (e.g. test builds), which can be used for additional validation, including performance benchmarking, or end-to-end regression testing.
 
     Disadvantages include maintenance overhead of tests and CI, including flaky tests or long running tasks, which may block valid changes or unnecssarily reduce team velocity. Standard CI runners may also lack the hardware capabilities to run certain jobs, and suitable runners may incur costs.
 
@@ -612,7 +612,7 @@ Proposed changes in the document are reviewed through pull requests, and the bra
     \item What disagreements did your group have in this deliverable, if any,
     and how did you resolve them?
 
-    Disagreements occurred in the underlying technologies and frameworks to utilize for the proof of concept, such as whether to use C++ or Rust for the inference engine. C++ was the initial choice due to being the language used in \verb|llamma.cpp|, but Rust was suggested after it was determined that it can call \verb|ggml|'s C interface, as well as provide other benefits, such as stronger memory checks, and better team familiarity. It was agreed to revise the plan to use Rust as the initial choice, while leaving final decisions open to change during implementation of the proof of concept.
+    Disagreements occurred in the underlying technologies and frameworks to utilise for the proof of concept, such as whether to use C++ or Rust for the inference engine. C++ was the initial choice due to being the language used in \verb|llamma.cpp|, but Rust was suggested after it was determined that it can call \verb|ggml|'s C interface, as well as provide other benefits, such as stronger memory checks, and better team familiarity. It was agreed to revise the plan to use Rust as the initial choice, while leaving final decisions open to change during implementation of the proof of concept.
 
 \end{enumerate}
 
@@ -659,7 +659,7 @@ Team members will try their best to inform other team members of their absence. 
 
 It is expected that all team members stay up to date on project happenings and the agenda for an upcoming meeting. Team members are considered responsible for bringing themselves up to speed on current decisions and actions so that they can contribute effectively.
 
-In terms of deliverables, it is expected that documents are reviewed for clarity, grammar, and spelling. In addition, the document should be in alignment with level 4 of the corresponding rubric to maximize the team's mark.
+In terms of deliverables, it is expected that documents are reviewed for clarity, grammar, and spelling. In addition, the document should be in alignment with level 4 of the corresponding rubric to maximise the team's mark.
 For code deliverables, it is expected that the code will pass the CI quality gate as well as all test cases (including the test cases that have been added for the new feature).
 
 \subsubsection*{Attitude}
