@@ -53,8 +53,7 @@
   \setcounter{subsection}{0}%
 }
 
-% Link to a requirement by its label, e.g. \req{FR.S.1.9}; \reqlabel puts an
-% anchor at the requirement itself so the link lands on it, not the section.
+% \req{FR.S.1.9} links to a requirement. \reqlabel{} marks where it lands.
 \newcommand{\req}[1]{\hyperref[#1]{#1}}
 \newcommand{\reqlabel}[1]{\phantomsection\label{#1}}
 
@@ -178,7 +177,8 @@ Added a Symbolic Constants appendix & The SRS checklist asks for literal values 
     \item \textbf{Inference Engine} -- The software module that loads the LLM and executes its model layer partitions to generate output.
     \item \textbf{KV cache} -- The cache of key-value pairs that are used to store the activations of an LLM.
     \item \textbf{Lake} -- A decentralized network of devices that work together to serve LLM inference via model layer partitioning.
-    \item \textbf{Lake Client} -- The copy of Lake running on one device. Every node runs one, and the leader node's client also serves the Web UI and the API.
+    \item \textbf{Lake Client} -- Lake running on one device. Every node runs
+    one. The leader node's client also serves the Web UI and the API.
     \item \textbf{Latency} -- The elapsed time between the start of an inference request and a defined event, such as the completion of the first token, or the completion of the entire response.  
     \item \textbf{LLM (large language model)} -- An artificial intelligence model that is trained on a large dataset of text and is used to generate text.
     \item \textbf{Model layer partitioning} -- The distribution of an LLM's layers across a device pool.
@@ -1385,8 +1385,8 @@ scenario of the same use case.
 \noindent\textbf{Extensions:}
 \begin{itemize}
     \item \textbf{3a.} No other computers running the Lake client are found:
-    Lake informs the operator that none were found and that the operator can
-    start the Lake client on other computers and refresh the list.
+    Lake tells the operator. The operator can start the Lake client on other
+    computers and refresh the list.
     \item \textbf{5a.} An owner declines: that computer is left out of the
     cluster and the operator is told which ones declined
     (\hyperref[UC2]{UC2}).
