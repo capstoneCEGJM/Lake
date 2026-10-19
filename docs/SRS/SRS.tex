@@ -1211,8 +1211,8 @@ Template).
 		that would give insight into what the data sent in the request might have been.}
 		after the request has completed.
 	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send any data
-		outside the cluster, except the response to the client that made the
-		request and discovery and invitation messages to devices on the local
+		outside the cluster, except the response to the client that sent the
+		request, and discovery and invitation messages to devices on the local
 		network (\req{FR.S.1.4}, \req{FR.S.5.1}, \req{FR.S.1.20}). This
 		includes request data, usage statistics, crash and diagnostic reports,
 		update checks and any other telemetry. Health and performance reports
@@ -2167,8 +2167,8 @@ group.
     traffic from every node is captured during requests, while idle, and
     during an update check if the release has one.\\
     \textit{Acceptance:} no request data remains on disk after its request
-    completes; logs contain no prompts, responses, tensor data or KV cache
-    content; every captured packet goes to a cluster node, a local device
+    completes. Logs contain no prompts, responses, tensor data or KV cache
+    content. Every captured packet goes to a cluster node, a local device
     being discovered or invited, or the client that sent the request.
 
   \item \textbf{API.} \req{FR.S.1.9}, \req{NFR.E.3}.\\
