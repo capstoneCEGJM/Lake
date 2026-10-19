@@ -52,10 +52,10 @@ and model capacity while operating on private, self-owned infrastructure.
 In the core project, privacy means that prompts, responses and model data stay on
 devices within the user's own local network and are never sent to an external AI
 provider. The core project does not encrypt traffic between devices or authenticate
-devices before they join (see Section~\ref{sec:privacy-security}). Users must
-therefore run Lake only on
-devices they trust, connected by a local network they control, since other devices
-on that network could read the traffic between devices.
+devices before they join (see Section~\ref{sec:privacy-security}). Users
+must therefore run Lake only on devices they trust, connected by a local
+network they control, since other devices on that network could read the
+traffic between devices.
 
 \subsection{Inputs and Outputs}
 
@@ -134,19 +134,14 @@ The system is able to operate across different operating systems and platforms (
 In the case goal 2.2 can be achieved (model parallelization), the system can dynamically allocate the parallelized model across the pool of available devices. This can be done when a device joins or leaves the network, given that there are sufficient pooled resources to run the model. This is a key shortcoming of existing local distributed inference providers that only do one allocation pass at the start of the session. By achieving this goal, the system would be more efficient and resilient since it can continue to operate as devices drop or are added to the network. The success of the goal will be evaluated by verifying that the distributed model can serve requests after model layers are reassigned, as well as measuring the reallocation time.
 
 \subsection{Concurrent Inference}\label{sec:concurrent-inference}
-The system serves inference requests from several users at the same time,
-rather than completing one request before starting the next. Serving several
-requests at once is one of the main advantages of splitting a model across
-devices, since each device can work on a different request while the others
-are busy, and it lets a small team or a clinic share one cluster rather than
-take turns on it. Each request keeps its own state so that outputs do not
-interfere with one another. Success will be measured by the
-number of simultaneous requests the system can serve before any single request
-slows by more than a set tolerance (20\% of the throughput it would have on
-its own), and by how that number grows as devices are added to the pool. The
-goal will be considered met when the system serves at least two requests at
-once within the tolerance and that number grows linearly with the number of
-devices.
+The system serves requests from several users at the same time instead of one
+after another. This is a main advantage of splitting a model, since each
+device can work on a different request. Each request keeps its own state so
+outputs do not interfere. Success will be measured by how many requests can
+run at once before any slows by more than 20\% from its throughput when run
+alone, and how that number grows with the number of devices. The goal is met
+when at least two requests run at once within this tolerance and the number
+grows linearly with devices.
 
 \section{Stretch Goals}
 
