@@ -1,0 +1,46 @@
+digraph context {
+  rankdir=LR;
+  compound=true;
+  dpi=200;
+  pad=0.3;
+  nodesep=0.5;
+  ranksep=1.1;
+  node [fontname="Helvetica", fontsize=15, shape=box, style="rounded,filled", fillcolor="white", color="#444444", margin="0.18,0.10"];
+  edge [fontname="Helvetica", fontsize=12, color="#444444", fontcolor="#222222"];
+
+  subgraph cluster_lake {
+    label="Lake (system boundary)";
+    fontname="Helvetica-Bold";
+    fontsize=16;
+    style="rounded,filled";
+    fillcolor="#eef3f8";
+    color="#2b5f8c";
+    leader   [label="Leader node\nCoordinator (leader), Model Partitioner,\nWeb UI, OpenAI-compatible API,\nInference Engine, Tensor I/O", fillcolor="#dbe8f4"];
+    follower [label="Follower nodes\nCoordinator (follower),\nInference Engine, Tensor I/O", fillcolor="#dbe8f4"];
+    { rank=same; leader; follower; }
+  }
+
+  tools   [label="Inference users, via existing LLM clients\n(chat interfaces, coding agents)"];
+  user    [label="Lake operator /\ndevice owners"];
+  model   [label="Model file (GGUF)"];
+  devices [label="Device OS, GPU and memory\nWindows, macOS, Linux"];
+  network [label="Local network\n(wired)"];
+
+  user  -> leader   [label="create cluster, pick model,\nview performance"];
+  user  -> follower [label="confirm joining\n(on each device)"];
+  tools -> leader   [label="prompts / streamed responses", dir=both];
+  leader   -> network  [label="partition assignments,\nhealth data, activations", dir=both];
+  network  -> follower [label="activations", dir=both];
+  model   -> follower [label="model layers", lhead=cluster_lake];
+  devices -> follower [label="compute, memory", style=dashed, lhead=cluster_lake];
+
+  legend [shape=plaintext, style="", margin=0, label=<
+    <TABLE BORDER="1" CELLBORDER="0" CELLSPACING="0" CELLPADDING="5" COLOR="#888888" STYLE="rounded">
+      <TR><TD COLSPAN="2" ALIGN="LEFT"><B>Legend</B></TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT POINT-SIZE="18">&#8594;</FONT></TD><TD ALIGN="LEFT">data or command, in arrow direction</TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT POINT-SIZE="18">&#8596;</FONT></TD><TD ALIGN="LEFT">data in both directions</TD></TR>
+      <TR><TD ALIGN="LEFT"><FONT POINT-SIZE="18">&#8674;</FONT></TD><TD ALIGN="LEFT">resource Lake uses</TD></TR>
+      <TR><TD BGCOLOR="#dbe8f4" BORDER="1" COLOR="#2b5f8c"> </TD><TD ALIGN="LEFT">inside Lake</TD></TR>
+    </TABLE>>];
+  { rank=same; tools; user; model; devices; legend; }
+}

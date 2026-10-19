@@ -1,0 +1,47 @@
+@startuml g5_usecase
+left to right direction
+skinparam dpi 200
+skinparam defaultFontName Helvetica
+skinparam shadowing false
+skinparam usecase {
+  BackgroundColor #dbe8f4
+  BorderColor #2b5f8c
+}
+skinparam rectangle {
+  BackgroundColor #eef3f8
+  BorderColor #2b5f8c
+}
+
+actor "Lake operator" as Operator
+actor "Device owner" as Owner
+actor "Inference user" as User
+
+rectangle "Lake" as System {
+  usecase "UC1 Form a cluster" as UC1
+  usecase "UC6 Add a device\nduring a session" as UC6
+  usecase "UC2 Confirm a device joining" as UC2
+  usecase "UC3 Run a model\nacross the cluster" as UC3
+  usecase "UC5 Keep working when\na device leaves" as UC5
+  usecase "UC4 Use Lake from\nan existing tool" as UC4
+  usecase "UC7 Find the bottleneck" as UC7
+  usecase "UC8 Serve several\nusers at once" as UC8
+}
+
+Operator -- UC1
+Operator -- UC6
+Operator -- UC3
+Operator -- UC7
+
+UC2 -- Owner
+UC5 -- Owner
+UC3 -- User
+UC4 -- User
+UC8 -- User
+
+UC1 ..> UC2 : <<include>>
+UC6 ..> UC2 : <<include>>
+UC6 ..> UC3 : <<extend>>\n{device added}
+UC5 ..> UC3 : <<extend>>\n{device leaves}
+UC4 ..> UC3 : <<extend>>\n{via client tool}
+UC8 ..> UC3 : <<extend>>\n{several at once}
+@enduml
