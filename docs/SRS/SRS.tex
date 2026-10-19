@@ -20,6 +20,7 @@
 \usepackage{amsfonts}
 \usepackage{amsmath}
 \usepackage{amstext}
+\usepackage{amsthm}
 \usepackage{float}
 \usepackage{graphicx}
 \usepackage{rotating}
@@ -29,6 +30,7 @@
 \usepackage{pdflscape}
 \usepackage{caption}
 \usepackage[round]{natbib}
+\usepackage[export]{adjustbox}
 
 \input{../Comments.text}
 \input{../Common.text}
@@ -48,12 +50,24 @@
   \setcounter{subsection}{0}%
 }
 
+% Numbered statements for S.9 Formalizations, e.g. Lemma S.9.2.3.
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}[subsubsection]
+\theoremstyle{plain}
+\newtheorem{lemma}[definition]{Lemma}
+
 % Unnumbered section that still appears in the table of contents.
 \newcommand{\tocsection}[1]{%
   \phantomsection
   \section*{#1}
   \addcontentsline{toc}{section}{#1}%
 }
+
+% Set numbering depth to include paragraph (level 4)
+\setcounter{secnumdepth}{4}
+
+% Set Table of Contents depth to include paragraph (level 4)
+\setcounter{tocdepth}{4}
 
 \title{Software Requirements Specification for \progname: subtitle describing software}
 \author{\authname}
@@ -924,68 +938,331 @@ and S.8.}
 % ===========================================================================
 \pegschapter{S}{System}
 
-\plt{The System chapter is the technical core: what the system does, split
-by component, with each requirement labelled, prioritized and verifiable.}
-
 \subsection{Components}\label{subsec:components}
-\plt{The major parts of the system and how they interact. Include a component
-diagram. The components named here are reused as the subsections of S.2 and
-the groupings of S.7.}
-
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.8\textwidth]{component_diagram.png}
-%     \caption{Component diagram.}
-%     \label{fig:component-diagram}
-% \end{figure}
+\begin{figure}[H]
+    \centering
+	\adjustbox{center}{\includegraphics[width=1.4\textwidth]{component_diagram.png}}
+    \caption{Component diagram.}
+    \label{fig:component-diagram}
+\end{figure}
 
 \begin{itemize}
-    \item \textbf{Component} -- Responsibility.
+	\item \textbf{Coordinator} -- This component exists on all nodes,
+		but the following responsibilities are only run on the leader node:
+		\begin{itemize}
+			\item Providing an OpenAI-API compatible API to the user for use with tools like
+				\href{https://opencode.ai/}{OpenCode}.
+			\item Tracking cluster health, and detecting node failures.
+			\item Notifying nodes of partitioning changes.
+			\item Rebuilding the cluster and saving in-progress requests
+				in the case of node failure, removal, or addition.
+			\item Measuring node connection performance.
+		\end{itemize}
+		On a follower node, it is primarily responsible for managing the inference engine
+		on its device, following the instructions of the leader node.
+
+	\item \textbf{Model Partitioner} --
+		This component determines how to partition the model among the participating devices. It
+		decides at which points to cut the graph, how large each partition is, and which device gets
+		each partition. This component is integral to ensuring that each device is assigned an appropriate
+		partition given the device's computational and networking performance.
+
+	\item \textbf{Inference Engine} --
+		This component is the high-performance inference engine running on each device. It will handle
+		execution of the given model partition for each device. It will call into
+		\href{https://github.com/ggml-org/ggml}{ggml} using the Rust-to-C FFI to control the execution of a
+		device's model partition.
+
+	\item \textbf{Tensor I/O} --
+		This component handles the compressing, sending, receiving, and decompressing of tensors between devices.
+		It will leverage \href{https://grpc.io/}{gRPC} for high-performance communication, with the potential
+		to use a custom solution should \href{https://grpc.io/}{gRPC} fail to meet our requirements in practice.
+
+	\item \textbf{Web UI} --
+		This component handles displaying cluster information and structure to the user, as well as allowing user
+		inputs to configure a new cluster, or modify an existing cluster.
 \end{itemize}
 
 \subsection{Functionality}\label{subsec:functionality}
-\plt{One subsubsection per component from S.1, each listing its functional
-requirements with labels FR.S.<component>.<n>. Each requirement is a single,
-testable ``shall'' statement. Non-functional requirements that cut across
-components go in the last subsubsection as NFR.S.<n>.}
-
-\subsubsection{Component Name}
+\subsubsection{Coordinator}
 \textbf{Functional Requirements}
 \begin{itemize}
-    \item \label{FR.S.1.1}\textbf{FR.S.1.1} The system shall \ldots
-    \item \label{FR.S.1.2}\textbf{FR.S.1.2} The system shall \ldots
+	\item \label{FR.S.1.1}\textbf{FR.S.1.1} The system shall provide the local Inference Engine with the model partition
+		assigned to the local device.
+	\item \label{FR.S.1.2}\textbf{FR.S.1.2} The system shall collect device health/performance
+		information\footnote{e.g. token throughput, end-to-end partition latency, backpressure.}
+		from the local Inference Engine on a 5 second interval.
+		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+	\item \label{FR.S.1.3}\textbf{FR.S.1.3} The system shall collect the network health/performance
+		information\footnote{e.g. RTT, throughput, backpressure.}
+		for established connections from the Tensor I/O component on a 5 second interval.
+		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+	\item \label{FR.S.1.4}\textbf{FR.S.1.4} The system shall continuously scan for all other devices on the same network
+		running Lake.
+	\item \label{FR.S.1.5}\textbf{FR.S.1.5} The system shall provide the upstream and downstream node info to the
+		local Tensor I/O.
+	\item \textbf{When running on a leader node:}
+		\begin{itemize}
+			\item \label{FR.S.1.6}\textbf{FR.S.1.6} The system shall send model partitions to other Coordinators on their
+				respective devices as determined by the Model Partitioner.
+				Partially satisfies hazard H0-2 from the Hazard Analysis.
+			\item \label{FR.S.1.7}\textbf{FR.S.1.7} The system shall monitor cluster performance by gathering performance
+				data from each follower node's Coordinator.
+				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+			\item \label{FR.S.1.8}\textbf{FR.S.1.8} The system shall provide the Model Partitioner with the available nodes,
+				and gathered node performance data, to help inform optimal model cut points.
+			\item \label{FR.S.1.9}\textbf{FR.S.1.9} The system shall provide an HTTP API matching OpenAI's API.
+			\item \label{FR.S.1.10}\textbf{FR.S.1.10} The system shall detect failing follower
+				nodes\footnote{A "failing" device is defined as severely degraded ($<50\%$ of historical)
+				token throughput, whether it be due to network or device resource instability.}.
+				Partially satisfies hazards H2-1, H4-2 and H4-1 from the Hazard Analysis.
+			\item \label{FR.S.1.11}\textbf{FR.S.1.11} The system shall rebuild the cluster on a node failing or leaving.
+				Partially satisfies hazards H2-1, H4-2 and H4-1 from the Hazard Analysis.
+			\item \label{FR.S.1.12}\textbf{FR.S.1.12} The system shall rebuild the cluster on a node joining.
+			\item \label{FR.S.1.13}\textbf{FR.S.1.13} The system shall retry in-progress requests after a cluster rebuild.
+			\item \label{FR.S.1.14}\textbf{FR.S.1.14} The system shall accept multiple concurrent requests through the HTTP API.
+				Related to \hyperref[NFR.S.5]{NFR.S.5}.
+			\item \label{FR.S.1.15}\textbf{FR.S.1.15} The system shall communicate the cluster graph structure to each follower.
+			\item \label{FR.S.1.16}\textbf{FR.S.1.16} The system shall provide the Web UI with cluster information, and
+				accept cluster configuration instructions from the Web UI.
+			\item \label{FR.S.1.17}\textbf{FR.S.1.17} The system shall not begin inference until all selected followers have
+				confirmed participation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+			\item \label{FR.S.1.18}\textbf{FR.S.1.18} The system shall only include selected followers in a new cluster.
+				Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+		\end{itemize}
+	\item \textbf{When running on a follower node:}
+		\begin{itemize}
+			\item \label{FR.S.1.19}\textbf{FR.S.1.19} The system shall accept model partition assignments from the
+				leader node Coordinator.
+			\item \label{FR.S.1.20}\textbf{FR.S.1.20} The system shall, upon receiving an invite to join a cluster,
+				request that the user confirm or decline participation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+			\item \label{FR.S.1.21}\textbf{FR.S.1.21} The system shall not partake in a cluster without user confirmation.
+				Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+			\item \label{FR.S.1.22}\textbf{FR.S.1.22} The system shall not require confirmation to re-join a rebuilding cluster
+				led by the same device, so long as the local device was already participating in the original cluster.
+			\item \label{FR.S.1.23}\textbf{FR.S.1.23} The system shall report collected health/performance data to the
+				leader node Coordinator on a 5 second interval.
+				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+			\item \label{FR.S.1.24}\textbf{FR.S.1.24} The system shall assume the leader node has failed if there has been
+				no health query from the leader node for more than 60 consecutive seconds.
+			\item \label{FR.S.1.25}\textbf{FR.S.1.25} The system shall initiate the shutdown of the local node, if the leader
+				node is assumed to have failed. Partially satisfies hazards H4-2 and H4-1 from the Hazard Analysis.
+				\begin{quote}
+					\textbf{Rationale:} The Leader node is the device the user is physically using to interact with the cluster,
+					so failure of that device will remove the user's ability to use the cluster, whether or not the cluster survives.
+					The architecture of Lake will allow the ability to recover from a leader failure to be implemented at a later date.
+				\end{quote}
+		\end{itemize}
+\end{itemize}
+
+\subsubsection{Model Partitioner}
+\textbf{Functional Requirements}
+\begin{itemize}
+	\item \label{FR.S.2.1}\textbf{FR.S.2.1} The system shall assign all devices a partition smaller than their available
+		GPU-accessible memory, with additional room left for runtime overhead. Related to \hyperref[NFR.S.4]{NFR.S.4}.
+		Satisfies hazard H1-3 from the Hazard Analysis.
+	\item \label{FR.S.2.2}\textbf{FR.S.2.2} The system shall report failure in the case that no valid partition across
+		the cluster exists (e.g. not enough GPU-accessible memory).
+	\item \label{FR.S.2.3}\textbf{FR.S.2.3} The system shall produce partitions that when assembled, are equivalent
+		to the original model. Satisfies \hyperref[NFR.S.6]{NFR.S.6}.
+	\item \label{FR.S.2.4}\textbf{FR.S.2.4} The system shall assign larger partitions to more capable
+		devices\footnote{The "capabilities" of any given devices are defined via a combination of network throughput,
+		GPU TFLOPs/TOPs, GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
+		Related to \hyperref[NFR.S.4]{NFR.S.4}.
+\end{itemize}
+
+\subsubsection{Inference Engine}
+\textbf{Functional Requirements}
+\begin{itemize}
+	\item \label{FR.S.3.1}\textbf{FR.S.3.1} The system shall load the model partition given by the local Coordinator into
+		GPU-accessible memory.
+	\item \label{FR.S.3.2}\textbf{FR.S.3.2} The system shall accept incoming tensors from Tensor I/O, and run them
+		through the loaded partition.
+	\item \label{FR.S.3.3}\textbf{FR.S.3.3} The system shall send output tensors to Tensor I/O.
+	\item \label{FR.S.3.4}\textbf{FR.S.3.4} The system shall measure partition performance
+		metrics\footnote{e.g. token throughput, end-to-end partition latency, backpressure.} and provide them to the local
+		Coordinator on a 5 second interval.
+	\item \label{FR.S.3.5}\textbf{FR.S.3.5} The system shall support processing tensors from multiple different
+		requests concurrently. Related to \hyperref[NFR.S.5]{NFR.S.5}.
+\end{itemize}
+
+\subsubsection{Tensor I/O}
+\textbf{Functional Requirements}
+\begin{itemize}
+	\item \label{FR.S.4.1}\textbf{FR.S.4.1} The system shall establish connections with neighbouring nodes' Tensor I/O components.
+	\item \label{FR.S.4.2}\textbf{FR.S.4.2} The system shall dynamically choose the compression level of
+		outgoing tensors to maximize throughput based on available CPU-time and network throughput.
+	\item \label{FR.S.4.3}\textbf{FR.S.4.3} The system shall accept input tensors from the upstream node, decompress them,
+		and provide them to the Inference Engine.
+	\item \label{FR.S.4.4}\textbf{FR.S.4.4} The system shall accept output tensors from the Inference Engine, compress
+		them, and send them to the downstream node's Tensor I/O.
+	\item \label{FR.S.4.5}\textbf{FR.S.4.5} The system shall measure network performance
+		data\footnote{e.g. RTT, throughput, backpressure.}, for established connections, and provide
+		that data to the local Coordinator on a 5 second interval.
+	\item \label{FR.S.4.6}\textbf{FR.S.4.6} The system shall maintain request association when sending
+		tensors\footnote{This is to allow tensors from different concurrent requests to be differentiated.}.
+		Related to \hyperref[NFR.S.5]{NFR.S.5}.
+\end{itemize}
+
+\subsubsection{Web UI}
+\textbf{Functional Requirements}
+\begin{itemize}
+	\item \label{FR.S.5.1}\textbf{FR.S.5.1} The system shall allow a user to scan for other connected devices
+		running Lake. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
+	\item \label{FR.S.5.2}\textbf{FR.S.5.2} The system shall allow a user to select connected devices to create
+		a cluster. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
+	\item \label{FR.S.5.3}\textbf{FR.S.5.3} The system shall allow a user to select an input
+		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file.
+		Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
+	\item \label{FR.S.5.4}\textbf{FR.S.5.4} The system shall display an error to the user if partitioning the selected
+		input file is infeasible given the selected devices. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
+	\item \label{FR.S.5.5}\textbf{FR.S.5.5} The system shall display the performance metrics of the cluster as a whole,
+		as well as for each individual node and connection. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
+	\item \label{FR.S.5.6}\textbf{FR.S.5.6} The system shall highlight nodes or network connections causing bottlenecks (TODO: glossary bottleneck)
+		in the cluster. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}. Satisfies hazard H4-3 from the Hazard Analysis.
+	\item \label{FR.S.5.7}\textbf{FR.S.5.7} The system shall, upon receiving an invite to join a cluster, display a prompt
+		for the user to either confirm or decline the invitation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
 \end{itemize}
 
 \subsubsection{Non-Functional Requirements}
+\paragraph{Usability}
 \begin{itemize}
-    \item \label{NFR.S.1}\textbf{NFR.S.1} \textbf{Quality attribute:} The system shall \ldots
+    \item \label{NFR.S.1}\textbf{NFR.S.1} \textbf{Understandability:} The user must be able to easily understand
+		cluster information.
+		A new user must be able to describe which devices are participating, the token throughput of the system,
+		and which devices/connections are bottlenecks within 2 minutes of seeing the interface.
+		Partially satisfied by \hyperref[FR.S.5.4]{FR.S.5.4}, \hyperref[FR.S.5.5]{FR.S.5.5}, and \hyperref[FR.S.5.6]{FR.S.5.6}.
+	\item \label{NFR.S.2}\textbf{NFR.S.2} \textbf{Controllability:} The user must be able to easily control
+		cluster configuration. A new user must be able to create a new cluster within 2 minutes of seeing the interface.
+		Partially satisfied by \hyperref[FR.S.5.1]{FR.S.5.1}, \hyperref[FR.S.5.2]{FR.S.5.2},
+		and \hyperref[FR.S.5.3]{FR.S.5.3}.
+	\item \label{NFR.S.3}\textbf{NFR.S.3} \textbf{Installability:} The user must be able to easily install Lake
+		natively on Windows, macOS, and Linux. On Windows and macOS, the installation process should be automated
+		and should require at most 10 clicks after downloading the installer. On Linux, the installation process
+		should only require a single package manager command.
+\end{itemize}
+
+\paragraph{Performance}
+\begin{itemize}
+	\item \label{NFR.S.4}\textbf{NFR.S.4} \textbf{Model Size:} The cluster must be able to run a model with more
+		parameters, higher precision, or larger context window than would be able to run individually on the
+		node with the most memory. Related to \hyperref[FR.S.2.1]{FR.S.2.1}, and
+		\hyperref[FR.S.2.4]{FR.S.2.4}.
+	\item \label{NFR.S.5}\textbf{NFR.S.5} \textbf{Scalability:} The number of concurrent requests with < 20\%
+		individual request performance degradation shall scale linearly with the number of participating devices.
+		Related to \hyperref[FR.S.1.14]{FR.S.1.14}, \hyperref[FR.S.3.5]{FR.S.3.5}, and \hyperref[FR.S.4.6]{FR.S.4.6}.
+	\item \label{NFR.S.6}\textbf{NFR.S.6} \textbf{Intelligence:} The partitioned model must score at least 95\% as well
+		as the same model running on one machine using relevant
+		benchmarks\footnote{Relevant benchmarks are entirely dependent on what types of model are being tested.
+		Example benchmarks: \href{https://github.com/swe-bench/SWE-bench}{SWE-bench},
+		\href{https://epoch.ai/frontiermath}{FrontierMath}}. Satisfied by \hyperref[FR.S.2.3]{FR.S.2.3}.
+\end{itemize}
+
+\paragraph{Look and Feel}
+\begin{itemize}
+	\item \label{NFR.S.7}\textbf{NFR.S.7} \textbf{Consistency:} Colors and fonts must be used consistently
+		across the application.
+\end{itemize}
+
+\paragraph{Fault-Tolerance}
+\begin{itemize}
+	\item \label{NFR.S.8}\textbf{NFR.S.8} The system shall reject invalid or corrupted
+		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} files, and notify the user of the
+		issue.
+	\item \label{NFR.S.9}\textbf{NFR.S.9} The system shall produce correct results in the face of network packet
+		corruption and dropping up to 10\% packet loss. Partially satisfies hazard H3-1 from the Hazard Analysis.
+\end{itemize}
+
+\paragraph{Privacy}
+\begin{itemize}
+	\item \label{NFR.S.10}\textbf{NFR.S.10} The system shall not save any request
+		data\footnote{\textbf{Request data} refers to any data sent to Lake as part of the request, or any data
+		that would give insight into what the data sent in the request might have been.}
+		after the request has completed.
+	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send \textbf{any} data to any device other than those included
+		in the cluster. This includes, but is not limited to all kinds of request data, telemetery, and user data.
+	\item \label{NFR.S.12}\textbf{NFR.S.12} The system shall not include untrusted devices in
+		a cluster. Satisfied by \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18},
+		\hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, and \hyperref[FR.S.5.7]{FR.S.5.7}.
+		Satisfies hazard H5-1 from the Hazard Analysis.
+\end{itemize}
+
+\paragraph{Compatibility}
+\begin{itemize}
+	\item \label{NFR.S.13}\textbf{NFR.S.13} \textbf{Operating System:} The system shall be compatible with Windows, macOS, Linux.
+	\item \label{NFR.S.14}\textbf{NFR.S.14} \textbf{CPU Architecture:} The system shall be compatible with x86\_64 and ARM CPU architectures.
+	\item \label{NFR.S.15}\textbf{NFR.S.15} \textbf{GPU Technology:} The system shall be compatible with NVIDIA, AMD, and Apple GPUs.
 \end{itemize}
 
 \subsection{Interfaces}\label{subsec:interfaces}
-\plt{The interfaces the system exposes or consumes: user interfaces, APIs,
-protocols, file formats, hardware interfaces. For each, say who or what is on
-the other side.}
-
+Lake requires the following interfaces:
 \begin{itemize}
-    \item \textbf{Interface} -- Description.
+    \item \textbf{OpenAI compatible API} -- An HTTP server, following the OpenAI API structure.
+		This will be the API used to interact with the user, via third-party tools of the user's
+		choice that accept the OpenAI API (e.g. \href{https://opencode.ai/}{OpenCode}).
+	\item \textbf{GGUF input model} -- An input file using the
+		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file format. This contains
+		the model Lake will partition and run.
+	\item \textbf{Rust-to-C FFI} -- The Rust-to-C foreign function interface will be used to call
+		\href{https://github.com/ggml-org/ggml}{ggml} from the Inference Engine.
+	\item \textbf{gRPC between nodes} -- A gRPC-based API used to communicate between nodes.
+	\item \textbf{REST API between Coordinator and Web UI} -- A REST API for communication between the
+		leader Coordinator and the Web UI.
 \end{itemize}
 
 \subsection{Normal Operation}\label{subsec:normal-operation}
-\plt{The expected flow of the system when everything goes right, from start-up
-to shut-down. Keep it to the main path; alternatives and failures go in S.5
-and S.6.}
-
 \begin{enumerate}
-    \item Step.
+	\item User opens Lake instances on all participating machines.
+    \item User creates a Lake cluster using the UI on one of the devices, and provides a
+		\href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF} file. This
+		device becomes the leader node.
+	\item Leader node checks connectivity with follower nodes, and collects performance
+		metrics for each node.
+	\item Partitioner devises a partitioning scheme based on the collected metrics.
+	\item Leader node sends the model partitions to their respective devices.
+	\item Neighbouring nodes on the partition graph establish direct P2P connections.
+	\item User initiates inference request by providing a prompt via the OpenAI compatible
+		API.
+	\item Leader node sends the prompt tokens to the inference engine corresponding to the
+		first node of the graph, initiating prefill.
+	\item Prompt tokens propagate through the graph until prefill completes, and the first
+		output token is generated.
+	\item Output tokens are repeatedly fed back into the top of the graph, generating a new token
+		on each iteration until the response is complete.
+	\item As the response generates, the user receives the generated output via the OpenAI compatible
+		API.
+	\item User initiates a shutdown of the Lake cluster.
+	\item Each node unloads its portion of the graph.
+	\item Leader node saves the cluster configuration to disk.
+	\item All nodes sever their connections, and all Lake instances terminate.
 \end{enumerate}
 
 \subsection{Undesired Event Handling}\label{subsec:undesired-event-handling}
-\plt{How the system responds to failures, invalid inputs, and unexpected
-conditions. Each entry should name the event and the required response.
-Cross-reference the Hazard Analysis.}
-
 \begin{itemize}
-    \item \textbf{Event} -- Required response.
+    \item \textbf{Model is too large for the available memory in the cluster} --
+		The Partitioner reports a partitioning failure, and this error is communicated to the
+		user via the Web UI.
+	\item \textbf{Follower node fails during inference} -- Leader node re-tries inference,
+		if it continues to fail, the leader rebuilds the cluster, excluding the problematic device.
+		Associated with hazard H2-1 in the Hazard Analysis.
+	\item \textbf{Tensors are corrupted on transfer between nodes} -- The receiving Tensor I/O
+		requests that the tensor is retransmitted from the source Tensor I/O.
+		Associated with hazard H3-1 in the Hazard Analysis.
+	\item \textbf{Connection between two nodes is lost} -- The nodes in question attempt to
+		re-establish a connection. If this fails, the leader must rebuild the cluster, excluding
+		the failed link. Associated with hazard H4-1 in the Hazard Analysis.
+	\item \textbf{Input \href{https://github.com/ggml-org/ggml/blob/master/docs/gguf.md}{GGUF}
+		file is corrupted or fails to load} --
+		Refuse to begin inference, and inform the user of the corrupted or faulty file.
+	\item \textbf{A request is made with a larger prompt than the cluster has memory for} --
+		If there are existing requests running, wait for them to complete, then try again.
+		If there is still not enough memory, return an error for the request, and instruct the user
+		to shorten their prompt or context window.
+	\item \textbf{A rebuilt cluster is too small to hold the model after a node leaves} --
+		The Partitioner reports a partitioning failure, and this error is communicated to the
+		user via the Web UI.
+	\item \textbf{A user attempts to create a cluster with a node without a GPU} --
+		The Web UI displays an error message outlining the requirement for all nodes to have a GPU.
 \end{itemize}
 
 \subsection{Detailed Usage Scenarios}\label{subsec:detailed-usage-scenarios}
@@ -1067,10 +1344,206 @@ in S.2 should map to at least one criterion here.}
 \end{itemize}
 
 \subsection{Formalizations}\label{subsec:formalizations}
-\plt{Mathematical or formal specification of the parts of the system that
-benefit from precision: state models, invariants, algorithms, data formats.
-Z notation is available through the \texttt{zed-csp} package. If nothing in
-the system warrants formalization, say so and why.}
+
+Two parts of \progname{} are formalized. S.9.2 defines what counts as a
+valid partitioning scheme for the model across the cluster, which every other
+requirement depends on. S.9.3 specifies, as a finite state machine, how the
+system responds when nodes join and leave the cluster. This is the precise
+form of the Dynamic Allocation goal.
+
+\subsubsection{Notation}\label{subsubsec:formal-notation}
+
+For integers $a$ and $b$, $a..b = \{\, n \in \mathbb{N} \mid a \le n \le b
+\,\}$, which is empty when $a > b$.
+
+\begin{table}[H]
+\centering
+\caption{Symbols used in the formalization}
+\label{tab:formal-symbols}
+\begin{tabularx}{\textwidth}{|l|l|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{Symbol} & \textbf{Type (unit)} & \textbf{Meaning} \\
+\hline
+$N$ & $\mathbb{N}$, $N \ge 1$ & Number of partition units in the model
+(embedding, transformer layers and output head), in execution order. \\
+\hline
+$L$ & $L = 1..N$ & The set of partition units. \\
+\hline
+$D$ & finite set & The nodes currently in the cluster: devices the user has
+selected (\hyperref[FR.S.5.2]{FR.S.5.2}) and that have confirmed participation (\hyperref[FR.S.1.21]{FR.S.1.21}). \\
+\hline
+$m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s weights
+and its KV cache for \textit{CONTEXT\_MAX} tokens. \\
+\hline
+$M_d$ & $\mathbb{N}$ (bytes) & GPU-accessible memory free on node $d$ when it
+joins the cluster, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR.S.2.1}. \\
+\hline
+\end{tabularx}
+\end{table}
+
+\noindent The formalization assumes that $M_d$ does not change while $d$ is
+in the cluster, and that $\mathit{join}(d)$ only occurs for $d \notin D$ and
+$\mathit{leave}(d)$ only for $d \in D$.
+
+\subsubsection{Valid Partitioning Schemes}\label{subsubsec:formal-partitions}
+
+\begin{definition}[Partitioning scheme]\label{def:partition}
+A \emph{partitioning scheme} is a finite sequence of partitions
+\begin{equation*}
+  P = \langle (d_1, a_1, b_1), \dots, (d_k, a_k, b_k) \rangle,
+  \qquad k \ge 1,
+\end{equation*}
+where $d_i$ is a node and $a_i, b_i \in \mathbb{N}$. Partition $i$ consists
+of units $a_i..b_i$, runs on node $d_i$, and passes its output to partition
+$i+1$. The nodes of $P$ are $\mathit{dev}(P) = \{d_1, \dots, d_k\}$.
+\end{definition}
+
+\begin{definition}[Valid partitioning scheme]\label{def:valid}
+$P$ is \emph{valid} over cluster $D$, written $P \in \mathcal{V}(D)$, if and
+only if:
+\begin{enumerate}
+  \item[(V1)] $\mathit{dev}(P) \subseteq D$ and $d_i \ne d_j$ for all
+    $1 \le i < j \le k$;
+  \item[(V2)] $a_1 = 1$ and $b_k = N$;
+  \item[(V3)] $a_i \le b_i$ for all $i \in 1..k$;
+  \item[(V4)] $a_{i+1} = b_i + 1$ for all $i \in 1..k-1$;
+  \item[(V5)] $\sum_{\ell = a_i}^{b_i} m_\ell \le M_{d_i}$ for all
+    $i \in 1..k$.
+\end{enumerate}
+\end{definition}
+
+(V1) gives each node at most one partition. (V2)--(V4) make the partitions
+consecutive, non-empty blocks of units in execution order. (V5) says each
+node has room for its partition. The Model Partitioner must return a member
+of $\mathcal{V}(D)$ whenever $\mathcal{V}(D) \ne \emptyset$, and must report
+failure otherwise (\hyperref[FR.S.2.2]{FR.S.2.2}).
+
+\begin{lemma}[Exact cover]\label{lem:cover}
+If $P \in \mathcal{V}(D)$, every unit $\ell \in L$ belongs to exactly one
+partition. That is, the sets $a_i..b_i$ for $i \in 1..k$ are non-empty,
+pairwise disjoint, and their union is $L$.
+\end{lemma}
+\begin{proof}
+Let $b_0 = 0$. By (V2) and (V4), $a_i = b_{i-1} + 1$ for all $i \in 1..k$,
+so partition $i$ consists of units $(b_{i-1}+1)..b_i$. By (V3) these sets are
+non-empty, so $0 = b_0 < b_1 < \dots < b_k = N$. Each $\ell \in L$ therefore
+satisfies $b_{i-1} < \ell \le b_i$ for exactly one $i$, so it belongs to
+exactly one partition.
+\end{proof}
+
+\subsubsection{Allocation State Machine}\label{subsubsec:formal-fsm}
+
+The system's response to nodes joining and leaving the cluster is a finite
+state machine $(Q, \Sigma, \delta, q_0)$ whose transitions are guarded by
+predicates over the cluster $D$ and the active partitioning scheme $P$.
+
+\paragraph{States.}
+$Q = \{\mathsf{U}, \mathsf{A}, \mathsf{I}, \mathsf{G}, \mathsf{R},
+\mathsf{X}\}$ with $q_0 = \mathsf{U}$:
+\begin{itemize}
+  \item $\mathsf{U}$ (Unloaded): no model is loaded.
+  \item $\mathsf{A}$ (Allocating): a target scheme $P'$ is being loaded, and
+    no request is in progress.
+  \item $\mathsf{I}$ (Idle): the model is loaded on scheme $P$.
+  \item $\mathsf{G}$ (Generating): a request is being served on $P$.
+  \item $\mathsf{R}$ (Recovering): a node in $\mathit{dev}(P)$ left during a
+    request. The request is stopped while $P'$ is loaded, then retried
+    (\hyperref[FR.S.1.13]{FR.S.1.13}).
+  \item $\mathsf{X}$ (Insufficient): $\mathcal{V}(D) = \emptyset$, so the
+    cluster cannot hold the model.
+\end{itemize}
+
+\paragraph{Events.}
+$\Sigma = \{\mathit{load}, \mathit{unload}, \mathit{req}, \mathit{fin},
+\mathit{done}\} \cup \{\mathit{join}(d), \mathit{leave}(d)\}$:
+\begin{itemize}
+  \item $\mathit{load}$ and $\mathit{unload}$: the user creates a cluster
+    with a model, or shuts it down.
+  \item $\mathit{req}$ and $\mathit{fin}$: a request is submitted, or
+    finishes.
+  \item $\mathit{done}$: the system finishes loading $P'$.
+  \item $\mathit{join}(d)$: a device the user selected confirms
+    participation and is added to the cluster.
+  \item $\mathit{leave}(d)$: follower $d$ leaves, or is detected as failing
+    (\hyperref[FR.S.1.10]{FR.S.1.10}).
+\end{itemize}
+This finite state machine only models the behaviour of follower nodes. If the leader node is detected as
+failed (\hyperref[FR.S.1.24]{FR.S.1.24}), the followers shut down and the session ends
+(\hyperref[FR.S.1.25]{FR.S.1.25}), which has the same effect as $\mathit{unload}$.
+
+\paragraph{Guards.}
+Let $D'$ be the cluster after the event: $D \cup \{d\}$ for
+$\mathit{join}(d)$, $D \setminus \{d\}$ for $\mathit{leave}(d)$, and $D$
+otherwise. Then
+\begin{equation*}
+  \varphi \;\equiv\; \mathcal{V}(D') \ne \emptyset
+  \qquad\text{and}\qquad
+  \psi \;\equiv\; d \in \mathit{dev}(P).
+\end{equation*}
+Whenever the machine enters $\mathsf{A}$ or $\mathsf{R}$, it selects a new
+target $P' \in \mathcal{V}(D')$.
+
+\paragraph{Transitions.}
+Table~\ref{tab:fsm} defines $\delta$. Combinations it does not list are
+handled as follows:
+\begin{itemize}
+  \item $\mathit{unload}$ moves every state to $\mathsf{U}$ and aborts any
+    request in progress.
+  \item $\mathit{leave}(d)$ with $\neg\psi$ in $\mathsf{I}$ or $\mathsf{G}$
+    removes $d$ from $D$ and leaves the state unchanged.
+  \item $\mathit{req}$ is rejected with an error in $\mathsf{U}$ and
+    $\mathsf{X}$. $\mathit{req}$ in $\mathsf{A}$, $\mathsf{G}$ or
+    $\mathsf{R}$, and $\mathit{join}(d)$ in $\mathsf{G}$ or $\mathsf{R}$, are
+    queued and fire in arrival order once $\mathsf{I}$ is entered. The
+    machine therefore serves one request at a time, and concurrent requests
+    (\hyperref[FR.S.1.14]{FR.S.1.14}) are not modelled.
+  \item Any other combination leaves the state unchanged.
+\end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Transition function $\delta$ of the allocation state machine}
+\label{tab:fsm}
+\small
+\begin{tabularx}{\textwidth}{|c|c|l|c|>{\raggedright\arraybackslash}X|}
+\hline
+\textbf{\#} & \textbf{State} & \textbf{Event [guard]} & \textbf{Next} &
+\textbf{Effect} \\
+\hline
+1 & $\mathsf{U}$ & $\mathit{load}$ $[\varphi]$ & $\mathsf{A}$ & Start loading $P'$. \\
+2 & $\mathsf{U}$ & $\mathit{load}$ $[\neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
+\hline
+3 & $\mathsf{A}$ & $\mathit{done}$ & $\mathsf{I}$ & $P := P'$. \\
+4 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\varphi]$ & $\mathsf{A}$ & Reselect $P'$ and restart loading. \\
+5 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
+\hline
+6 & $\mathsf{I}$ & $\mathit{req}$ & $\mathsf{G}$ & Start generating. \\
+7 & $\mathsf{I}$ & $\mathit{join}(d)$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
+8 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
+9 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
+\hline
+10 & $\mathsf{G}$ & $\mathit{fin}$ & $\mathsf{I}$ & Return the response. \\
+11 & $\mathsf{G}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{R}$ & Stop the request. \\
+12 & $\mathsf{G}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Abort the request with an error. \\
+\hline
+13 & $\mathsf{R}$ & $\mathit{done}$ & $\mathsf{G}$ & $P := P'$, retry the request. \\
+14 & $\mathsf{R}$ & $\mathit{leave}(d)$ $[\varphi]$ & $\mathsf{R}$ & Reselect $P'$ and restart loading. \\
+15 & $\mathsf{R}$ & $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Abort the request with an error. \\
+\hline
+16 & $\mathsf{X}$ & $\mathit{join}(d)$ $[\varphi]$ & $\mathsf{A}$ & Start loading $P'$. \\
+\hline
+\end{tabularx}
+\end{table}
+Row 7 needs no guard. Conditions (V1)--(V5) refer to $D$ only through
+$\mathit{dev}(P) \subseteq D$, so a scheme valid over $D$ stays valid over
+$D \cup \{d\}$. For the same reason, removing a node outside
+$\mathit{dev}(P)$ keeps $P$ valid.
+
+\paragraph{Invariant.} In states $\mathsf{I}$ and $\mathsf{G}$,
+$P \in \mathcal{V}(D)$. $P$ is only assigned in rows 3 and 13, from a $P'$
+that is reselected after every change to the cluster. The only change that
+keeps the machine in $\mathsf{I}$ or $\mathsf{G}$ removes a node outside
+$\mathit{dev}(P)$.
 
 \subsection{Likely Changes to Requirements}\label{subsec:likely-changes-to-requirements}
 \begin{itemize}
