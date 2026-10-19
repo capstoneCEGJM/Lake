@@ -1210,20 +1210,17 @@ Template).
 		data\footnote{\textbf{Request data} refers to any data sent to Lake as part of the request, or any data
 		that would give insight into what the data sent in the request might have been.}
 		after the request has completed.
-	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send any data to
-		any destination outside the cluster, with two exceptions: the response
-		returned to the client that made the request, and the discovery and
-		invitation messages sent to devices on the same local network
-		(\req{FR.S.1.4}, \req{FR.S.5.1}, \req{FR.S.1.20}). The prohibition
-		covers request data, usage statistics, crash and diagnostic reports,
-		update checks, and any other telemetry. Health and performance reports
-		between nodes of the cluster (\req{FR.S.1.23}) stay inside the cluster
-		and are allowed. \emph{Rationale:} the developer interviewed in
-		Section~\ref{subsubsec:g7-sources} runs models locally because his
-		firm's data is export-controlled, and asked that anything like Lake run
-		fully offline with no telemetry and no automatic updates
-		(Appendix~\ref{app:interview}). This requirement realises
-		\req{NFR.G.4.1}.
+	\item \label{NFR.S.11}\textbf{NFR.S.11} The system shall not send any data
+		outside the cluster, except the response to the client that made the
+		request and discovery and invitation messages to devices on the local
+		network (\req{FR.S.1.4}, \req{FR.S.5.1}, \req{FR.S.1.20}). This
+		includes request data, usage statistics, crash and diagnostic reports,
+		update checks and any other telemetry. Health and performance reports
+		between nodes (\req{FR.S.1.23}) stay in the cluster and are allowed.
+		\emph{Rationale:} the developer we interviewed
+		(Section~\ref{subsubsec:g7-sources}, Appendix~\ref{app:interview})
+		works with export-controlled data and needs Lake to run offline with no
+		telemetry or automatic updates. Realizes \req{NFR.G.4.1}.
 	\item \label{NFR.S.12}\textbf{NFR.S.12} The system shall not include untrusted devices in
 		a cluster. Satisfied by \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18},
 		\hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, and \hyperref[FR.S.5.7]{FR.S.5.7}.
@@ -1979,7 +1976,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.8}{Reject bad model files}{M}{Prevents crashes and misleading output from a corrupted file.}
 \priorityrow{NFR.S.9}{Packet loss}{S}{The transport protocol already handles most loss and corruption.}
 \priorityrow{NFR.S.10}{No stored request data}{M}{Privacy is a primary reason to use Lake.}
-\priorityrow{NFR.S.11}{No data leaves the cluster, no telemetry}{M}{Same as NFR.S.10. The interviewed developer (Section~\ref{subsubsec:g7-sources}) made no telemetry a condition of deploying Lake at all.}
+\priorityrow{NFR.S.11}{No data leaves the cluster, no telemetry}{M}{Same as NFR.S.10. The interviewed developer (Section~\ref{subsubsec:g7-sources}) would not use Lake with telemetry.}
 \priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
 \priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimization goal.}
 \priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
