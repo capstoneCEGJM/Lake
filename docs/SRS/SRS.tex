@@ -477,8 +477,8 @@ unused until everything is restarted. Lake builds on the same idea but makes the
 assignment something the system can change while it is running.
 Table~\ref{tab:alternatives} summarises how Lake compares. Mixed operating
 systems are marked ``partly'' for the existing tools because exo runs on
-Apple silicon through Apple's MLX framework and only on the \gl[cpu]{CPU} on
-Linux, with no Windows build \citep{Exo}, and prima.cpp supports Linux and macOS
+Apple silicon through MLX and only on the \gl[cpu]{CPU} on Linux, with no
+Windows build \citep{Exo}, and prima.cpp supports Linux and macOS
 \citep{PrimaCpp2025}; only the llama.cpp RPC backend runs on all three.
 
 \begin{table}[H]
@@ -527,10 +527,9 @@ Section~\ref{subsec:functionality}.
 A user can run a model that does not fit on any one of their devices. The
 measure is the largest model, by parameter count, precision, and
 \gl[contextwindow]{context window}, that a \gl{cluster} can serve compared with
-the largest the single best
-device in that cluster can serve alone. This is the primary benefit, and the
-Model Size requirement in Section~\ref{subsec:functionality} states the
-target.
+the largest the single best device in that cluster can serve alone. This is
+the primary benefit, and the Model Size requirement in
+Section~\ref{subsec:functionality} states the target.
 
 \subsubsection*{Privacy}
 Prompts, responses, and the model's intermediate data stay on the devices in
@@ -705,10 +704,9 @@ privacy-bound organisation and the user who already has a model they like.
 
 \subsubsection{RACI Matrix}\label{subsubsec:g4-raci}
 
-Table~\ref{tab:raci} is a \gl[raci]{RACI} matrix: it shows who is responsible,
-accountable, consulted, and informed for each high-level requirement, using
-the stakeholders from
-Section~\ref{subsec:stakeholders-and-requirements-sources}.
+Table~\ref{tab:raci} shows who is responsible, accountable, consulted, and
+informed (\gl[raci]{RACI}) for each high-level requirement, using the
+stakeholders from Section~\ref{subsec:stakeholders-and-requirements-sources}.
 
 \begin{table}[H]
 \centering
@@ -891,7 +889,7 @@ the System chapter record which of these may change.
     AMD, or Apple, because inference on a CPU alone is too slow to be useful
     in a cluster. Smartphones are a stretch goal.
     \item \emph{Wired connections first.} The first revision targets wired
-    Ethernet. Wireless operation is a stretch goal because its latency and
+    Ethernet. Wireless operation is a stretch goal because its \gl{latency} and
     variability may make the split model too slow.
     \item \emph{Not faster for models that already fit.} Lake does not speed
     up a model that already runs well on one device. The benefit is running
@@ -1098,7 +1096,7 @@ guarantee, and for retries that never repeat side effects.
 \paragraph{Researcher}
 
 \noindent\emph{Dr. Mei Lin, 35, postdoctoral researcher leading a four-person
-natural language processing (NLP) group} \\
+NLP group} \\
 ``We have six workstations and no cloud budget. I need numbers I can put in a
 paper.''
 
@@ -1256,7 +1254,7 @@ Template).
 
 	\item \textbf{\gl[tensorio]{Tensor I/O}} --
 		This component handles the compressing, sending, receiving, and decompressing of \gl[tensor]{tensors} between devices.
-		It will leverage gRPC \citep{GRPC} for high-performance communication, with the potential
+		It will leverage \gl[grpc]{gRPC} \citep{GRPC} for high-performance communication, with the potential
 		to use a custom solution should gRPC fail to meet our requirements in practice.
 
 	\item \textbf{\gl[webui]{Web UI}} --
@@ -1348,7 +1346,7 @@ Template).
 		to the original model. Satisfies \hyperref[NFR.S.6]{NFR.S.6}.
 	\item \reqlabel{FR.S.2.4}\textbf{FR.S.2.4} The system shall assign larger partitions to more capable
 		devices\footnote{The "capabilities" of any given devices are defined via a combination of network throughput,
-		GPU \gl[flops]{TFLOPs} or TOPs (tera operations per second), GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
+		GPU \gl[flops]{TFLOPs}/TOPs, GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
 		Related to \hyperref[NFR.S.4]{NFR.S.4}.
 \end{itemize}
 
@@ -1393,7 +1391,7 @@ Template).
 	\item \reqlabel{FR.S.5.2}\textbf{FR.S.5.2} The system shall allow a user to select connected devices to create
 		a cluster. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 	\item \reqlabel{FR.S.5.3}\textbf{FR.S.5.3} The system shall allow a user to select an input
-		GGUF file \citep{GGUF}.
+		\gl[gguf]{GGUF} file \citep{GGUF}.
 		Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 	\item \reqlabel{FR.S.5.4}\textbf{FR.S.5.4} The system shall display an error to the user if partitioning the selected
 		input file is infeasible given the selected devices. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
@@ -1464,7 +1462,7 @@ Template).
 		outside the cluster, except responses to the client and discovery and
 		invitation messages to devices on the local network. This includes request
 		data, usage statistics, crash and diagnostic reports, update checks and
-		any other telemetry. Health and performance reports between nodes are
+		any other \gl{telemetry}. Health and performance reports between nodes are
 		allowed. \textbf{Rationale:} The developer we interviewed works with
 		export-controlled data and needs Lake to run offline with no telemetry or
 		automatic updates. Related to \req{NFR.G.4.1}, \req{FR.S.1.4},
@@ -1714,7 +1712,7 @@ stakeholder who may not be the person running the cluster.
 \begin{itemize}
     \item A cluster exists (\hyperref[UC1]{UC1}).
     \item The operator has a model file in a supported format
-    (\gl[gguf]{GGUF}).
+    (GGUF).
     \item The cluster has enough combined memory for the model.
 \end{itemize}
 
@@ -2072,7 +2070,7 @@ main advantages of splitting a model by layers, and it is where Lake's
 throughput gain is clear.
 
 \subsection{Prioritization}\label{subsec:prioritization}
-\noindent Priorities follow MoSCoW: \textbf{M} must have, \textbf{S} should
+\noindent Priorities follow \gl[moscow]{MoSCoW}: \textbf{M} must have, \textbf{S} should
 have, \textbf{C} could have, \textbf{W} won't have (this release). They are
 assigned with the following rules:
 \begin{itemize}
@@ -2417,7 +2415,7 @@ group.
     traffic from every node is captured during requests, while idle and
     during any update check.\\
     \textit{Acceptance:} no request data remains on disk after its request
-    completes. Logs contain no prompts, responses, tensor data or KV cache
+    completes. Logs contain no prompts, responses, tensor data or \gl[kvcache]{KV cache}
     content. Every captured packet goes to a cluster node, a local device
     being discovered or invited, or the client that sent the request.
 
@@ -2510,7 +2508,7 @@ $D$ & finite set & The nodes currently in the cluster: devices the user has
 selected (\hyperref[FR.S.5.2]{FR.S.5.2}) and that have confirmed participation (\hyperref[FR.S.1.21]{FR.S.1.21}). \\
 \hline
 $m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s \gl{weights}
-and its \gl[kvcache]{KV cache} for \textit{CONTEXT\_MAX} tokens. \\
+and its KV cache for \textit{CONTEXT\_MAX} tokens. \\
 \hline
 $M_d$ & $\mathbb{N}$ (bytes) & GPU-accessible memory free on node $d$ when it
 joins the cluster, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR.S.2.1}. \\
@@ -2727,9 +2725,9 @@ $\mathit{dev}(P)$.
     \item \textbf{Architecture lead (Ethan Walsh)} -- Leads the architecture design of the system.
     \item \textbf{Coordinator lead (Gary Qin)} -- Leads the \gl{coordinator} and inter-process communication (\gl[ipc]{IPC}) design of the system.
     \item \textbf{Performance lead (Matthew Nesbitt)} -- Leads the performance benchmarking and optimization of the system.
-    \item \textbf{Machine learning leads (Jinwoo Hong, Colin Chambachan)} -- Lead the machine learning systems of Lake.
+    \item \textbf{Machine learning leads (Jinwoo Hong, Colin Chambachan)} -- Lead the ML systems of Lake.
     \item \textbf{Meeting chair (Rotating weekly amongst team members)} -- Leads weekly team meetings.
-    \item \textbf{Quality assurance lead (Rotating weekly amongst team members)} -- Performs quality assurance and dogfooding of the system.
+    \item \textbf{QA lead (Rotating weekly amongst team members)} -- Performs quality assurance and dogfooding of the system.
     \item \textbf{Teaching assistant (Rebecca Di Filippo)} -- Provides technical guidance and feedback throughout the project.
 \end{itemize}
 
