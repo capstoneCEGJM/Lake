@@ -160,7 +160,6 @@ Added Appendix (User Interview) & Records the questions put to a potential user 
 % TODO: Make alphabetical order
 \begin{itemize}
     \item \textbf{Activation} -- An intermediate value that is computed during the text generation of an LLM.
-    \item \textbf{Activation} -- An intermediate value that is computed during the text generation of an LLM.
     \item \textbf{Device pool} -- A collection of nodes that comprise the Lake network.
     \item \textbf{FFI (Foreign Function Interface)} -- An interface that allows code written in different languages to call one another.
     \item \textbf{FLOPs (Floating Point Operations per second)} -- The number of floating point arithmetic operations performed per second. Used to as a unit of computational work.
@@ -879,7 +878,7 @@ Template).
     \item \textbf{Network communication} -- Network communication, whether wired or wireless, should have a sufficiently high bandwitch and low latency. Inter-node communication overhead may make distributed inference slower than single-device inference.
     \item \textbf{Platform compatibility} -- Nodes within the Lake network must operate on Windows, macOS, and Linux, (as well as Android and iOS as stretch goals) as hardware acceleration and inference platforms are limited by the available drivers on this operating systems.
     \item \textbf{API compatibility} -- Lake must implement a standardized OpenAI API spec such that existing external clients can easily utilize Lake, \citep{OpenAIAPI}, as specified in Section S.3.
-    \item \textbf{Model architecture} -- Only supported LLM architectures that Lake's model layer partioning supports can be used.
+    \item \textbf{Model architecture} -- Only supported LLM architectures that Lake's model layer partitioning supports can be used.
 \end{itemize}
 
 \subsection{Assumptions}\label{subsec:assumptions}
@@ -906,7 +905,7 @@ Template).
 \subsection{Invariants}\label{subsec:invariants}
 
 \begin{itemize}
-    \item The provided model must remain unchanged. Loading the model and partioning its layers must not mutate the underlying model weights.
+    \item The provided model must remain unchanged. Loading the model and partitioning its layers must not mutate the underlying model weights.
     \item Inference must be contained within the Lake network, and must not be sent to 3rd-party services.
     \item All nodes within the Lake network must be using compatible layer partitions that originate from the same model's layers.
     \item All nodes must serve inference in a way that the activations are performed in the identical order of how single-device inference is performed.
@@ -940,7 +939,7 @@ Template).
     \hline
     \label{NFR.E.1}NFR.E.1 & The system shall be installable and usable on the supported platforms of Windows, macOS, and Linux, and Android/iOS as a stretch goal. Related to NFR.S.3 and NFR.S.13. \\
     \hline
-    \label{NFR.E.2}NFR.E.2 & The system shall perform model layer partioning to distribute model inference across various supported devices. Related to SR-1 AND SR1-2.\\
+    \label{NFR.E.2}NFR.E.2 & The system shall perform model layer partitioning to distribute model inference across various supported devices. Related to SR-1 AND SR1-2.\\
     \hline
     \label{NFR.E.3}NFR.E.3 & The system shall follow the OpenAI API specification for its request and response API service. Related to FR.S.1.9. \\
     \hline
@@ -952,7 +951,7 @@ Template).
     \hline
     \label{NFR.E.7}NFR.E.7 & The system shall follow the GNU GPL v3.0 license in applicable use cases and distributions. \\
     \hline
-    \label{NFR.E.8}NFR.E.8 & The system shall adhere to a pretrained model's licesnsing requirements for use and distribution within Lake. \\
+    \label{NFR.E.8}NFR.E.8 & The system shall adhere to a pretrained model's licensing requirements for use and distribution within Lake. \\
     \hline
     \end{tabular}
 \end{table}
@@ -1717,7 +1716,7 @@ document will be kept in sync with the Hazard Analysis, V\&V Plan and design.}
     \item \label{SR3-1}\textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests.
     \item \label{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the coordinator so the inference request can recover, subject to SR5-2.
     \item \label{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy.
-    \item \label{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria is not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown Related SRS requirements: FR.S.1.24 and FR.S.1.25.
+    \item \label{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria is not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown. Related SRS requirements: FR.S.1.24 and FR.S.1.25.
     \item \label{SR4-3}\textbf{SR4-3} -- The system shall utilize configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance.
     \item \label{SR5-1}\textbf{SR5-1} -- The system shall require the user approval on the leader node to authorize a follower node, and user confirmation on the follower node to confirm the authorization before it can participate in the Lake network. Related SRS requirements: FR.S.1.17, FR.S.1.18, FR.S.1.20, FR.S.1.21, NFR.S.12.
     \item \label{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, and KV cache content in diagnostic logs. Related SRS requirements: NFR.S.10.
