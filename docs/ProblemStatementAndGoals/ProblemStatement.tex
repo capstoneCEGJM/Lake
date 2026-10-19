@@ -138,8 +138,10 @@ The system serves requests from several users at the same time instead of one
 after another. This is a main advantage of splitting a model, since each
 device can work on a different request. Each request keeps its own state so
 outputs do not interfere. Success will be measured by how many requests can
-run at once before any slows by more than 20\% from its throughput when run
-alone, and how that number grows with the number of devices. The goal is met
+run at once before any slows by more than \textit{MAX\_DEGRADATION} (a
+tolerance defined in the symbolic constants appendix of the SRS) from its
+throughput when run alone, and how that number grows with the number of
+devices. The goal is met
 when at least two requests run at once within this tolerance and the number
 grows linearly with devices.
 
