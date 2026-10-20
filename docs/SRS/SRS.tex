@@ -8,9 +8,6 @@
 % Their project content has been removed; only the structure, numbering
 % mechanics and table layouts are kept. Deviations from Meyer's original
 % template are listed in "Changes from Original SRS Meyer Template".
-%
-% Template guidance is written with \plt{...} (cyan). Delete each note once
-% the section it describes has been written.
 
 \documentclass[12pt]{article}
 
@@ -59,8 +56,8 @@
 
 % Glossary entries and links. \glsentry{key}{Term} starts an entry and puts
 % an anchor at it; \gl[key]{text} links text back to that entry, in the
-% document's link colour. The key defaults to the text, so \gl{cluster} links
-% to gls:cluster. Keys are lowercase with no spaces.
+% document's link colour. The key defaults to the text, so \gl{node} links
+% to gls:node. Keys are lowercase with no spaces.
 \newcommand{\glsentry}[2]{\item \phantomsection\label{gls:#1}\textbf{#2} --}
 \newcommand{\gl}[2][]{%
   \if\relax\detokenize{#1}\relax
@@ -199,11 +196,8 @@ text link back here.
     tensors faster than it can process them, so the upstream node should slow
     down (\req{FR.S.1.2}).
     \glsentry{bottleneck}{Bottleneck} The node or network connection that
-    takes the longest per token and limits the throughput of the whole cluster
+    takes the longest per token and limits the throughput of the whole Lake network
     (\hyperref[UC7]{UC7}, \req{FR.S.5.6}).
-    \glsentry{cluster}{Cluster} The nodes on one local network that have
-    joined to serve one model. Also called the device pool or the Lake network
-    (\req{FR.G.4.1}).
     \glsentry{contextwindow}{Context window} The maximum number of tokens,
     prompt and response together, that a model can handle in one request
     (\req{NFR.S.4}).
@@ -211,24 +205,22 @@ text link back here.
     automatically on every push to the repository
     (Section~\ref{subsec:required-tech}).
     \glsentry{coordinator}{Coordinator} The Lake component that forms and
-    monitors the cluster, serves the API on the leader node, and manages the
+    monitors the Lake network, serves the API on the leader node, and manages the
     Inference Engine on each node (Section~\ref{subsec:components}).
     \glsentry{cpu}{CPU (central processing unit)} A device's general-purpose
     processor (\req{FR.S.4.2}).
     \glsentry{deviceowner}{Device owner} The person whose computer joins a
-    cluster. They must consent before their device takes part
+    Lake network. They must consent before their device takes part
     (Section~\ref{subsec:environment-components}).
-    \glsentry{devicepool}{Device pool} The collection of nodes that make up a
-    cluster (Section~\ref{subsec:environment-components}).
     \glsentry{dynamicallocation}{Dynamic allocation} Moving model layers
-    between nodes while the cluster is running, when a node joins, leaves, or
+    between nodes while the Lake network is running, when a node joins, leaves, or
     fails (\req{FR.G.4.4}, Section~\ref{subsubsec:formal-fsm}).
     \glsentry{ffi}{FFI (foreign function interface)} An interface that lets code
     in one language call code in another (Section~\ref{subsec:interfaces}).
     \glsentry{flops}{FLOP/s (floating-point operations per second)} The number
     of floating-point operations a processor performs per second, used to
     measure compute performance (\req{FR.S.2.4}).
-    \glsentry{follower}{Follower node} Any node in a cluster other than the
+    \glsentry{follower}{Follower node} Any node in a Lake network other than the
     leader node (Section~\ref{subsec:components}).
     \glsentry{gguf}{GGUF} The file format used by llama.cpp and ggml to store a
     model's weights, tokeniser, and metadata. Lake only accepts GGUF models
@@ -252,7 +244,7 @@ text link back here.
     node that loads the node's partition and runs it to generate output. It is
     built on ggml (Section~\ref{subsec:components}).
     \glsentry{inferenceuser}{Inference user} A person, or a tool acting for
-    one, who sends prompts to a cluster and gets responses back
+    one, who sends prompts to a Lake network and gets responses back
     (Section~\ref{subsec:environment-components}).
     \glsentry{ipc}{IPC (inter-process communication)} Passing data between
     processes on the same machine (Section~\ref{subsec:tasks}).
@@ -262,17 +254,21 @@ text link back here.
     \glsentry{lake}{Lake} The system this document specifies. It runs one LLM
     across several devices on a local network using model layer partitioning
     (Section~\ref{subsec:context-and-overall-objective}).
-    \glsentry{lakeclient}{Lake client} Lake running on one device. Every node
-    runs one. The leader node's client also serves the web UI and the API
-    (Section~\ref{subsec:normal-operation}).
+    \glsentry{lakeclient}{Lake Client} The Lake application installed on each
+    device, and the component people use. Every node runs one. The operator
+    forms a Lake network, loads a model, and views performance from the Lake
+    Client on the leader node, and a device owner confirms joining from the
+    Lake Client on their own device (Section~\ref{subsec:components}).
+    \glsentry{lakenetwork}{Lake network} The nodes on one local network that
+    have joined to serve one model (\req{FR.G.4.1}).
     \glsentry{latency}{Latency} The time between the start of an inference
     request and a defined event, such as the first token or the end of the
     response.
     \glsentry{layer}{Layer} One of the stacked stages of a transformer model.
     Lake splits a model between nodes at layer boundaries
     (Section~\ref{subsec:context-and-overall-objective}).
-    \glsentry{leader}{Leader node} The node whose operator formed the cluster.
-    It runs the Model Partitioner, serves the API and the web UI, and monitors
+    \glsentry{leader}{Leader node} The node whose operator formed the Lake network.
+    It runs the Model Partitioner, serves the API, and monitors
     the followers (Section~\ref{subsec:components}).
     \glsentry{llm}{LLM (large language model)} An AI model trained on a large
     body of text and used to generate text.
@@ -288,16 +284,16 @@ text link back here.
     (Section~\ref{subsec:prioritization}).
     \glsentry{nist}{NIST (National Institute of Standards and Technology)} The
     United States standards agency (Section~\ref{subsubsec:g7-sources}).
-    \glsentry{node}{Node} A device running the Lake client that has joined a
-    cluster.
+    \glsentry{node}{Node} A device running the Lake Client that has joined a
+    Lake network.
     \glsentry{ocr}{OCR (optical character recognition)} Converting images of
     text into machine-readable text (Section~\ref{subsec:expected-benefits}).
     \glsentry{openaiapi}{OpenAI-compatible API} An HTTP API with the same
     request and response formats as the OpenAI API, so clients written for
     OpenAI work with Lake unchanged (\req{FR.G.4.6},
     Section~\ref{subsec:interfaces}).
-    \glsentry{operator}{Operator} The person who forms a cluster, loads a
-    model, and monitors performance from the web UI. Also called the Lake
+    \glsentry{operator}{Operator} The person who forms a Lake network, loads a
+    model, and monitors performance from the Lake Client. Also called the Lake
     operator (Section~\ref{subsec:environment-components}).
     \glsentry{p2p}{P2P (peer-to-peer)} A direct connection between two nodes
     that does not go through the leader. Neighbouring nodes send tensors this
@@ -335,7 +331,7 @@ text link back here.
     another node and for the reply to come back (\req{FR.S.1.3}).
     \glsentry{session}{Session} A period of interaction with Lake in which one
     or more inference requests are served. For the operator, it runs from
-    forming a cluster to shutting it down (\hyperref[UC1]{UC1}). For an
+    forming a Lake network to shutting it down (\hyperref[UC1]{UC1}). For an
     inference user, it is one conversation whose context is kept between
     prompts (\hyperref[UC3]{UC3}).
     \glsentry{srs}{SRS (Software Requirements Specification)} This
@@ -365,14 +361,11 @@ text link back here.
     current LLMs, built from a stack of layers
     (Section~\ref{subsec:limitations-and-exclusions}).
     \glsentry{ui}{UI (user interface)} The part of a program a person
-    interacts with. Lake's UI is the web UI.
+    interacts with. Lake's UI is the Lake Client.
     \glsentry{vv}{V\&V (verification and validation)} Verification checks
     that the system meets its requirements. Validation checks that it is the
     right system for its stakeholders
     (Section~\ref{subsec:verification-and-acceptance-criteria}).
-    \glsentry{webui}{Web UI} The Lake component, served by the leader node and
-    opened in a browser, where the operator forms a cluster, loads a model, and
-    views performance (Section~\ref{subsec:components}).
     \glsentry{weights}{Weights} The learned parameters of a model that
     determine its behaviour. Lake never modifies them (\req{NFR.E.4}).
     \glsentry{x86}{x86\_64} The 64-bit instruction set of Intel and AMD
@@ -488,33 +481,33 @@ Section~\ref{subsec:functionality}.
 \subsubsection*{Larger models on existing hardware}
 A user can run a model that does not fit on any one of their devices. The
 measure is the largest model, by parameter count, precision, and
-\gl[contextwindow]{context window}, that a \gl{cluster} can serve compared with
-the largest the single best device in that cluster can serve alone. This is
+\gl[contextwindow]{context window}, that a \gl[lakenetwork]{Lake network} can serve compared with
+the largest the single best device in that Lake network can serve alone. This is
 the primary benefit, and the Model Size requirement in
 Section~\ref{subsec:functionality} states the target.
 
 \subsubsection*{Privacy}
 Prompts, responses, and the model's intermediate data stay on the devices in
-the cluster and never go to an external provider. The measure is that no
-request data leaves the cluster during a session. What privacy does and does
+the Lake network and never go to an external provider. The measure is that no
+request data leaves the Lake network during a session. What privacy does and does
 not cover in the first release is stated in
 Section~\ref{subsec:limitations-and-exclusions}.
 
 \subsubsection*{Lower cost}
 There are no per-token or subscription fees, and no new hardware is needed
-beyond what the user already owns. The measure is that a cluster can be formed
+beyond what the user already owns. The measure is that a Lake network can be formed
 entirely from machines the user had before installing Lake.
 
 \subsubsection*{Resilience to devices coming and going}
 When a device leaves or joins, Lake reassigns layers and keeps serving
-requests as long as the remaining cluster has enough memory. The measures are
+requests as long as the remaining Lake network has enough memory. The measures are
 whether requests are served after a reassignment and how long the
 reassignment takes, which Section~\ref{subsec:formalizations} defines
 precisely.
 
-\subsubsection*{Mixed platforms in one cluster}
+\subsubsection*{Mixed platforms in one Lake network}
 Windows, macOS, and Linux machines can be combined, so a user is not limited
-to devices of one type. The measure is a working cluster that mixes all three.
+to devices of one type. The measure is a working Lake network that mixes all three.
 
 \subsubsection*{Works with the tools people already use}
 Lake exposes the same API format as the major hosted providers, so existing
@@ -524,9 +517,9 @@ third-party client completing a session against Lake.
 
 \subsubsection*{Several users at once}
 While one request's \gl{token} is being computed on one \gl{node}, another
-request's token can be computed on the next, so a cluster can serve several
+request's token can be computed on the next, so a Lake network can serve several
 users without each one waiting for the others. The measure is the number of
-requests the cluster can serve at once before any single request slows by
+requests the Lake network can serve at once before any single request slows by
 more than the tolerance set in the Scalability requirement in
 Section~\ref{subsec:functionality}, and how that number grows with the
 number of nodes.
@@ -548,7 +541,7 @@ This section is a capsule version of the System chapter. Each high-level
 requirement here maps to one or more of the components in
 Section~\ref{subsec:components} (the \gl[coordinator]{Coordinator}, the
 \gl[partitioner]{Model Partitioner}, the \gl[inferenceengine]{Inference Engine},
-\gl[tensorio]{Tensor I/O}, and the \gl[webui]{Web UI}) and to detailed
+\gl[tensorio]{Tensor I/O}, and the \gl[lakeclient]{Lake Client}) and to detailed
 requirements in Section~\ref{subsec:functionality}.
 
 \subsubsection{Functional Requirements}\label{subsubsec:g4-functional}
@@ -559,8 +552,8 @@ Section~\ref{subsec:functionality} and the Environmental Requirements table
 that realise it, so a change in either place can be traced to the other.
 
 \begin{itemize}
-    \item \reqlabel{FR.G.4.1}\textbf{FR.G.4.1 Form a cluster with consent.}
-    Lake runs on each device. From the web user interface (\gl[ui]{UI}) on one
+    \item \reqlabel{FR.G.4.1}\textbf{FR.G.4.1 Form a Lake network with consent.}
+    Lake runs on each device. From the \gl[lakeclient]{Lake Client} on one
     device, which becomes the \gl[leader]{leader node}, the \gl{operator} sees
     the other devices on the
     local network that are running Lake and chooses which to include. Each
@@ -578,7 +571,7 @@ that realise it, so a change in either place can be traced to the other.
     \req{FR.S.1.19}, \req{FR.S.1.1}, \req{FR.S.3.1}, \req{NFR.S.4}, and
     \req{NFR.E.2}.
     \item \reqlabel{FR.G.4.3}\textbf{FR.G.4.3 Run inference across the
-    cluster.} A prompt enters at the first node, the
+    Lake network.} A prompt enters at the first node, the
     \gl[activation]{activations} pass from node to node in layer order, and
     generated tokens \gl[streaming]{stream} back to the user one at a time. Each
     node keeps the \gl[kvcache]{key-value (KV) cache} for its own
@@ -588,18 +581,18 @@ that realise it, so a change in either place can be traced to the other.
     \req{FR.S.1.15}, \req{FR.S.4.1}, \req{FR.S.4.3}, \req{FR.S.3.2},
     \req{FR.S.3.3}, \req{FR.S.4.4}, and, for concurrent requests,
     \req{FR.S.1.14}, \req{FR.S.3.5}, \req{FR.S.4.6}, and \req{NFR.S.5}.
-    \item \reqlabel{FR.G.4.4}\textbf{FR.G.4.4 Reallocate when the cluster
+    \item \reqlabel{FR.G.4.4}\textbf{FR.G.4.4 Reallocate when the Lake network
     changes.} When a node leaves, fails, or joins, the leader re-partitions
     the model across the nodes that remain and resumes serving, retrying any
-    request that was in progress. If the cluster no longer has enough memory
+    request that was in progress. If the Lake network no longer has enough memory
     for the model, the user is told why rather than left with a hung session.
     \emph{Realised by} \req{FR.S.1.10} to \req{FR.S.1.13}, \req{FR.S.1.22},
     \req{FR.S.2.2}, and \req{FR.S.5.4}.
     \item \reqlabel{FR.G.4.5}\textbf{FR.G.4.5 Measure performance.} Lake
     records compute time on each node and transfer time between nodes. These
-    measurements drive the partitioner and are shown in the web UI, which
+    measurements drive the Model Partitioner and are shown in the Lake Client, which
     highlights the node or link that is the \gl{bottleneck} and compares the
-    cluster against the single best machine in it, so the operator can see
+    Lake network against the single best machine in it, so the operator can see
     whether pooling is paying off. \emph{Realised by} \req{FR.S.1.2},
     \req{FR.S.1.3}, \req{FR.S.3.4}, \req{FR.S.4.5}, \req{FR.S.1.23},
     \req{FR.S.1.7}, \req{FR.S.1.16}, \req{FR.S.5.5}, \req{FR.S.5.6}, and
@@ -626,14 +619,14 @@ each names the detailed requirement that gives it a measurable target.
 
 \begin{itemize}
     \item \reqlabel{NFR.G.4.1}\textbf{NFR.G.4.1 Request data stays in the
-    cluster.} No prompt, response, or intermediate data is sent to any device
-    outside the cluster, none is kept after a request completes, and Lake
+    Lake network.} No prompt, response, or intermediate data is sent to any device
+    outside the Lake network, none is kept after a request completes, and Lake
     sends no \gl{telemetry}. This is the privacy benefit, and it is the reason
     an organisation handling export-controlled or medical data could use Lake at
     all. \emph{Realised by} \req{NFR.S.10}, \req{NFR.S.11}, \req{NFR.S.12},
     and \req{NFR.E.5}.
     \item \reqlabel{NFR.G.4.2}\textbf{NFR.G.4.2 Runs on Windows, macOS, and
-    Linux.} Each is a supported platform for any node, and one cluster can
+    Linux.} Each is a supported platform for any node, and one Lake network can
     mix all three. This is the cross-platform goal from the Problem
     Statement. \emph{Realised by} \req{NFR.S.3}, \req{NFR.S.13} to
     \req{NFR.S.15}, and \req{NFR.E.1}.
@@ -654,7 +647,7 @@ each names the detailed requirement that gives it a measurable target.
     deploy a tool that needs more than that. \emph{Realised by} \req{NFR.S.3}
     and \req{NFR.E.1}.
     \item \reqlabel{NFR.G.4.6}\textbf{NFR.G.4.6 Serves more users as nodes
-    are added.} The number of requests a cluster can serve at once without
+    are added.} The number of requests a Lake network can serve at once without
     any one of them slowing beyond a set tolerance grows with the number of
     nodes. This is the measure behind the concurrent inference goal.
     \emph{Realised by} \req{NFR.S.5}.
@@ -679,19 +672,19 @@ stakeholders from Section~\ref{subsec:stakeholders-and-requirements-sources}.
 \hline
 \textbf{Requirement} & \rotatebox{90}{\textbf{Local AI users}} & \rotatebox{90}{\textbf{Regulated small orgs}} & \rotatebox{90}{\textbf{Small AI labs}} & \rotatebox{90}{\textbf{Device owners}} & \rotatebox{90}{\textbf{Development team}} & \rotatebox{90}{\textbf{Instructor and TA}} & \rotatebox{90}{\textbf{Society}} \\
 \hline
-\hyperref[FR.G.4.1]{FR.G.4.1} Form a cluster with consent & C & C & C & C & R, A & I & -- \\
+\hyperref[FR.G.4.1]{FR.G.4.1} Form a Lake network with consent & C & C & C & C & R, A & I & -- \\
 \hline
 \hyperref[FR.G.4.2]{FR.G.4.2} Load and partition a model & C & I & C & I & R, A & I & -- \\
 \hline
-\hyperref[FR.G.4.3]{FR.G.4.3} Run inference across the cluster & C & I & C & I & R, A & I & -- \\
+\hyperref[FR.G.4.3]{FR.G.4.3} Run inference across the Lake network & C & I & C & I & R, A & I & -- \\
 \hline
-\hyperref[FR.G.4.4]{FR.G.4.4} Reallocate when the cluster changes & C & C & C & C & R, A & I & -- \\
+\hyperref[FR.G.4.4]{FR.G.4.4} Reallocate when the Lake network changes & C & C & C & C & R, A & I & -- \\
 \hline
 \hyperref[FR.G.4.5]{FR.G.4.5} Measure performance & C & I & C & I & R, A & I & -- \\
 \hline
 \hyperref[FR.G.4.6]{FR.G.4.6} Serve prompts through a standard API & C & I & C & -- & R, A & I & -- \\
 \hline
-\hyperref[NFR.G.4.1]{NFR.G.4.1} Request data stays in the cluster & C & C & C & C & R, A & I & I \\
+\hyperref[NFR.G.4.1]{NFR.G.4.1} Request data stays in the Lake network & C & C & C & C & R, A & I & I \\
 \hline
 \hyperref[NFR.G.4.2]{NFR.G.4.2} Runs on Windows, macOS, and Linux & C & C & C & C & R, A & I & -- \\
 \hline
@@ -748,30 +741,30 @@ Section~\ref{subsec:detailed-usage-scenarios}.
 \end{figure}
 
 \begin{enumerate}
-    \item \label{UC1}\textbf{UC1 Form a cluster}
+    \item \label{UC1}\textbf{UC1 Form a Lake network}
     \begin{itemize}
         \item The operator starts Lake on each computer they want to use.
         \item On one of them, the operator opens Lake and sees the other
         computers on the network that are running it.
         \item The operator selects the computers to include.
         \item Each selected computer's owner confirms (\hyperref[UC2]{UC2}).
-        \item The cluster is shown with each computer's memory and platform.
+        \item The Lake network is shown with each node's memory and platform.
     \end{itemize}
 
     \item \label{UC2}\textbf{UC2 Confirm a device joining}
     \begin{itemize}
         \item A prompt appears on the device asking whether it may join the
-        named cluster.
+        named Lake network.
         \item The owner accepts or declines.
         \item If accepted, the device joins and the owner can see what it is
         doing; if declined, it is left out.
     \end{itemize}
 
-    \item \label{UC3}\textbf{UC3 Run a model across the cluster}
+    \item \label{UC3}\textbf{UC3 Run a model across the Lake network}
     \begin{itemize}
         \item The operator chooses a model file, which may be larger than any
         one computer can hold.
-        \item Lake reports that the model is loaded across the cluster.
+        \item Lake reports that the model is loaded across the Lake network.
         \item A user sends a prompt.
         \item The response streams back word by word.
         \item The user sends further prompts in the same session.
@@ -788,13 +781,13 @@ Section~\ref{subsec:detailed-usage-scenarios}.
 
     \item \label{UC5}\textbf{UC5 Keep working when a device leaves}
     \begin{itemize}
-        \item During a session, a computer in the cluster is closed or
+        \item During a session, a node in the Lake network is closed or
         disconnected by its owner.
         \item Lake tells the operator which device left and that it is
         reorganising.
         \item The user's current prompt is answered, or re-run, without being
         resubmitted. A partial answer is never presented as a complete one.
-        \item If the remaining computers cannot hold the model, the operator
+        \item If the remaining nodes cannot hold the model, the operator
         is told why and what would fix it.
     \end{itemize}
 
@@ -810,8 +803,8 @@ Section~\ref{subsec:detailed-usage-scenarios}.
 
     \item \label{UC7}\textbf{UC7 Find the bottleneck}
     \begin{itemize}
-        \item Responses feel slow, so the operator opens the cluster view.
-        \item The view shows how long each computer and each connection takes
+        \item Responses feel slow, so the operator opens the Lake network view.
+        \item The view shows how long each node and each connection takes
         per word generated, and marks the slowest.
         \item The operator decides whether to swap a cable, remove a
         computer, or add one.
@@ -819,13 +812,13 @@ Section~\ref{subsec:detailed-usage-scenarios}.
 
     \item \label{UC8}\textbf{UC8 Serve several users at once}
     \begin{itemize}
-        \item Two or more users send prompts to the same cluster at the same
+        \item Two or more users send prompts to the same Lake network at the same
         time, from their own tools.
         \item Each sees their own response stream back, and none sees
         another's prompt or answer.
         \item Each response arrives about as fast as it would have alone,
-        until the cluster is busy enough that the operator sees requests
-        queue in the cluster view.
+        until the Lake network is busy enough that the operator sees requests
+        queue in the Lake network view.
     \end{itemize}
 \end{enumerate}
 
@@ -849,10 +842,10 @@ the System chapter record which of these may change.
     network they control. Encryption and authentication are a stretch goal.
     \item \emph{Supported hardware.} Each device needs a GPU from Nvidia,
     AMD, or Apple, because inference on a CPU alone is too slow to be useful
-    in a cluster. Smartphones are a stretch goal.
+    in a Lake network. Smartphones are a stretch goal.
     \item \emph{Wired connections first.} The first revision targets wired
     links: Thunderbolt for the two-device proof of concept and Ethernet for
-    larger clusters. Wireless operation is a stretch goal because its
+    larger Lake networks. Wireless operation is a stretch goal because its
     \gl{latency} and variability may make the split model too slow.
     \item \emph{Not faster for models that already fit.} Lake does not speed
     up a model that already runs well on one device. The benefit is running
@@ -903,7 +896,7 @@ modest budget who want to run large models without renting cloud GPUs. &
 They push the model-size and measurement requirements hardest and are the
 most likely to use the API directly. \\
 \hline
-Device owners & Direct & People whose computer joins a cluster, who may not
+Device owners & Direct & People whose computer joins a Lake network, who may not
 be the person running it. & Their device gives up memory, compute, battery,
 and bandwidth while it takes part. They must consent, be able to see what
 their device is doing, and be able to pause it; the interviewee's first
@@ -1010,7 +1003,7 @@ structure follows.
 
 The Environment chapter distinguishes three roles: the
 \gl[inferenceuser]{inference user} who sends prompts, the Lake operator who sets
-up and runs the cluster, and the \gl[deviceowner]{device owner} who contributes
+up and runs the Lake network, and the \gl[deviceowner]{device owner} who contributes
 a machine. The personas below represent the
 three direct user groups from Table~\ref{tab:stakeholders} and show how those
 roles land on real people. They are composites, not individuals.
@@ -1051,7 +1044,7 @@ jobs such as re-indexing, OCR, and overnight evaluation, not live chat. She
 would deploy it only with signed installers pushed by IT, no telemetry, no
 automatic updates, company-managed machines only, and a pause switch on
 every node. She drives the requirements for the OpenAI-compatible API with
-streaming and tool calling, for comparing the cluster against the single
+streaming and tool calling, for comparing the Lake network against the single
 best machine, for exportable metrics, for the no-telemetry privacy
 guarantee, and for retries that never repeat side effects.
 
@@ -1081,9 +1074,9 @@ Template).
 \subsection{Environment Components}\label{subsec:environment-components}
 
 \begin{itemize}
-    \item \textbf{\gl[inferenceuser]{Inference users} (a.k.a users)} -- Individuals who interact with the \gl[cluster]{Lake network} to serve \gl{inference} requests.
-    \item \textbf{Lake \gl[operator]{operators}} -- Individuals who manage the Lake network, including the \gl[devicepool]{device pool} and the model.
-    \item \textbf{\gl[deviceowner]{Device owners}} -- Individuals who contribute one or more \gl[node]{nodes} towards the device pool.
+    \item \textbf{\gl[inferenceuser]{Inference users} (a.k.a users)} -- Individuals who interact with the \gl[lakenetwork]{Lake network} to serve \gl{inference} requests.
+    \item \textbf{Lake \gl[operator]{operators}} -- Individuals who manage the \gl[lakenetwork]{Lake network} and the model.
+    \item \textbf{\gl[deviceowner]{Device owners}} -- Individuals who contribute one or more \gl[node]{nodes} to the Lake network.
     \item \textbf{Operating systems and drivers} -- Windows, macOS, and Linux operating systems that have the supported drivers to facilitate inference requests. Android and iOS operating system support is a stretch goal.
     \item \textbf{Network equipment} -- Routers, switches, Thunderbolt cables, and any other hardware necessary to connect the nodes to the network. Connectivity via Wi-Fi is a stretch goal.
     \item \textbf{Model} -- Pre-trained and open-source model \gl{weights} that are permitted to be downloaded and utilised by the Lake network via \gl[partitioning]{model layer partitioning}.
@@ -1183,7 +1176,7 @@ Template).
 \begin{figure}[H]
     \centering
 	\adjustbox{center}{\includegraphics[width=1.4\textwidth]{component_diagram.png}}
-    \caption{Component diagram.}
+    \caption{Component diagram}
     \label{fig:component-diagram}
 \end{figure}
 
@@ -1193,13 +1186,13 @@ Template).
 		\begin{itemize}
 			\item Providing an OpenAI-API compatible API to the user for use with tools like
 				OpenCode \citep{OpenCode}.
-			\item Tracking \gl{cluster} health, and detecting node failures.
+			\item Tracking \gl[lakenetwork]{Lake network} health, and detecting node failures.
 			\item Notifying nodes of partitioning changes.
-			\item Rebuilding the cluster and saving in-progress requests
+			\item Rebuilding the Lake network and saving in-progress requests
 				in the case of node failure, removal, or addition.
 			\item Measuring node connection performance.
 		\end{itemize}
-		On a \gl[follower]{follower node}, it is primarily responsible for managing the inference engine
+		On a \gl[follower]{follower node}, it is primarily responsible for managing the Inference Engine
 		on its device, following the instructions of the leader node.
 
 	\item \textbf{\gl[partitioner]{Model Partitioner}} --
@@ -1219,9 +1212,9 @@ Template).
 		It will leverage \gl[grpc]{gRPC} \citep{GRPC} for high-performance communication, with the potential
 		to use a custom solution should gRPC fail to meet our requirements in practice.
 
-	\item \textbf{\gl[webui]{Web UI}} --
-		This component handles displaying cluster information and structure to the user, as well as allowing user
-		inputs to configure a new cluster, or modify an existing cluster.
+	\item \textbf{\gl[lakeclient]{Lake Client}} --
+		This component exists on all \gl[node]{nodes} and handles displaying Lake network information and structure to the user, as well as allowing user
+		inputs to configure a new Lake network, or modify an existing Lake network.
 \end{itemize}
 
 \subsection{Functionality}\label{subsec:functionality}
@@ -1252,7 +1245,7 @@ Template).
 				respective devices as determined by the Model Partitioner.
 				Partially satisfies hazard H0-2 from the Hazard Analysis.
 				Depends on \req{FR.S.2.1}.
-			\item \reqlabel{FR.S.1.7}\textbf{FR.S.1.7} The system shall monitor cluster performance by gathering performance
+			\item \reqlabel{FR.S.1.7}\textbf{FR.S.1.7} The system shall monitor Lake network performance by gathering performance
 				data from each follower node's Coordinator.
 				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 				Depends on \req{FR.S.1.23}.
@@ -1265,25 +1258,25 @@ Template).
 				token throughput, whether it be due to network or device resource instability.}.
 				Partially satisfies hazards H2-1, H4-2 and H4-1 from the Hazard Analysis.
 				Depends on \req{FR.S.1.7}.
-			\item \reqlabel{FR.S.1.11}\textbf{FR.S.1.11} The system shall rebuild the cluster on a node failing or leaving.
+			\item \reqlabel{FR.S.1.11}\textbf{FR.S.1.11} The system shall rebuild the Lake network on a node failing or leaving.
 				Partially satisfies hazards H2-1, H4-2 and H4-1 from the Hazard Analysis.
 				Depends on \req{FR.S.1.6} and \req{FR.S.1.10}.
-			\item \reqlabel{FR.S.1.12}\textbf{FR.S.1.12} The system shall rebuild the cluster on a node joining.
+			\item \reqlabel{FR.S.1.12}\textbf{FR.S.1.12} The system shall rebuild the Lake network on a node joining.
 				Depends on \req{FR.S.1.6} and \req{FR.S.1.20}.
-			\item \reqlabel{FR.S.1.13}\textbf{FR.S.1.13} The system shall retry in-progress requests after a cluster rebuild.
+			\item \reqlabel{FR.S.1.13}\textbf{FR.S.1.13} The system shall retry in-progress requests after a Lake network rebuild.
 				Depends on \req{FR.S.1.11} and \req{FR.S.1.12}.
 			\item \reqlabel{FR.S.1.14}\textbf{FR.S.1.14} The system shall accept multiple concurrent requests through the HTTP API.
 				Related to \hyperref[NFR.S.5]{NFR.S.5}.
 				Depends on \req{FR.S.1.9} and \req{FR.S.3.5}.
-			\item \reqlabel{FR.S.1.15}\textbf{FR.S.1.15} The system shall communicate the cluster graph structure to each follower.
+			\item \reqlabel{FR.S.1.15}\textbf{FR.S.1.15} The system shall communicate the Lake network graph structure to each follower.
 				Depends on \req{FR.S.2.1}.
-			\item \reqlabel{FR.S.1.16}\textbf{FR.S.1.16} The system shall provide the Web UI with cluster information, and
-				accept cluster configuration instructions from the Web UI.
+			\item \reqlabel{FR.S.1.16}\textbf{FR.S.1.16} The system shall provide the Lake Client with Lake network information, and
+				accept Lake network configuration instructions from the Lake Client.
 				Depends on \req{FR.S.1.7}.
 			\item \reqlabel{FR.S.1.17}\textbf{FR.S.1.17} The system shall not begin inference until all selected followers have
 				confirmed participation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
 				Depends on \req{FR.S.1.20}.
-			\item \reqlabel{FR.S.1.18}\textbf{FR.S.1.18} The system shall only include selected followers in a new cluster.
+			\item \reqlabel{FR.S.1.18}\textbf{FR.S.1.18} The system shall only include selected followers in a new Lake network.
 				Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
 				Depends on \req{FR.S.5.2}.
 		\end{itemize}
@@ -1292,27 +1285,27 @@ Template).
 			\item \reqlabel{FR.S.1.19}\textbf{FR.S.1.19} The system shall accept model partition assignments from the
 				leader node Coordinator.
 				Depends on \req{FR.S.1.6}.
-			\item \reqlabel{FR.S.1.20}\textbf{FR.S.1.20} The system shall, upon receiving an invite to join a cluster,
+			\item \reqlabel{FR.S.1.20}\textbf{FR.S.1.20} The system shall, upon receiving an invite to join a Lake network,
 				request that the user confirm or decline participation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
-			\item \reqlabel{FR.S.1.21}\textbf{FR.S.1.21} The system shall not partake in a cluster without user confirmation.
+			\item \reqlabel{FR.S.1.21}\textbf{FR.S.1.21} The system shall not partake in a Lake network without user confirmation.
 				Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
 				Depends on \req{FR.S.1.20}.
-			\item \reqlabel{FR.S.1.22}\textbf{FR.S.1.22} The system shall not require confirmation to re-join a rebuilding cluster
-				led by the same device, so long as the local device was already participating in the original cluster.
+			\item \reqlabel{FR.S.1.22}\textbf{FR.S.1.22} The system shall not require confirmation to re-join a rebuilding Lake network
+				led by the same device, so long as the local device was already participating in the original Lake network.
 				Depends on \req{FR.S.1.11} and \req{FR.S.1.12}.
 			\item \reqlabel{FR.S.1.23}\textbf{FR.S.1.23} The system shall report collected health/performance data to the
 				leader node Coordinator on a \textit{HEALTH\_INTERVAL} second interval.
 				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 				Depends on \req{FR.S.1.2} and \req{FR.S.1.3}.
 			\item \reqlabel{FR.S.1.24}\textbf{FR.S.1.24} The system shall assume the leader node has failed if there has been
-				no health query from the leader node for more than \textit{LEADER\_TIMEOUT} consecutive seconds.
+				no health query from the leader node for more than \textit{LEADER\_TIMEOUT}.
 				Depends on \req{FR.S.1.7}.
 			\item \reqlabel{FR.S.1.25}\textbf{FR.S.1.25} The system shall initiate the shutdown of the local node, if the leader
 				node is assumed to have failed. Partially satisfies hazards H4-2 and H4-1 from the Hazard Analysis.
 				Depends on \req{FR.S.1.24}.
 				\begin{quote}
-					\textbf{Rationale:} The Leader node is the device the user is physically using to interact with the cluster,
-					so failure of that device will remove the user's ability to use the cluster, whether or not the cluster survives.
+					\textbf{Rationale:} The Leader node is the device the user is physically using to interact with the Lake network,
+					so failure of that device will remove the user's ability to use the Lake network, whether or not the Lake network survives.
 					The architecture of Lake will allow the ability to recover from a leader failure to be implemented at a later date.
 				\end{quote}
 		\end{itemize}
@@ -1326,7 +1319,7 @@ Template).
 		Satisfies hazard H1-3 from the Hazard Analysis.
 		Depends on \req{FR.S.1.8}.
 	\item \reqlabel{FR.S.2.2}\textbf{FR.S.2.2} The system shall report failure in the case that no valid partition across
-		the cluster exists (e.g. not enough GPU-accessible memory).
+		the Lake network exists (e.g. not enough GPU-accessible memory).
 		Depends on \req{FR.S.2.1}.
 	\item \reqlabel{FR.S.2.3}\textbf{FR.S.2.3} The system shall produce partitions that when assembled, are equivalent
 		to the original model. Satisfies \hyperref[NFR.S.6]{NFR.S.6}.
@@ -1382,14 +1375,14 @@ Template).
 		Depends on \req{FR.S.4.4}.
 \end{itemize}
 
-\subsubsection{Web UI}
+\subsubsection{Lake Client}
 \textbf{Functional Requirements}
 \begin{itemize}
 	\item \reqlabel{FR.S.5.1}\textbf{FR.S.5.1} The system shall allow a user to scan for other connected devices
 		running Lake. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 		Depends on \req{FR.S.1.4}.
 	\item \reqlabel{FR.S.5.2}\textbf{FR.S.5.2} The system shall allow a user to select connected devices to create
-		a cluster. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
+		a Lake network. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 		Depends on \req{FR.S.5.1}.
 	\item \reqlabel{FR.S.5.3}\textbf{FR.S.5.3} The system shall allow a user to select an input
 		\gl[gguf]{GGUF} file \citep{GGUF}.
@@ -1397,13 +1390,13 @@ Template).
 	\item \reqlabel{FR.S.5.4}\textbf{FR.S.5.4} The system shall display an error to the user if partitioning the selected
 		input file is infeasible given the selected devices. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
 		Depends on \req{FR.S.2.2}.
-	\item \reqlabel{FR.S.5.5}\textbf{FR.S.5.5} The system shall display the performance metrics of the cluster as a whole,
+	\item \reqlabel{FR.S.5.5}\textbf{FR.S.5.5} The system shall display the performance metrics of the Lake network as a whole,
 		as well as for each individual node and connection. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
 		Depends on \req{FR.S.1.16}.
 	\item \reqlabel{FR.S.5.6}\textbf{FR.S.5.6} The system shall highlight nodes or network connections causing \gl[bottleneck]{bottlenecks}
-		in the cluster. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}. Satisfies hazard H4-3 from the Hazard Analysis.
+		in the Lake network. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}. Satisfies hazard H4-3 from the Hazard Analysis.
 		Depends on \req{FR.S.5.5}.
-	\item \reqlabel{FR.S.5.7}\textbf{FR.S.5.7} The system shall, upon receiving an invite to join a cluster, display a prompt
+	\item \reqlabel{FR.S.5.7}\textbf{FR.S.5.7} The system shall, upon receiving an invite to join a Lake network, display a prompt
 		for the user to either confirm or decline the invitation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
 		Depends on \req{FR.S.1.20}.
 \end{itemize}
@@ -1412,12 +1405,12 @@ Template).
 \paragraph{Usability}
 \begin{itemize}
     \item \reqlabel{NFR.S.1}\textbf{NFR.S.1} \textbf{Understandability:} The user must be able to easily understand
-		cluster information.
+		Lake network information.
 		A new user must be able to describe which devices are participating, the token throughput of the system,
 		and which devices/connections are bottlenecks within \textit{UI\_TASK\_TIME} of seeing the interface.
 		Partially satisfied by \hyperref[FR.S.5.4]{FR.S.5.4}, \hyperref[FR.S.5.5]{FR.S.5.5}, and \hyperref[FR.S.5.6]{FR.S.5.6}.
 	\item \reqlabel{NFR.S.2}\textbf{NFR.S.2} \textbf{Controllability:} The user must be able to easily control
-		cluster configuration. A new user must be able to create a new cluster within \textit{UI\_TASK\_TIME} of seeing the interface.
+		Lake network configuration. A new user must be able to create a new Lake network within \textit{UI\_TASK\_TIME} of seeing the interface.
 		Partially satisfied by \hyperref[FR.S.5.1]{FR.S.5.1}, \hyperref[FR.S.5.2]{FR.S.5.2},
 		and \hyperref[FR.S.5.3]{FR.S.5.3}.
 	\item \reqlabel{NFR.S.3}\textbf{NFR.S.3} \textbf{Installability:} The user must be able to easily install Lake
@@ -1428,7 +1421,7 @@ Template).
 
 \paragraph{Performance}
 \begin{itemize}
-	\item \reqlabel{NFR.S.4}\textbf{NFR.S.4} \textbf{Model Size:} The cluster must be able to run a model with more
+	\item \reqlabel{NFR.S.4}\textbf{NFR.S.4} \textbf{Model Size:} The Lake network must be able to run a model with more
 		parameters, higher precision, or larger \gl[contextwindow]{context window} than would be able to run individually on the
 		node with the most memory. Related to \hyperref[FR.S.2.1]{FR.S.2.1}, and
 		\hyperref[FR.S.2.4]{FR.S.2.4}.
@@ -1464,7 +1457,7 @@ Template).
 		that would give insight into what the data sent in the request might have been.}
 		after the request has completed.
 	\item \reqlabel{NFR.S.11}\textbf{NFR.S.11} The system shall not send any data
-		outside the cluster, except responses to the client and discovery and
+		outside the Lake network, except responses to the client and discovery and
 		invitation messages to devices on the local network. This includes request
 		data, usage statistics, crash and diagnostic reports, update checks and
 		any other \gl{telemetry}. Health and performance reports between nodes are
@@ -1473,7 +1466,7 @@ Template).
 		automatic updates. Related to \req{NFR.G.4.1}, \req{FR.S.1.4},
 		\req{FR.S.1.20}, \req{FR.S.1.23} and \req{FR.S.5.1}.
 	\item \reqlabel{NFR.S.12}\textbf{NFR.S.12} The system shall not include untrusted devices in
-		a cluster. Satisfied by \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18},
+		a Lake network. Satisfied by \hyperref[FR.S.1.17]{FR.S.1.17}, \hyperref[FR.S.1.18]{FR.S.1.18},
 		\hyperref[FR.S.1.20]{FR.S.1.20}, \hyperref[FR.S.1.21]{FR.S.1.21}, and \hyperref[FR.S.5.7]{FR.S.5.7}.
 		Satisfies hazard H5-1 from the Hazard Analysis.
 \end{itemize}
@@ -1497,25 +1490,25 @@ Lake requires the following interfaces:
 	\item \textbf{Rust-to-C \gl[ffi]{FFI}} -- The Rust-to-C foreign function interface will be used to call
 		ggml \citep{Ggml} from the Inference Engine.
 	\item \textbf{gRPC between nodes} -- A gRPC-based API used to communicate between nodes.
-	\item \textbf{\gl[rest]{REST} API between Coordinator and Web UI} -- A REST API for communication between the
-		leader Coordinator and the Web UI.
+	\item \textbf{\gl[rest]{REST} API between Coordinator and Lake Client} -- A REST API for communication between the
+		Coordinator and the Lake Client on the same node.
 \end{itemize}
 
 \subsection{Normal Operation}\label{subsec:normal-operation}
 \begin{enumerate}
-	\item User starts the \gl[lakeclient]{Lake client} on all participating machines.
-    \item User creates a Lake cluster using the \gl[ui]{UI} on one of the devices, and provides a
+	\item User starts the \gl[lakeclient]{Lake Client} on all participating machines.
+    \item User creates a Lake network using the \gl[ui]{UI} on one of the devices, and provides a
 		GGUF file \citep{GGUF}. This
 		device becomes the leader node.
 	\item Leader node checks connectivity with follower nodes, and collects performance
 		metrics for each node.
-	\item Partitioner devises a \gl[scheme]{partitioning scheme} based on the collected metrics.
+	\item The Model Partitioner devises a \gl[scheme]{partitioning scheme} based on the collected metrics.
 	\item Leader node sends the model partitions to their respective devices.
 	\item Neighbouring nodes on the partition graph establish direct peer-to-peer
 		(\gl[p2p]{P2P}) connections.
 	\item User initiates inference request by providing a prompt via the OpenAI compatible
 		API.
-	\item Leader node sends the prompt \gl[token]{tokens} to the inference engine corresponding to the
+	\item Leader node sends the prompt \gl[token]{tokens} to the Inference Engine corresponding to the
 		first node of the graph, initiating \gl{prefill}.
 	\item Prompt tokens propagate through the graph until prefill completes, and the first
 		output token is generated.
@@ -1523,38 +1516,38 @@ Lake requires the following interfaces:
 		on each iteration until the response is complete.
 	\item As the response generates, the user receives the generated output via the OpenAI compatible
 		API.
-	\item User initiates a shutdown of the Lake cluster.
+	\item User initiates a shutdown of the Lake network.
 	\item Each node unloads its portion of the graph.
-	\item Leader node saves the cluster configuration to disk.
-	\item All nodes sever their connections, and every Lake client terminates.
+	\item Leader node saves the Lake network configuration to disk.
+	\item All nodes sever their connections, and every Lake Client terminates.
 \end{enumerate}
 
 \subsection{Undesired Event Handling}\label{subsec:undesired-event-handling}
 \begin{itemize}
-    \item \textbf{Model is too large for the available memory in the cluster} --
-		The Partitioner reports a partitioning failure, and this error is communicated to the
-		user via the Web UI.
+    \item \textbf{Model is too large for the available memory in the Lake network} --
+		The Model Partitioner reports a partitioning failure, and this error is communicated to the
+		user via the Lake Client.
 	\item \textbf{Follower node fails during inference} -- Leader node re-tries inference,
-		if it continues to fail, the leader rebuilds the cluster, excluding the problematic device.
+		if it continues to fail, the leader rebuilds the Lake network, excluding the problematic device.
 		Associated with hazard H2-1 in the Hazard Analysis.
 	\item \textbf{Tensors are corrupted on transfer between nodes} -- The receiving Tensor I/O
 		requests that the tensor is retransmitted from the source Tensor I/O.
 		Associated with hazard H3-1 in the Hazard Analysis.
 	\item \textbf{Connection between two nodes is lost} -- The nodes in question attempt to
-		re-establish a connection. If this fails, the leader must rebuild the cluster, excluding
+		re-establish a connection. If this fails, the leader must rebuild the Lake network, excluding
 		the failed link. Associated with hazard H4-1 in the Hazard Analysis.
 	\item \textbf{Input GGUF
 		file is corrupted or fails to load} --
 		Refuse to begin inference, and inform the user of the corrupted or faulty file.
-	\item \textbf{A request is made with a larger prompt than the cluster has memory for} --
+	\item \textbf{A request is made with a larger prompt than the Lake network has memory for} --
 		If there are existing requests running, wait for them to complete, then try again.
 		If there is still not enough memory, return an error for the request, and instruct the user
 		to shorten their prompt or context window.
-	\item \textbf{A rebuilt cluster is too small to hold the model after a node leaves} --
-		The Partitioner reports a partitioning failure, and this error is communicated to the
-		user via the Web UI.
-	\item \textbf{A user attempts to create a cluster with a node without a GPU} --
-		The Web UI displays an error message outlining the requirement for all nodes to have a GPU.
+	\item \textbf{A rebuilt Lake network is too small to hold the model after a node leaves} --
+		The Model Partitioner reports a partitioning failure, and this error is communicated to the
+		user via the Lake Client.
+	\item \textbf{A user attempts to create a Lake network with a node without a GPU} --
+		The Lake Client displays an error message outlining the requirement for all nodes to have a GPU.
 \end{itemize}
 
 \subsection{Detailed Usage Scenarios}\label{subsec:detailed-usage-scenarios}
@@ -1566,38 +1559,37 @@ extensions. Step numbers in the extensions refer to the main success
 scenario of the same use case.
 
 % ---------------------------------------------------------------------------
-\subsubsection*{UC1: Form a cluster}\label{sec:uc1-detailed}
+\subsubsection*{UC1: Form a Lake network}\label{sec:uc1-detailed}
 
-\noindent\textbf{Use Case Name:} Form a cluster
+\noindent\textbf{Use Case Name:} Form a Lake network
 
 \noindent\textbf{Primary Actor:} Operator
 
 \noindent\textbf{Stakeholders and Interests:}
 \begin{itemize}
-    \item \gl[operator]{Operator}: wants to pool the available computers into one cluster
-    with little effort and to see what the cluster contains.
+    \item \gl[operator]{Operator}: wants to pool the available computers into one Lake network
+    with little effort and to see what the Lake network contains.
     \item \gl[deviceowner]{Device Owner}: wants no device to take part without the
     owner's consent.
-    \item \gl[inferenceuser]{Inference User}: wants a working cluster to send prompts to.
+    \item \gl[inferenceuser]{Inference User}: wants a working Lake network to send prompts to.
 \end{itemize}
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item The Lake client is installed on every computer the operator wants to use.
+    \item The Lake Client is installed on every computer the operator wants to use.
     \item The computers are on the same local network.
-    \item The operator can open the Lake web user interface on one computer.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
 \begin{itemize}
-    \item A cluster exists containing the operator's computer (the leader
+    \item A Lake network exists containing the operator's computer (the leader
     node) and every selected computer whose owner confirmed.
-    \item The cluster view shows each member's memory and platform.
+    \item The Lake network view shows each member's memory and platform.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Failure Guarantees):}
 \begin{itemize}
-    \item No computer is in the cluster without its owner's confirmation.
+    \item No computer is in the Lake network without its owner's confirmation.
     \item Computers that did not join are unaffected and keep running as
     before.
     \item The leader node's interface displays the error to the user.
@@ -1605,30 +1597,30 @@ scenario of the same use case.
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
-    \item The operator starts the Lake client on each computer they want to use.
-    \item On one of them, the operator opens the Web UI, and that computer
-    becomes the leader node.
+    \item The operator starts the Lake Client on each computer they want to use.
+    \item On one of them, the operator chooses to form a Lake network, and that
+    computer becomes the leader node.
     \item Lake lists the other computers on the network that are running the
-    Lake client.
+    Lake Client.
     \item The operator selects the computers to include.
     \item Lake asks each selected computer's owner to confirm
     (\hyperref[UC2]{UC2}).
-    \item Lake shows the cluster with each computer's memory and platform.
+    \item Lake shows the Lake network with each node's memory and platform.
 \end{enumerate}
 
 \noindent\textbf{Extensions:}
 \begin{itemize}
-    \item \textbf{3a.} No other computers running the Lake client are found:
+    \item \textbf{3a.} No other computers running the Lake Client are found:
     Lake tells the operator none were found. The operator can start the Lake
     client on other computers and refresh the list.
     \item \textbf{5a.} An owner declines: that computer is left out of the
-    cluster and the operator is told which ones declined
+    Lake network and the operator is told which ones declined
     (\hyperref[UC2]{UC2}).
     \item \textbf{5b.} An owner does not respond: the request ends after a
     timeout, the computer is left out, and the operator is notified.
     \item \textbf{5c.} A selected computer becomes unreachable before it
     confirms: it is left out and the operator is notified.
-    \item \textbf{6a.} No computer confirmed: the cluster contains only the
+    \item \textbf{6a.} No computer confirmed: the Lake network contains only the
     leader node and the operator is notified.
 \end{itemize}
 
@@ -1652,22 +1644,22 @@ network in advance.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item The Lake client is running on the owner's computer.
-    \item An operator has selected the computer for a cluster, either when
+    \item The Lake Client is running on the owner's computer.
+    \item An operator has selected the computer for a Lake network, either when
     forming one (\hyperref[UC1]{UC1}) or during a session
     (\hyperref[UC6]{UC6}).
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
 \begin{itemize}
-    \item If accepted, the device is a member of the named cluster and its
+    \item If accepted, the device is a member of the named Lake network and its
     owner can see the device's performance and what it is computing.
     \item If declined, the device is not a member.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Failure Guarantees):}
 \begin{itemize}
-    \item The device does not take part in the cluster without an explicit
+    \item The device does not take part in the Lake network without an explicit
     acceptance.
     \item The operator is told the outcome for this device.
 \end{itemize}
@@ -1675,16 +1667,16 @@ network in advance.
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
     \item A prompt appears on the device asking whether it may join the
-    named cluster.
+    named Lake network.
     \item The owner accepts.
-    \item The device joins the cluster.
-    \item The owner can see what the device is doing for the cluster.
+    \item The device joins the Lake network.
+    \item The owner can see what the device is doing for the Lake network.
 \end{enumerate}
 
 \noindent\textbf{Extensions:}
 \begin{itemize}
     \item \textbf{2a.} The owner declines: the device is left out of the
-    cluster and the operator is notified.
+    Lake network and the operator is notified.
     \item \textbf{2b.} The owner does not respond: the request expires, the
     device is left out, and the operator is notified.
     \item \textbf{2c.} The owner is not at the device or the device is
@@ -1693,12 +1685,12 @@ network in advance.
 
 \noindent\textbf{Justification:} Consent is a stated requirement of the
 first goal (\req{FR.G.4.1}), and the owner is a direct
-stakeholder who may not be the person running the cluster.
+stakeholder who may not be the person running the Lake network.
 
 % ---------------------------------------------------------------------------
-\subsubsection*{UC3: Run a model across the cluster}\label{sec:uc3-detailed}
+\subsubsection*{UC3: Run a model across the Lake network}\label{sec:uc3-detailed}
 
-\noindent\textbf{Use Case Name:} Run a model across the cluster
+\noindent\textbf{Use Case Name:} Run a model across the Lake network
 
 \noindent\textbf{Primary Actors:} Operator (to load the model); Inference User
 (to send prompts)
@@ -1706,7 +1698,7 @@ stakeholder who may not be the person running the cluster.
 \noindent\textbf{Stakeholders and Interests:}
 \begin{itemize}
     \item Operator: wants a model larger than any one computer can hold to
-    load across the cluster.
+    load across the Lake network.
     \item Inference User: wants a complete, correct response to each prompt,
     \gl[streaming]{streamed} as it is generated.
     \item Device Owner: wants their device to hold only its share of the
@@ -1715,15 +1707,15 @@ stakeholder who may not be the person running the cluster.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item A cluster exists (\hyperref[UC1]{UC1}).
+    \item A Lake network exists (\hyperref[UC1]{UC1}).
     \item The operator has a model file in a supported format
     (GGUF).
-    \item The cluster has enough combined memory for the model.
+    \item The Lake network has enough combined memory for the model.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
 \begin{itemize}
-    \item The model is loaded across the cluster, each node holding only its
+    \item The model is loaded across the Lake network, each node holding only its
     assigned \gl[layer]{layers}.
     \item The user receives a complete response to each prompt, and the
     session keeps its context for further prompts.
@@ -1740,7 +1732,7 @@ stakeholder who may not be the person running the cluster.
     \item The operator chooses a model file.
     \item Lake divides the model among the nodes and each node loads its
     share.
-    \item Lake reports that the model is loaded across the cluster.
+    \item Lake reports that the model is loaded across the Lake network.
     \item A user sends a prompt.
     \item The response streams back to the leader node.
     \item Steps 4 and 5 repeat until the user chooses to stop the session.
@@ -1750,7 +1742,7 @@ stakeholder who may not be the person running the cluster.
 \begin{itemize}
     \item \textbf{1a.} The chosen file is not a supported model format or is
     unreadable: Lake rejects it and provides reasoning.
-    \item \textbf{2a.} The cluster's combined memory is too small for the
+    \item \textbf{2a.} The Lake network's combined memory is too small for the
     model: Lake does not start loading, tells the operator why, and says what
     would fix it (for example adding a computer or choosing a smaller
     model).
@@ -1782,7 +1774,7 @@ model that does not fit on any single device.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item A cluster has a model loaded (\hyperref[UC3]{UC3}).
+    \item A Lake network has a model loaded (\hyperref[UC3]{UC3}).
     \item The user's tool can talk to an OpenAI-format API and can reach the
     leader node over the network.
     \item The user knows the leader node's API address.
@@ -1799,7 +1791,7 @@ model that does not fit on any single device.
 \begin{itemize}
     \item If the request cannot be served, the tool receives an error
     response in the API's format rather than a hung connection.
-    \item No request data is sent outside the cluster.
+    \item No request data is sent outside the Lake network.
 \end{itemize}
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
@@ -1809,7 +1801,7 @@ model that does not fit on any single device.
     \item The user points it at the Lake address instead of a cloud
     provider.
     \item The user uses the tool as before.
-    \item Lake receives each prompt, runs it across the cluster, and returns
+    \item Lake receives each prompt, runs it across the Lake network, and returns
     the response (streamed if the tool asks for streaming).
 \end{enumerate}
 
@@ -1849,7 +1841,7 @@ inference users reach Lake.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item A cluster with at least two nodes has a model loaded and is
+    \item A Lake network with at least \textit{MIN\_NODES} nodes has a model loaded and is
     serving a session.
 \end{itemize}
 
@@ -1868,7 +1860,7 @@ inference users reach Lake.
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
-    \item During a session, a computer in the cluster is closed or
+    \item During a session, a node in the Lake network is closed or
     disconnected by its owner.
     \item Lake detects that the node has left.
     \item Lake notifies the operator which device left and that it is
@@ -1883,7 +1875,7 @@ inference users reach Lake.
 \begin{itemize}
     \item \textbf{2a.} The device fails or loses its connection without
     warning: Lake detects it as in step 2 and continues.
-    \item \textbf{4a.} The remaining computers cannot hold the model: Lake
+    \item \textbf{4a.} The remaining nodes cannot hold the model: Lake
     stops serving, notifies the operator, and provides a potential solution (for example
     adding a computer), and does not leave the session hanging.
     \item \textbf{4b.} The leader node itself leaves: the session cannot
@@ -1913,20 +1905,20 @@ between Lake and existing local distributed inference providers.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item A cluster is running a session.
-    \item A new computer running the Lake client has appeared on the network.
+    \item A Lake network is running a session.
+    \item A new computer running the Lake Client has appeared on the network.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
 \begin{itemize}
-    \item The new computer is a member of the cluster and holds part of the
+    \item The new computer is a member of the Lake network and holds part of the
     model.
     \item The operator sees the new arrangement.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Failure Guarantees):}
 \begin{itemize}
-    \item If the computer does not join, the cluster and the session continue
+    \item If the computer does not join, the Lake network and the session continue
     unchanged.
     \item The user's requests are not lost or corrupted by the
     attempt.
@@ -1952,7 +1944,7 @@ between Lake and existing local distributed inference providers.
     finishes it or re-runs it without the user resubmitting, and never
     presents a partial answer as complete.
     \item \textbf{5a.} The change in speed is not an improvement: the
-    operator can inspect the cluster view (\hyperref[UC7]{UC7}).
+    operator can inspect the Lake network view (\hyperref[UC7]{UC7}).
 \end{itemize}
 
 \noindent\textbf{Justification:} Taking advantage of new devices is a key differentiator
@@ -1974,13 +1966,13 @@ through \gl[dynamicallocation]{dynamic allocation} as a session progresses.
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item A cluster has a model loaded and has served at least one
+    \item A Lake network has a model loaded and has served at least one
     request.
 \end{itemize}
 
 \noindent\textbf{Postconditions (Success Guarantees):}
 \begin{itemize}
-    \item The operator knows which computer or connection is the slowest and
+    \item The operator knows which node or connection is the slowest and
     can decide what to change.
 \end{itemize}
 
@@ -1992,10 +1984,10 @@ through \gl[dynamicallocation]{dynamic allocation} as a session progresses.
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
-    \item Responses feel slow, so the operator opens the cluster view.
-    \item The view shows how long each computer and each connection takes per
+    \item Responses feel slow, so the operator opens the Lake network view.
+    \item The view shows how long each node and each connection takes per
     word generated.
-    \item The view marks the slowest computer or connection.
+    \item The view marks the slowest node or connection.
     \item The operator takes action depending on the provided information, ideally improving
     the performance of the network.
 \end{enumerate}
@@ -2023,14 +2015,14 @@ beneficial and potential areas for improvement.
 \begin{itemize}
     \item Inference Users: each wants their own response, as fast as if they
     were alone, and wants no other user to see their prompt or answer.
-    \item Operator: wants to see when the cluster is busy enough that requests
+    \item Operator: wants to see when the Lake network is busy enough that requests
     queue.
     \item Regulated organisations: want requests kept separate for data privacy.
 \end{itemize}
 
 \noindent\textbf{Preconditions:}
 \begin{itemize}
-    \item A cluster has a model loaded (\hyperref[UC3]{UC3}).
+    \item A Lake network has a model loaded (\hyperref[UC3]{UC3}).
     \item Each user's tool can reach the leader node
     (\hyperref[UC4]{UC4}).
 \end{itemize}
@@ -2050,7 +2042,7 @@ beneficial and potential areas for improvement.
 
 \noindent\textbf{Main Success Scenario (Basic Flow):}
 \begin{enumerate}
-    \item Two or more users send prompts to the same cluster at the same
+    \item Two or more users send prompts to the same Lake network at the same
     time, from their own tools.
     \item Lake processes the requests concurrently, each at a different
     stage of the model, keeping their state separate.
@@ -2060,14 +2052,14 @@ beneficial and potential areas for improvement.
 
 \noindent\textbf{Extensions:}
 \begin{itemize}
-    \item \textbf{2a.} The cluster is busy enough that further requests
+    \item \textbf{2a.} The Lake network is busy enough that further requests
     cannot start immediately: Lake queues them, and the operator sees the
-    queue in the cluster view.
+    queue in the Lake network view.
     \item \textbf{3a.} A node leaves while several requests are in progress:
     see \hyperref[UC5]{UC5}; each affected request is re-run or reported
     individually.
     \item \textbf{4a.} Responses slow because of load: the operator can
-    inspect the cluster view (\hyperref[UC7]{UC7}).
+    inspect the Lake network view (\hyperref[UC7]{UC7}).
 \end{itemize}
 
 \noindent\textbf{Justification:} Serving several users at once is one of the
@@ -2102,9 +2094,9 @@ were last decided on 2026-10-16.
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
 \priorityrow{FR.S.1.1}{Provide local partition}{M}{Each node must load its own partition for a split model to run at all.}
-\priorityrow{FR.S.1.2}{Collect device metrics}{S}{Feeds failure detection and the dashboard, but inference runs without it.}
+\priorityrow{FR.S.1.2}{Collect device metrics}{S}{Feeds failure detection and the Lake Client, but inference runs without it.}
 \priorityrow{FR.S.1.3}{Collect network metrics}{S}{Same as FR.S.1.2, for connections between nodes.}
-\priorityrow{FR.S.1.4}{Discover devices}{M}{A cluster cannot be formed without finding the other nodes.}
+\priorityrow{FR.S.1.4}{Discover devices}{M}{A Lake network cannot be formed without finding the other nodes.}
 \priorityrow{FR.S.1.5}{Neighbour info to Tensor I/O}{M}{Each node must know where to send its output tensors.}
 \end{tabularx}
 \caption{Prioritisation of Coordinator requirements on all nodes}
@@ -2117,17 +2109,17 @@ were last decided on 2026-10-16.
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
 \priorityrow{FR.S.1.6}{Send partitions}{M}{Distributing partitions is the core of model parallelisation.}
-\priorityrow{FR.S.1.7}{Monitor cluster}{S}{Needed for the dashboard and failure detection, not for inference.}
+\priorityrow{FR.S.1.7}{Monitor Lake network}{S}{Needed for the Lake Client and failure detection, not for inference.}
 \priorityrow{FR.S.1.8}{Inputs to Model Partitioner}{M}{The Model Partitioner needs the available nodes and their memory to produce a valid scheme.}
 \priorityrow{FR.S.1.9}{OpenAI-compatible API}{M}{The only way users submit prompts.}
 \priorityrow{FR.S.1.10}{Detect failing followers}{M}{Dynamic allocation cannot react to failures it does not detect.}
 \priorityrow{FR.S.1.11}{Rebuild on failure or leave}{M}{Core of the Dynamic Allocation goal.}
-\priorityrow{FR.S.1.12}{Rebuild on join}{S}{A join only adds capacity; the cluster keeps working without it.}
+\priorityrow{FR.S.1.12}{Rebuild on join}{S}{A join only adds capacity; the Lake network keeps working without it.}
 \priorityrow{FR.S.1.13}{Retry after rebuild}{S}{Improves resilience, but the user can resubmit a failed request.}
 \priorityrow{FR.S.1.14}{Concurrent requests}{M}{Required by the concurrent inference goal. This means serving requests concurrently, not only accepting and queueing them.}
-\priorityrow{FR.S.1.15}{Send cluster graph}{M}{Followers must know the pipeline order to connect to each other.}
-\priorityrow{FR.S.1.16}{Web UI data and control}{M}{The Web UI is how users create and inspect clusters.}
-\priorityrow{FR.S.1.17}{Wait for confirmations}{M}{Required to keep untrusted devices out of a cluster (NFR.S.12).}
+\priorityrow{FR.S.1.15}{Send Lake network graph}{M}{Followers must know the pipeline order to connect to each other.}
+\priorityrow{FR.S.1.16}{Lake Client data and control}{M}{The Lake Client is how users create and inspect Lake networks.}
+\priorityrow{FR.S.1.17}{Wait for confirmations}{M}{Required to keep untrusted devices out of a Lake network (NFR.S.12).}
 \priorityrow{FR.S.1.18}{Selected followers only}{M}{Same as FR.S.1.17.}
 \end{tabularx}
 \caption{Prioritisation of Coordinator requirements on the leader node}
@@ -2140,7 +2132,7 @@ were last decided on 2026-10-16.
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
 \priorityrow{FR.S.1.19}{Accept assignments}{M}{A follower must accept its partition to take part.}
-\priorityrow{FR.S.1.20}{Ask user to confirm}{M}{Required to keep untrusted devices out of a cluster (NFR.S.12).}
+\priorityrow{FR.S.1.20}{Ask user to confirm}{M}{Required to keep untrusted devices out of a Lake network (NFR.S.12).}
 \priorityrow{FR.S.1.21}{Confirmation required}{M}{Same as FR.S.1.20.}
 \priorityrow{FR.S.1.22}{No reconfirm on rebuild}{S}{Avoids interrupting a rebuild, but the user could confirm again by hand.}
 \priorityrow{FR.S.1.23}{Report metrics}{S}{Same as FR.S.1.2.}
@@ -2157,7 +2149,7 @@ were last decided on 2026-10-16.
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
 \priorityrow{FR.S.2.1}{Fit in memory}{M}{A partition that does not fit crashes the node.}
-\priorityrow{FR.S.2.2}{Report infeasible split}{M}{The user must know when the cluster cannot hold the model.}
+\priorityrow{FR.S.2.2}{Report infeasible split}{M}{The user must know when the Lake network cannot hold the model.}
 \priorityrow{FR.S.2.3}{Equivalent to original}{M}{A split that changes the model produces wrong output.}
 \priorityrow{FR.S.2.4}{Size by capability}{S}{Improves speed; a split based on memory alone still works.}
 \end{tabularx}
@@ -2201,15 +2193,15 @@ were last decided on 2026-10-16.
 \small
 \begin{tabularx}{\textwidth}{|l|>{\raggedright\arraybackslash}p{3.4cm}|c|>{\raggedright\arraybackslash}X|}
 \priorityhead
-\priorityrow{FR.S.5.1}{Scan for devices}{M}{Users must see available devices to build a cluster.}
+\priorityrow{FR.S.5.1}{Scan for devices}{M}{Users must see available devices to build a Lake network.}
 \priorityrow{FR.S.5.2}{Select devices}{M}{Users choose which devices to trust (NFR.S.12).}
 \priorityrow{FR.S.5.3}{Select model file}{M}{There is nothing to run without a model.}
-\priorityrow{FR.S.5.4}{Infeasible split error}{M}{The user must know why a cluster cannot start.}
+\priorityrow{FR.S.5.4}{Infeasible split error}{M}{The user must know why a Lake network cannot start.}
 \priorityrow{FR.S.5.5}{Display metrics}{S}{Supports understandability (NFR.S.1), not inference.}
 \priorityrow{FR.S.5.6}{Highlight bottlenecks}{C}{Useful, but users can read bottlenecks from the metrics in FR.S.5.5.}
 \priorityrow{FR.S.5.7}{Invite prompt}{M}{Same as FR.S.1.20.}
 \end{tabularx}
-\caption{Prioritisation of Web UI requirements}
+\caption{Prioritisation of Lake Client requirements}
 \label{tab:prioritization-web-ui}
 \end{table}
 
@@ -2228,7 +2220,7 @@ were last decided on 2026-10-16.
 \priorityrow{NFR.S.8}{Reject bad model files}{M}{Prevents crashes and misleading output from a corrupted file.}
 \priorityrow{NFR.S.9}{Packet loss}{S}{The transport protocol already handles most loss and corruption.}
 \priorityrow{NFR.S.10}{No stored request data}{M}{Privacy is a primary reason to use Lake.}
-\priorityrow{NFR.S.11}{No data leaves the cluster}{M}{Same as NFR.S.10. The developer we interviewed would not use Lake with telemetry.}
+\priorityrow{NFR.S.11}{No data leaves the Lake network}{M}{Same as NFR.S.10. The developer we interviewed would not use Lake with telemetry.}
 \priorityrow{NFR.S.12}{No untrusted devices}{M}{Same as NFR.S.10.}
 \priorityrow{NFR.S.13}{Operating systems}{M}{Required by the Cross-Platform Optimisation goal.}
 \priorityrow{NFR.S.14}{CPU architectures}{M}{Same as NFR.S.13; covers Apple Silicon and x86 machines.}
@@ -2263,13 +2255,13 @@ were last decided on 2026-10-16.
 \priorityhead
 \priorityrow{SR0-1}{Discard stale health data}{S}{Supports failure detection, which already works from timeouts (SR4-1).}
 \priorityrow{SR0-2}{Route only to assigned nodes}{M}{Sending tensors to a node without the right partition produces wrong output.}
-\priorityrow{SR1-1}{At least two nodes}{M}{Distributed inference on a single node is not distributed. A model that runs on one device is used normally instead.}
+\priorityrow{SR1-1}{At least \textit{MIN\_NODES} nodes}{M}{Distributed inference on a single node is not distributed. A model that runs on one device is used normally instead.}
 \priorityrow{SR1-2}{All layers assigned}{M}{A missing layer produces wrong output.}
 \priorityrow{SR1-3}{Memory safety margin}{M}{Same as FR.S.2.1.}
 \priorityrow{SR2-1}{Bounded recovery}{S}{Same as FR.S.1.13. Reporting the failure keeps a request from waiting forever.}
 \priorityrow{SR3-1}{Detect corrupted tensors}{M}{A corrupted tensor produces wrong output.}
 \priorityrow{SR3-2}{Report decoding failures}{S}{Helps recovery and debugging; SR3-1 already prevents wrong output.}
-\priorityrow{SR4-1}{Communication timeouts}{M}{Without timeouts, a lost connection stalls the cluster indefinitely.}
+\priorityrow{SR4-1}{Communication timeouts}{M}{Without timeouts, a lost connection stalls the Lake network indefinitely.}
 \priorityrow{SR4-2}{Mark unhealthy nodes}{M}{Same as FR.S.1.10.}
 \priorityrow{SR4-3}{Latency baseline}{C}{Only reports slowness; inference is unaffected.}
 \priorityrow{SR5-1}{Two-sided approval}{M}{Same as NFR.S.12.}
@@ -2291,19 +2283,19 @@ cases for each group are given in the \gl[vv]{V\&V} Plan.
 
 Validation checks that \progname{} is the right system for its stakeholders,
 measured against the goals in the Problem Statement. The team demonstrates the
-system at the \gl[poc]{proof of concept}, Revision 0 and final demonstrations,
+system at the \gl[poc]{proof of concept}, Rev 0 and final demonstrations,
 and the \gl[ta]{teaching assistant} and other reviewers judge it against these
 goals:
 \begin{itemize}
   \item \textbf{Model Parallelisation}: a model split across two or more
     nodes produces coherent output (groups 2 and 3 below).
-  \item \textbf{Improved Local Performance}: the cluster runs a model that no
+  \item \textbf{Improved Local Performance}: the Lake network runs a model that no
     single node can hold (group 3).
-  \item \textbf{Cross-Platform Optimisation}: a cluster mixing operating
+  \item \textbf{Cross-Platform Optimisation}: a Lake network mixing operating
     systems runs a model (group 12).
-  \item \textbf{Dynamic Allocation}: the cluster keeps serving requests after
+  \item \textbf{Dynamic Allocation}: the Lake network keeps serving requests after
     nodes join and leave, and the reallocation time is recorded (group 6).
-  \item \textbf{Concurrent Inference}: the cluster serves at least
+  \item \textbf{Concurrent Inference}: the Lake network serves at least
     \textit{MIN\_CONCURRENT} users at once without their outputs interfering
     (group 13).
 \end{itemize}
@@ -2324,13 +2316,13 @@ group.
     \req{FR.S.2.2}, \req{FR.S.2.4}, \req{FR.S.5.4}, \req{NFR.E.2},
     \req{NFR.E.4}, \req{SR1-1}--\req{SR1-3}.\\
     \textit{Method:} unit and property-based tests of the Model Partitioner on
-    generated clusters and models; a Web UI test with a model too large for
+    generated Lake networks and models; a Lake Client test with a model too large for
     the selected devices; a checksum of the model file before and after
     partitioning.\\
     \textit{Acceptance:} every scheme produced is valid by
     Definition~S.9.2.2, leaves at least \textit{MEMORY\_MARGIN} of each node's
-    memory free, and uses at least two nodes for distributed inference;
-    failure is reported exactly when no such scheme exists, and the Web UI
+    memory free, and uses at least \textit{MIN\_NODES} nodes for distributed inference;
+    failure is reported exactly when no such scheme exists, and the Lake Client
     shows the error; the model file's checksum is unchanged. For
     \req{FR.S.2.4}, until its
     definition of capability is made measurable: of two nodes with equal
@@ -2353,10 +2345,10 @@ group.
   \item \textbf{Model capacity.} \req{NFR.S.4}.\\
     \textit{Method:} a system test on team hardware with a model whose memory
     need exceeds the free memory of the largest node.\\
-    \textit{Acceptance:} the cluster runs the model and meets the acceptance
+    \textit{Acceptance:} the Lake network runs the model and meets the acceptance
     criteria of group 2.
 
-  \item \textbf{Cluster formation and trust.} \req{FR.S.1.4},
+  \item \textbf{Lake network formation and trust.} \req{FR.S.1.4},
     \req{FR.S.1.17}, \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21},
     \req{FR.S.5.1}--\req{FR.S.5.3}, \req{FR.S.5.7}, \req{NFR.S.12},
     \req{SR5-1}.\\
@@ -2380,8 +2372,8 @@ group.
     \textit{HEALTH\_INTERVAL}, within \textit{INTERVAL\_TOL}; reports older
     than \textit{HEALTH\_TTL} are not used to judge availability; latency
     more than \textit{LATENCY\_TOL} above a connection's baseline is reported
-    to the Coordinator; and the Web UI shows the reported values for the
-    cluster, each node and each connection.
+    to the Coordinator; and the Lake Client shows the reported values for the
+    Lake network, each node and each connection.
 
   \item \textbf{Dynamic allocation.} \req{FR.S.1.10}--\req{FR.S.1.13},
     \req{FR.S.1.22}, \req{FR.S.1.24}, \req{FR.S.1.25}, \req{SR0-2},
@@ -2422,7 +2414,7 @@ group.
     during any update check.\\
     \textit{Acceptance:} no request data remains on disk after its request
     completes. Logs contain no prompts, responses, tensor data or \gl[kvcache]{KV cache}
-    content. Every captured packet goes to a cluster node, a local device
+    content. Every captured packet goes to a Lake network node, a local device
     being discovered or invited, or the client that sent the request.
 
   \item \textbf{API.} \req{FR.S.1.9}, \req{NFR.E.3}.\\
@@ -2438,16 +2430,16 @@ group.
     verifies the rest itself: an install test on each operating system for
     \req{NFR.S.3}, and a throttled node for \req{FR.S.5.6}.\\
     \textit{Acceptance:} within \textit{UI\_TASK\_TIME} of first seeing the
-    interface, each participant can create a cluster and can name the
+    interface, each participant can create a Lake network and can name the
     participating devices, the token throughput and the bottleneck; the
     throttled node is highlighted; installation takes at most
     \textit{INSTALL\_CLICKS} clicks on Windows and macOS, and one package
     manager command on Linux.
 
   \item \textbf{Look and feel.} \req{NFR.S.7}.\\
-    \textit{Method:} inspection of the Web UI source.\\
+    \textit{Method:} inspection of the Lake Client source.\\
     \textit{Acceptance:} until the requirement is made measurable, every
-    colour and font used comes from the Web UI's theme definition.
+    colour and font used comes from the Lake Client's theme definition.
 
   \item \textbf{Compatibility.} \req{NFR.S.13}--\req{NFR.S.15},
     \req{NFR.E.1}.\\
@@ -2460,8 +2452,8 @@ group.
   \item \textbf{Concurrent requests.} \req{FR.S.1.14}, \req{FR.S.3.5},
     \req{FR.S.4.6}, \req{NFR.S.5}.\\
     \textit{Method:} load tests with increasing numbers of concurrent
-    requests on clusters of increasing size.\\
-    \textit{Acceptance:} every cluster serves at least
+    requests on Lake networks of increasing size.\\
+    \textit{Acceptance:} every Lake network serves at least
     \textit{MIN\_CONCURRENT} requests at the same time; no tokens from one request appear in another; and the number
     of concurrent requests served with at most
     \textit{MAX\_DEGRADATION} loss of per-request throughput grows in
@@ -2487,9 +2479,9 @@ group.
 \subsection{Formalisations}\label{subsec:formalizations}
 
 Two parts of \progname{} are formalised. S.9.2 defines what counts as a
-valid partitioning scheme for the model across the cluster, which every other
+valid partitioning scheme for the model across the Lake network, which every other
 requirement depends on. S.9.3 specifies, as a finite state machine, how the
-system responds when nodes join and leave the cluster. This is the precise
+system responds when nodes join and leave the Lake network. This is the precise
 form of the Dynamic Allocation goal.
 
 \subsubsection{Notation}\label{subsubsec:formal-notation}
@@ -2510,20 +2502,20 @@ $N$ & $\mathbb{N}$, $N \ge 1$ & Number of partition units in the model
 \hline
 $L$ & $L = 1..N$ & The set of partition units. \\
 \hline
-$D$ & finite set & The nodes currently in the cluster: devices the user has
+$D$ & finite set & The nodes currently in the Lake network: devices the user has
 selected (\hyperref[FR.S.5.2]{FR.S.5.2}) and that have confirmed participation (\hyperref[FR.S.1.21]{FR.S.1.21}). \\
 \hline
 $m_\ell$ & $\mathbb{N}$ (bytes) & Memory needed to hold unit $\ell$'s \gl{weights}
 and its KV cache for \textit{CONTEXT\_MAX} tokens. \\
 \hline
 $M_d$ & $\mathbb{N}$ (bytes) & GPU-accessible memory free on node $d$ when it
-joins the cluster, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR.S.2.1}. \\
+joins the Lake network, minus the runtime overhead reserved by \hyperref[FR.S.2.1]{FR.S.2.1}. \\
 \hline
 \end{tabularx}
 \end{table}
 
 \noindent The formalisation assumes that $M_d$ does not change while $d$ is
-in the cluster, and that $\mathit{join}(d)$ only occurs for $d \notin D$ and
+in the Lake network, and that $\mathit{join}(d)$ only occurs for $d \notin D$ and
 $\mathit{leave}(d)$ only for $d \in D$.
 
 \subsubsection{Valid Partitioning Schemes}\label{subsubsec:formal-partitions}
@@ -2540,7 +2532,7 @@ $i+1$. The nodes of $P$ are $\mathit{dev}(P) = \{d_1, \dots, d_k\}$.
 \end{definition}
 
 \begin{definition}[Valid partitioning scheme]\label{def:valid}
-$P$ is \emph{valid} over cluster $D$, written $P \in \mathcal{V}(D)$, if and
+$P$ is \emph{valid} over Lake network $D$, written $P \in \mathcal{V}(D)$, if and
 only if:
 \begin{enumerate}
   \item[(V1)] $\mathit{dev}(P) \subseteq D$ and $d_i \ne d_j$ for all
@@ -2574,9 +2566,9 @@ exactly one partition.
 
 \subsubsection{Allocation State Machine}\label{subsubsec:formal-fsm}
 
-The system's response to nodes joining and leaving the cluster is a finite
+The system's response to nodes joining and leaving the Lake network is a finite
 state machine $(Q, \Sigma, \delta, q_0)$ whose transitions are guarded by
-predicates over the cluster $D$ and the active partitioning scheme $P$.
+predicates over the Lake network $D$ and the active partitioning scheme $P$.
 
 \paragraph{States.}
 $Q = \{\mathsf{U}, \mathsf{A}, \mathsf{I}, \mathsf{G}, \mathsf{R},
@@ -2591,20 +2583,20 @@ $Q = \{\mathsf{U}, \mathsf{A}, \mathsf{I}, \mathsf{G}, \mathsf{R},
     request. The request is stopped while $P'$ is loaded, then retried
     (\hyperref[FR.S.1.13]{FR.S.1.13}).
   \item $\mathsf{X}$ (Insufficient): $\mathcal{V}(D) = \emptyset$, so the
-    cluster cannot hold the model.
+    Lake network cannot hold the model.
 \end{itemize}
 
 \paragraph{Events.}
 $\Sigma = \{\mathit{load}, \mathit{unload}, \mathit{req}, \mathit{fin},
 \mathit{done}\} \cup \{\mathit{join}(d), \mathit{leave}(d)\}$:
 \begin{itemize}
-  \item $\mathit{load}$ and $\mathit{unload}$: the user creates a cluster
+  \item $\mathit{load}$ and $\mathit{unload}$: the user creates a Lake network
     with a model, or shuts it down.
   \item $\mathit{req}$ and $\mathit{fin}$: a request is submitted, or
     finishes.
   \item $\mathit{done}$: the system finishes loading $P'$.
   \item $\mathit{join}(d)$: a device the user selected confirms
-    participation and is added to the cluster.
+    participation and is added to the Lake network.
   \item $\mathit{leave}(d)$: follower $d$ leaves, or is detected as failing
     (\hyperref[FR.S.1.10]{FR.S.1.10}).
 \end{itemize}
@@ -2613,7 +2605,7 @@ failed (\hyperref[FR.S.1.24]{FR.S.1.24}), the followers shut down and the sessio
 (\hyperref[FR.S.1.25]{FR.S.1.25}), which has the same effect as $\mathit{unload}$.
 
 \paragraph{Guards.}
-Let $D'$ be the cluster after the event: $D \cup \{d\}$ for
+Let $D'$ be the Lake network after the event: $D \cup \{d\}$ for
 $\mathit{join}(d)$, $D \setminus \{d\}$ for $\mathit{leave}(d)$, and $D$
 otherwise. Then
 \begin{equation*}
@@ -2665,8 +2657,8 @@ handled as follows:
 5 & $\mathsf{A}$ & $\mathit{join}(d)$, $\mathit{leave}(d)$ $[\neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
 \hline
 6 & $\mathsf{I}$ & $\mathit{req}$ & $\mathsf{G}$ & Start generating. \\
-7 & $\mathsf{I}$ & $\mathit{join}(d)$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
-8 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{A}$ & Rebuild the cluster over $D'$. \\
+7 & $\mathsf{I}$ & $\mathit{join}(d)$ & $\mathsf{A}$ & Rebuild the Lake network over $D'$. \\
+8 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \varphi]$ & $\mathsf{A}$ & Rebuild the Lake network over $D'$. \\
 9 & $\mathsf{I}$ & $\mathit{leave}(d)$ $[\psi \wedge \neg\varphi]$ & $\mathsf{X}$ & Report a partitioning failure. \\
 \hline
 10 & $\mathsf{G}$ & $\mathit{fin}$ & $\mathsf{I}$ & Return the response. \\
@@ -2688,22 +2680,22 @@ $\mathit{dev}(P)$ keeps $P$ valid.
 
 \paragraph{Invariant.} In states $\mathsf{I}$ and $\mathsf{G}$,
 $P \in \mathcal{V}(D)$. $P$ is only assigned in rows 3 and 13, from a $P'$
-that is reselected after every change to the cluster. The only change that
+that is reselected after every change to the Lake network. The only change that
 keeps the machine in $\mathsf{I}$ or $\mathsf{G}$ removes a node outside
 $\mathit{dev}(P)$.
 
 \subsection{Likely Changes to Requirements}\label{subsec:likely-changes-to-requirements}
 \begin{itemize}
-	\item \label{LC.1}\textbf{LC.1} A Lake cluster cannot recover from a failing leader node (see \hyperref[FR.S.1.25]{FR.S.1.25}).
+	\item \label{LC.1}\textbf{LC.1} A Lake network cannot recover from a failing leader node (see \hyperref[FR.S.1.25]{FR.S.1.25}).
 		In the future, the ability to recover from a failing leader node may be added.
 	\item \label{LC.2}\textbf{LC.2} Lake only supports desktop operating systems (Windows, macOS, Linux) (see \hyperref[NFR.S.13]{NFR.S.13}).
 		Support for mobile devices (iOS, Android) may be added once other goals and requirements have been met.
 	\item \label{LC.3}\textbf{LC.3} Lake assumes the local area network being used to connect the devices is private
 		and trusted (See Hazard Analysis Section 4 - Critical Assumptions). Lake's may be extended with additional
-		security hardening to allow clusters to run on public or untrusted networks.
-	\item \label{LC.4}\textbf{LC.4} Lake requires that each device manually confirm joining a cluster
+		security hardening to allow Lake networks to run on public or untrusted networks.
+	\item \label{LC.4}\textbf{LC.4} Lake requires that each device manually confirm joining a Lake network
 		(see \hyperref[FR.S.1.17]{FR.S.1.17} and \hyperref[FR.S.1.21]{FR.S.1.21}). In the future,
-		a trust mechanism may be introduced, which would allow devices to automatically join clusters created by trusted
+		a trust mechanism may be introduced, which would allow devices to automatically join Lake networks created by trusted
 		devices without requiring confirmation.
 	\item \label{LC.5}\textbf{LC.5} Requirement thresholds and intervals will likely change, as real-world usage
 		gives better estimates for reasonable threshold values.
@@ -2747,7 +2739,7 @@ $\mathit{dev}(P)$.
 
 \begin{itemize}
     \item \textbf{API specification} -- Lake will follow the \gl[openaiapi]{OpenAI API} specification for its request and response formats \citep{OpenAIAPI}. This is chosen due to the widespread adoption of this \gl[api]{API} specification and the flexibility it provides when connecting to existing external clients.
-    \item \textbf{Supported platforms} -- Windows, macOS, and Linux will be supported platforms for \gl[node]{nodes} within the \gl[cluster]{Lake network}. Android and iOS support is a stretch goal. These are chosen due to the availability of \gl[inferenceengine]{inference engine} support and hardware acceleration support for these operating systems.
+    \item \textbf{Supported platforms} -- Windows, macOS, and Linux will be supported platforms for \gl[node]{nodes} within the \gl[lakenetwork]{Lake network}. Android and iOS support is a stretch goal. These are chosen due to the availability of \gl[inferenceengine]{inference engine} support and hardware acceleration support for these operating systems.
 \end{itemize}
 
 \subsection{Schedule and Milestones}\label{subsec:schedule}
@@ -2788,17 +2780,17 @@ $\mathit{dev}(P)$.
 \hline
 \textbf{Task} & \textbf{Description / Steps} & \textbf{Deliverable} & \textbf{Due Date} \\ \hline
 
-Initial single-device prototype & Implement a model split up across two processes on a single device, communicating via inter-process communication. & V\&V Plan Revision & Nov. 2 \\ \hline
+Initial single-device prototype & Implement a model split up across two processes on a single device, communicating via inter-process communication. & V\&V Plan Rev 0 & Nov. 2 \\ \hline
 
-Expansion across two devices & Implement wired communication and model splitting (50\% and 50\%) across two devices, communicating via \gl[grpc]{gRPC}. & Design Document Revision &  Nov. 16 \\ \hline
+Expansion across two devices & Implement wired communication and model splitting (50\% and 50\%) across two devices, communicating via \gl[grpc]{gRPC}. & PoC Demo & Nov. 23 \\ \hline
 
-Expansion across n devices \& Partitioning algorithm & Implement model splitting for n devices through \gl[partitioning]{model partitioning} that is aware of each device's performance and hardware limitations. & POC Demo & Nov. 23 \\ \hline
+Expansion across n devices \& Partitioning algorithm & Implement model splitting for n devices through \gl[partitioning]{model partitioning} that is aware of each device's performance and hardware limitations. Re-split the model between requests when a node joins or leaves. & Design Document Rev 0 & Jan. 18 \\ \hline
 
-\gl[dynamicallocation]{Dynamic allocation} & Implement algorithm to dynamically allocate model \gl[layer]{layers} throughout a \gl{session}. & Design Document Revision 0 & Jan. 18 \\ \hline
+\gl[dynamicallocation]{Dynamic allocation} & Implement algorithm to dynamically allocate model \gl[layer]{layers} throughout a \gl{session}. & Design Document Rev 0 & Jan. 18 \\ \hline
 
-Test model allocation and dynamic add/drop & Test that system can handle devices being added or dropped from the network and that model split changes to maintain efficiency as network changes. & Design Document Revision 1 & Jan. 18 \\ \hline
+Test model allocation and dynamic add/drop & Test that system can handle devices being added or dropped from the network and that model split changes to maintain efficiency as network changes. & Design Document Rev 0 & Jan. 18 \\ \hline
 
-User Interface Design \& Network Display & Add user interface on top of API interface, listing statistics on model split and performance for each device. & Rev 0 Demo & Feb. 1 \\ \hline
+Lake Client \& Network Display & Add the Lake Client interface on top of the API, listing statistics on model split and performance for each device. & Rev 0 Demo & Feb. 1 \\ \hline
 
 Integration \& Communication Testing & Completion of integration testing to ensure sessions work and can handle various node failures. & Final Demo & Mar. 15 \\ \hline
 
@@ -2830,7 +2822,7 @@ Tasks that will be a part of each of the following entries include:
     \item \textbf{Primary Programming Language} - The primary programming languages for the 
     system will be Python and Rust. Python is chosen due to its common use for artificial intelligence applications
     and rich library ecosystem. Rust is chosen due to its high performance and type safety, along with it being a common choice for
-    working directly with \gl[tensor]{tensors}. On each node, Python will be used for coordinator operations and Rust will be used for the inference engine. 
+    working directly with \gl[tensor]{tensors}. On each node, Python will be used for the Coordinator and Rust will be used for the Inference Engine. 
     \gl[ui]{User interface} will be created using TypeScript due to it being an industry standard type safe language for user interfaces.
     \item \textbf{Communication Framework} - gRPC is a \gl[rpc]{remote procedure call} framework
     developed by Google. It allows a client to call a method directly on a server and prioritizes speed and performance.
@@ -2844,7 +2836,7 @@ Tasks that will be a part of each of the following entries include:
     \item \textbf{Hardware} Multiple $(>=2)$ laptop or personal computer devices that can be connected via Thunderbolt to run local inference tests.
     \item \textbf{Version Control} Git, along with GitHub for source code management.
     \item \textbf{\gl[ci]{Continuous Integration}} GitHub Actions for build pipelines and testing.
-    \item \textbf{Testing API and Interface} OpenAI API Interface will be used for testing the system without using the user interface (or prior to building the user interface). 
+    \item \textbf{Testing API and Interface} OpenAI API Interface will be used for testing the system without the Lake Client, or before the Lake Client is built. 
 \end{itemize}
 
 \subsection{Risk and Mitigation Analysis}\label{subsec:risk}
@@ -2950,7 +2942,7 @@ the device-owner stakeholder and the second persona. It also raised a
 no-telemetry requirement for S.2 that is still an open issue. The priorities
 were last decided on October 16, 2026. The peer review of this document is
 due October 22, 2026. We will handle its issues and the teaching assistant's
-feedback before writing the V\&V Plan. Revision 1 is due with the final
+feedback before writing the V\&V Plan. Rev 1 is due with the final
 documentation on March 31, 2027.
 
 % ===========================================================================
@@ -2960,17 +2952,17 @@ documentation on March 31, 2027.
 
 \subsection*{Functional Safety Requirements}
 \begin{itemize}
-    \item \reqlabel{SR0-1}\textbf{SR0-1} -- The system shall identify and discard stale device health data from determining device availability by configuring a time-to-live for valid data. Related SRS requirements: \req{FR.S.1.2}, \req{FR.S.1.7}, \req{FR.S.1.23}.
+    \item \reqlabel{SR0-1}\textbf{SR0-1} -- The system shall identify and discard stale device health data from determining device availability by treating data older than \textit{HEALTH\_TTL} as stale. Related SRS requirements: \req{FR.S.1.2}, \req{FR.S.1.7}, \req{FR.S.1.23}.
     \item \reqlabel{SR0-2}\textbf{SR0-2} -- The system shall only route inference requests to nodes that currently have a confirmed model layer partition. Related SRS requirements: \req{FR.S.1.1}, \req{FR.S.1.6}.
-    \item \reqlabel{SR1-1}\textbf{SR1-1} -- The system shall assign at least two nodes for model layer partitioning during distributed inference.
+    \item \reqlabel{SR1-1}\textbf{SR1-1} -- The system shall assign at least \textit{MIN\_NODES} nodes for model layer partitioning during distributed inference.
     \item \reqlabel{SR1-2}\textbf{SR1-2} -- The system shall ensure all model layers are assigned to a node, and that each device configured to run model layers receives a non-zero model layer partition assignment.
-    \item \reqlabel{SR1-3}\textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a configured safety margin. Related SRS requirements: \req{FR.S.2.1}, \req{FR.S.2.2}.
-    \item \reqlabel{SR2-1}\textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered within the configured recovery limits, the system must report to the API that the request has failed. Related SRS requirements: \req{FR.S.1.10}, \req{FR.S.1.11}, \req{FR.S.1.13}.
+    \item \reqlabel{SR1-3}\textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a safety margin of \textit{MEMORY\_MARGIN} on each node. Related SRS requirements: \req{FR.S.2.1}, \req{FR.S.2.2}.
+    \item \reqlabel{SR2-1}\textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered within \textit{RECOVERY\_LIMIT} attempts, the system must report to the API that the request has failed. Related SRS requirements: \req{FR.S.1.10}, \req{FR.S.1.11}, \req{FR.S.1.13}.
     \item \reqlabel{SR3-1}\textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests. Related SRS requirements: \req{FR.S.4.3}, \req{NFR.S.9}.
-    \item \reqlabel{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the coordinator so the inference request can recover, subject to \req{SR5-2}.
-    \item \reqlabel{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy. Related SRS requirements: \req{FR.S.1.10}, \req{FR.S.1.24}.
+    \item \reqlabel{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the Coordinator so the inference request can recover, subject to \req{SR5-2}.
+    \item \reqlabel{SR4-1}\textbf{SR4-1} -- The system shall treat a connection between nodes as failed after \textit{NODE\_TIMEOUT} without a response, and handle exceeded timeouts according to the appropriate recovery or failure policy. Related SRS requirements: \req{FR.S.1.10}, \req{FR.S.1.24}.
     \item \reqlabel{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria are not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown. Related SRS requirements: \req{FR.S.1.24} and \req{FR.S.1.25}.
-    \item \reqlabel{SR4-3}\textbf{SR4-3} -- The system shall utilise configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance. Related SRS requirements: \req{FR.S.1.3}, \req{FR.S.4.5}.
+    \item \reqlabel{SR4-3}\textbf{SR4-3} -- The system shall utilise configured values or historical data to determine a baseline inter-node communication latency and notify the Coordinator when that baseline is exceeded by \textit{LATENCY\_TOL}. Related SRS requirements: \req{FR.S.1.3}, \req{FR.S.4.5}.
     \item \reqlabel{SR5-1}\textbf{SR5-1} -- The system shall require user approval on the leader node to authorise a follower node, and user confirmation on the follower node to confirm the authorisation before it can participate in the Lake network. Related SRS requirements: \req{FR.S.1.17}, \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{NFR.S.12}.
     \item \reqlabel{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, and KV cache content in diagnostic logs. Related SRS requirements: \req{NFR.S.10}.
 \end{itemize}
@@ -2987,7 +2979,7 @@ requirements, and Table~\ref{tab:requirement-dependencies} lists them both ways.
 \vspace{0.4em}
 \centering
 \makebox[\linewidth][c]{\includegraphics[width=1.08\linewidth,height=0.74\textheight,keepaspectratio]{requirement_dependencies.png}}
-\captionof{figure}{Dependencies between the detailed requirements. The key
+\captionof{figure}[Requirement dependencies]{Dependencies between the detailed requirements. The key
 in the corner explains the arrows and box colours.}
 \label{fig:requirement-dependencies}
 \end{landscape}
@@ -2997,7 +2989,7 @@ in the corner explains the arrows and box colours.}
 {\footnotesize
 \setlength{\tabcolsep}{4pt}
 \begin{longtable}{>{\raggedright\arraybackslash}p{0.09\linewidth}>{\raggedright\arraybackslash}p{0.14\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.11\linewidth}>{\raggedright\arraybackslash}p{0.06\linewidth}}
-\caption{Requirement dependency matrix. Depends on follows the
+\caption[Requirement dependency matrix]{Requirement dependency matrix. Depends on follows the
 arrows in Figure~\ref{fig:requirement-dependencies} (depends on,
 is satisfied by or is related to) and Required by lists the same
 links the other way. Every identifier links to
@@ -3207,13 +3199,13 @@ as testing gives better data.
 \hline
 \textit{MAX\_DEGRADATION} & 20\% & Maximum loss of per-request throughput when serving concurrent requests. Used in \req{NFR.S.5}. \\
 \hline
-\textit{MIN\_CONCURRENT} & 2 & Minimum number of requests every cluster must serve at the same time. Used in S.8 group 13 and the Validation list. \\
+\textit{MIN\_CONCURRENT} & 2 & Minimum number of requests every Lake network must serve at the same time. Used in S.8 group 13 and the Validation list. \\
 \hline
 \textit{BENCH\_RATIO} & 95\% & Minimum benchmark score of a split model, relative to the unsplit model. Used in \req{NFR.S.6}. \\
 \hline
 \textit{MAX\_LOSS} & 10\% & Packet loss the system must tolerate while still producing correct output. Used in \req{NFR.S.9}. \\
 \hline
-\textit{CONTEXT\_MAX} & 4096 tokens & Longest context (prompt and response) a session can use. Each node reserves KV cache for this many tokens. Used in S.5, S.9. \\
+\textit{CONTEXT\_MAX} & 4096 tokens & Longest context (prompt and response) a session can use. Each node reserves KV cache for this many tokens. Used in S.9. \\
 \hline
 \end{tabularx}
 \end{table}
@@ -3226,6 +3218,8 @@ as testing gives better data.
 \begin{tabularx}{\textwidth}{|l|l|>{\raggedright\arraybackslash}X|}
 \hline
 \textbf{Name} & \textbf{Value} & \textbf{Description} \\
+\hline
+\textit{MIN\_NODES} & 2 & Minimum number of nodes a model is partitioned across during distributed inference. Used in \req{SR1-1}, \req{UC5}, S.8 group 1. \\
 \hline
 \textit{MEMORY\_MARGIN} & 10\% & Share of each node's memory left free for runtime overhead. Used in \req{FR.S.2.1}, \req{SR1-3}. \\
 \hline

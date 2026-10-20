@@ -64,11 +64,11 @@ October 14, 2026 & All & Initial revision \\
 \section{Introduction}
 
 This document is the hazard analysis for \progname{}. \progname{} splits a
-large language model (LLM) into blocks of layers and runs each block on a
-different device on a local network, so that the devices can run a model
-together that none of them could run alone. The leader node's coordinator assigns
-blocks of layers to the devices and accepts prompts from the user. Each
-follower node runs its block and passes the result on to the next
+large language model (LLM) into partitions of layers and runs each partition
+on a different device on a local network, so that the devices can run a model
+together that none of them could run alone. The leader node's Coordinator
+assigns partitions to the devices and accepts prompts from the user. Each
+follower node runs its partition and passes the result on to the next
 device.
 
 \subsection{Definition of a Hazard}
@@ -100,9 +100,9 @@ and then verified through the V\&V Plan.
 
 \noindent\textbf{In scope:}
 \begin{itemize}
-  \item The software components of \progname{}: the coordinator, the model
-    partitioner, the inference engine on each device, the communication
-    between devices, and the user interface.
+  \item The software components of \progname{}: the Coordinator, the Model
+    Partitioner, the Inference Engine on each device, Tensor I/O between
+    devices, and the Lake Client.
   \item The interaction of these components with the user's devices, the
     local network that connects them, and the model files that are loaded.
 \end{itemize}
@@ -157,13 +157,13 @@ This component exists on all nodes, but the following responsibilities are only 
 \begin{itemize}
 	\item Providing an OpenAI-API compatible API to the user for use with tools like
 		\href{https://opencode.ai/}{OpenCode}.
-	\item Tracking cluster health, and detecting node failures.
+	\item Tracking Lake network health, and detecting node failures.
 	\item Notifying nodes of partitioning changes.
-	\item Rebuilding the cluster and saving in-progress requests
+	\item Rebuilding the Lake network and saving in-progress requests
 		in the case of node failure, removal, or addition.
 	\item Measuring node connection performance.
 \end{itemize}
-On a follower node, it is primarily responsible for managing the inference engine
+On a follower node, it is primarily responsible for managing the Inference Engine
 on its device, following the instructions of the leader node.
 
 \subsection{Model Partitioner}
@@ -173,9 +173,8 @@ each partition. This component is integral to ensuring that each device is assig
 partition given the device's computational and networking performance.
 
 \subsection{Inference Engine}
-This component is the high-performance inference engine running on each device. It will handle
-execution of the given model partition for each device. It will call into
-\href{https://github.com/ggml-org/ggml}{ggml} using the Rust-to-C FFI (TODO: glossary) to control the execution of a
+This component runs the model partition on each device. It will call into
+\href{https://github.com/ggml-org/ggml}{ggml} using the Rust-to-C foreign function interface (FFI) to control the execution of a
 device's model partition.
 
 \subsection{Tensor I/O}
@@ -199,7 +198,7 @@ We assume:
 \begin{itemize}
 	\item The model file (GGUF) provided to Lake is already a functional LLM before partitioning.
 	\item User requests are only made through the API on the leader device.
-	\item Only one model will be run by the pool at a time.
+	\item Only one model will be run by the Lake network at a time.
 	\item The local area network connecting the devices is private, and trusted by the user.
 \end{itemize}
 
@@ -208,7 +207,7 @@ We assume:
 \section{Failure Mode and Effect Analysis}
 \label{SecFMEA}
 
-The following Failure Mode and Effect Analysis (FMEA) table summarises potential failure modes for the Lake system based on each component.
+The following Failure Mode and Effect Analysis (FMEA) table summarises potential failure modes for Lake based on each component.
 It also details potential causes and effects for each of the failures, along with a recommended action to mitigate
 the potential failure. Components are listed based on their appearance above in Section 3. Beyond this, there are also
 hazards listed for general communication failures that may take place in between nodes or components, as well as privacy failures.
@@ -231,8 +230,8 @@ Component
   % (Model Coordinator: multirow label is in the second row below)
   & Incorrect or outdated device health statistics are reported back to the user.
   & Coordinator sends requests to device that is unable to handle requests and inference fails.
-  & Health checks are too infrequent from the coordinator or user interface displays older data than available.
-  & Scheduled health checks to each device and removal of data from user interface as soon as new data reaches leader node.
+  & Health checks are too infrequent from the Coordinator or the Lake Client displays older data than available.
+  & Scheduled health checks to each device and removal of data from the Lake Client as soon as new data reaches leader node.
   & SR0-1
   & H0-1 \\ \cline{2-7}
 \multirow{-2}{\dimexpr0.2\textwidth\relax}{Coordinator}
@@ -253,7 +252,7 @@ Component
   & SR1-1
   & H1-1 \\ \cline{2-7}
   & The model is insufficiently partitioned and cannot be split up amongst the
-    device pool. (\# Partitions $<$ \# Devices)
+    nodes in the Lake network. (\# Partitions $<$ \# Devices)
   & Model runs on only part of available hardware and does not achieve best possible performance.
   & Poor constraints on model partition algorithm.
   & Ensure that layers are split up into enough pieces to span all devices
@@ -353,10 +352,10 @@ Inference Engine
     \item \label{SR1-3}\textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a configured safety margin. Related SRS requirements: FR.S.2.1, FR.S.2.2.
     \item \label{SR2-1}\textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered within the configured recovery limits, the system must report to the API that the request has failed. Related SRS requirements: FR.S.1.10, FR.S.1.11, FR.S.1.13.
     \item \label{SR3-1}\textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests.
-    \item \label{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the coordinator so the inference request can recover, subject to SR5-2.
+    \item \label{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the Coordinator so the inference request can recover, subject to SR5-2.
     \item \label{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy.
     \item \label{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria are not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown. Related SRS requirements: FR.S.1.24 and FR.S.1.25.
-    \item \label{SR4-3}\textbf{SR4-3} -- The system shall utilise configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance.
+    \item \label{SR4-3}\textbf{SR4-3} -- The system shall utilise configured values or historical data to determine a baseline inter-node communication latency and notify the Coordinator when that baseline is exceeded by a specified tolerance.
     \item \label{SR5-1}\textbf{SR5-1} -- The system shall require user approval on the leader node to authorise a follower node, and user confirmation on the follower node to confirm the authorisation before it can participate in the Lake network. Related SRS requirements: FR.S.1.17, FR.S.1.18, FR.S.1.20, FR.S.1.21, NFR.S.12.
     \item \label{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, and KV cache content in diagnostic logs. Related SRS requirements: NFR.S.10.
 \end{itemize}
@@ -394,31 +393,32 @@ SR1-1 & Proof of concept & Nov 23, 2026 & The PoC is a model split across two
   processes, then two devices. A split that puts everything on one node is
   not a PoC at all, so the check is part of the first partitioner.\\
 SR1-2 & Proof of concept & Nov 23, 2026 & Same reason: every layer assigned,
-  every node given a non-empty block, is the definition of a correct
+  every node given a non-empty partition, is the definition of a correct
   split and is tested from the first run.\\
 SR1-3 & Proof of concept & Nov 23, 2026 & The PoC splits a model by hand
-  across two devices and the first way it fails is a block larger than the
+  across two devices and the first way it fails is a partition larger than the
   device's memory. The memory check goes in with the first loader.\\
 SR5-2 & Proof of concept & Nov 23, 2026 & The PoC writes the first
   diagnostic logs, and the cheapest time to keep prompts, responses,
   tensors, and KV cache content out of them is before any log line exists.
   Every later log (SR3-2 included) inherits the rule.\\
 \midrule
-SR0-2 & Revision 0 & Feb 1, 2027 & Dynamic allocation lands in January.
-  Once blocks can move between nodes, the coordinator can route a request
-  to a node whose block is not yet confirmed, so this guard ships with
+SR0-2 & Rev 0 & Feb 1, 2027 & Dynamic allocation lands in January.
+  Once partitions can move between nodes, the
+  Coordinator can route a request to a node whose partition is not yet
+  confirmed, so this guard ships with
   reallocation.\\
-SR0-1 & Revision 0 & Feb 1, 2027 & Health data only matters once nodes can
+SR0-1 & Rev 0 & Feb 1, 2027 & Health data only matters once nodes can
   join and leave mid-session. The time-to-live on health reports is built
   with the health-check loop that reallocation depends on.\\
-SR4-2 & Revision 0 & Feb 1, 2027 & Marking a node unavailable until it
+SR4-2 & Rev 0 & Feb 1, 2027 & Marking a node unavailable until it
   passes a health check is the other half of the same loop.\\
-SR4-1 & Revision 0 & Feb 1, 2027 & Timeouts between nodes are how a
+SR4-1 & Rev 0 & Feb 1, 2027 & Timeouts between nodes are how a
   departed node is detected. Without them reallocation never triggers.\\
-SR2-1 & Revision 0 & Feb 1, 2027 & Bounded retry after a follower fails is
+SR2-1 & Rev 0 & Feb 1, 2027 & Bounded retry after a follower fails is
   the user-facing behaviour of reallocation, and it is what the Rev~0 demo
   shows.\\
-SR5-1 & Revision 0 & Feb 1, 2027 & Node agents joining and leaving are a
+SR5-1 & Rev 0 & Feb 1, 2027 & Lake Clients joining and leaving are a
   Core system deliverable. The PoC has no join flow (the two devices are
   configured by hand), so the first time an unknown device can ask to
   join is Rev~0, and the approval on both sides ships with that flow.\\
@@ -431,7 +431,7 @@ SR3-2 & Final demonstration & Mar 15, 2027 & Logging failed decodings is
   added with SR3-1, since it is the record that SR3-1's checks fired.\\
 SR4-3 & Final demonstration & Mar 15, 2027 & A latency baseline needs
   enough measured runs to set a tolerance. The per-token profiler feeds it,
-  and the user interface that shows the warning is a Rev~0 deliverable, so
+  and the Lake Client that shows the warning is a Rev~0 deliverable, so
   the alert is wired up during final integration.\\
 \bottomrule
 \end{longtable}
@@ -470,9 +470,9 @@ into scope.
     owner starts working. This becomes a requirement once Lake is run on
     machines that are not dedicated to it, which is after the capstone.
   \item \textbf{No telemetry, and auditability.} The same interview asked
-    that Lake send nothing outside the cluster, including usage or crash
+    that Lake send nothing outside the Lake network, including usage or crash
     reports, and that its behaviour be auditable. The SRS privacy
-    requirement (NFR.G.4.1) states that no request data leaves the cluster
+    requirement (NFR.G.4.1) states that no request data leaves the Lake network
     and that Lake sends no telemetry; it is verified by a network capture
     during a session, and SR5-2 keeps request data out of the logs that
     stay on the devices. Auditability has no requirement yet and is
@@ -549,7 +549,7 @@ of whether material was generated by a person or an AI tool.
     \item Splitting the document by component worked. Matt had already
     named the five components for the SRS, so the system boundary section
     and the FMEA used the same names, and each hazard ID carries its
-    component number (H1 for the partitioner, H3 for Tensor I/O). That made
+    component number (H1 for the Model Partitioner, H3 for Tensor I/O). That made
     it easy to see which component had no hazards yet and go looking for
     them, and it means the safety requirements trace to the SRS without a
     separate mapping table. The losses table in the scope section also
@@ -573,25 +573,25 @@ of whether material was generated by a person or an AI tool.
     Development Plan's proof of concept section names network overhead
     making the split slower than a single device (H4-3), and the Problem
     Statement's dynamic allocation goal is built around devices dropping
-    out of the pool mid-session (H2-1). A block larger than a device's
+    out of the Lake network mid-session (H2-1). A partition larger than a device's
     memory (H1-3) was implicit in how the Development Plan describes the
     partitioner, but had not been written down as a failure. The rest came
     out of the FMEA. Walking the
-    coordinator's responsibilities one at a time produced H0-1 and H0-2,
+    Coordinator's responsibilities one at a time produced H0-1 and H0-2,
     stale health data and a missed partition notification, which we had
     not thought of because we had been picturing the happy path where every
     message arrives. The partitioner rows H1-1 and H1-2 came from asking
     what a correct partition even is, which forced us to write down that
     every layer is assigned exactly once and every node gets a non-empty
-    block; that definition is now also the formalisation in the SRS. The
+    partition; that definition is now also the formalisation in the SRS. The
     Tensor I/O rows H3-1 and H3-2 came from the question of what happens
     when a message arrives but is wrong rather than missing, which is a
     different failure from H4-1 and needs a different check. The privacy
     rows H5-1 and H5-2 were added while the FMEA was under review. The SRS
-    already said that untrusted devices must not join a cluster and that
+    already said that untrusted devices must not join a Lake network and that
     request data is not saved, but neither had been written down as a
     hazard, and a review comment moved H5-2 from node approval, which H5-1
-    already covers, to data left on devices that are already in the pool.
+    already covers, to data left on devices that are already in the Lake network.
     Finally, the
     user interview for the SRS, which happened during this deliverable,
     added two items to the roadmap that no one on the team had listed:
