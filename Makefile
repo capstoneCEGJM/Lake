@@ -14,12 +14,15 @@ define COMPILE_TEX
 	cd $(dir $1) && $(PDFLATEX_CMD) $(notdir $1) || { echo "Error: pdflatex failed for $1"; exit 1; }
 endef
 
-# Define the bibtex command
-BIBTEX_CMD = [ -f $(basename $(notdir $1)).aux ] && bibtex $(basename $(notdir $1)) || echo "No bibtex references found" || { echo "Error: bibtex failed for $1"; exit 1; }
-
 # Define the compile step for bibtex
 define COMPILE_BIBTEX
-	cd $(dir $1) && $(BIBTEX_CMD)
+	cd $(dir $1) && \
+	if grep -q '\\bibdata{' $(basename $(notdir $1)).aux && \
+	   grep -q '\\citation{' $(basename $(notdir $1)).aux; then \
+		bibtex $(basename $(notdir $1)) || { echo "Error: bibtex failed for $1"; exit 1; }; \
+	else \
+		echo "No bibliography citations to process for $1"; \
+	fi
 endef
 
 # Default target: Compile all .tex files if no specific target is given

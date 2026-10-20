@@ -119,7 +119,14 @@ jobs:
           # with "Font rm-lmr7 at 600 not found".
           sudo updmap-sys >/dev/null
 
+          # Cached packages also skip the postinst that registers bibtex's
+          # alternatives link. Restore it when only the real binary exists.
+          if ! command -v bibtex >/dev/null 2>&1 && [ -x /usr/bin/bibtex.original ]; then
+            sudo update-alternatives --install /usr/bin/bibtex bibtex /usr/bin/bibtex.original 100
+          fi
+
           pdflatex --version | head -1
+          bibtex --version
           pandoc --version | head -1
           kpsewhich article.cls
           kpsewhich amsmath.sty
