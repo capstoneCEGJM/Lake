@@ -1,0 +1,117 @@
+% Requirement dependency table. Keep in step with the links in SRS.tex.
+% Do not edit by hand; rerun the script after changing requirements.
+{\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.09\linewidth}>{\raggedright\arraybackslash}p{0.14\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.24\linewidth}>{\raggedright\arraybackslash}p{0.11\linewidth}>{\raggedright\arraybackslash}p{0.06\linewidth}}
+\caption{Requirement dependency matrix. Depends on follows the
+arrows in Figure~\ref{fig:requirement-dependencies} (depends on,
+is satisfied by or is related to) and Required by lists the same
+links the other way. Every identifier links to
+the requirement; * marks a hazard a requirement only partially
+satisfies; the last column is the group in
+Section~\ref{subsec:verification-and-acceptance-criteria}.}
+\label{tab:requirement-dependencies}\\
+\toprule
+\textbf{ID} & \textbf{Realises} & \textbf{Depends on} &
+\textbf{Required by} & \textbf{HA hazard} & \textbf{S.8 group}\\
+\midrule
+\endfirsthead
+\multicolumn{6}{l}{\textit{Table~\ref{tab:requirement-dependencies} continued}}\\
+\toprule
+\textbf{ID} & \textbf{Realises} & \textbf{Depends on} &
+\textbf{Required by} & \textbf{HA hazard} & \textbf{S.8 group}\\
+\midrule
+\endhead
+\midrule
+\multicolumn{6}{r}{\textit{continued on next page}}\\
+\endfoot
+\bottomrule
+\endlastfoot
+\req{FR.S.1.1} & \req{FR.G.4.2} & \req{FR.S.1.19} & \req{FR.S.3.1}, \req{SR0-2} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.1.2} & \req{FR.G.4.5} & \req{FR.S.3.4} & \req{FR.S.1.23}, \req{SR0-1} & H0-1*, H0-2* & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.1.3} & \req{FR.G.4.5} & \req{FR.S.4.5} & \req{FR.S.1.23}, \req{SR4-3} & H0-1*, H0-2* & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.1.4} & \req{FR.G.4.1} & -- & \req{FR.S.5.1}, \req{NFR.S.11} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.1.5} & \req{FR.G.4.3} & \req{FR.S.1.15} & \req{FR.S.4.1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.1.6} & \req{FR.G.4.2} & \req{FR.S.2.1} & \req{FR.S.1.11}, \req{FR.S.1.12}, \req{FR.S.1.19}, \req{SR0-2} & H0-2* & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.1.7} & \req{FR.G.4.5} & \req{FR.S.1.23} & \req{FR.S.1.10}, \req{FR.S.1.16}, \req{FR.S.1.24}, \req{SR0-1} & H0-1*, H0-2* & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.1.8} & \req{FR.G.4.2} & \req{FR.S.1.18} & \req{FR.S.2.1}, \req{FR.S.2.4} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{FR.S.1.9} & \req{FR.G.4.6} & -- & \req{NFR.E.3}, \req{FR.S.1.14} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{9}\\
+\req{FR.S.1.10} & \req{FR.G.4.4} & \req{FR.S.1.7} & \req{FR.S.1.11}, \req{SR2-1}, \req{SR4-1} & H2-1*, H4-2*, H4-1* & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{FR.S.1.11} & \req{FR.G.4.4} & \req{FR.S.1.6}, \req{FR.S.1.10} & \req{FR.S.1.13}, \req{FR.S.1.22}, \req{SR2-1} & H2-1*, H4-2*, H4-1* & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{FR.S.1.12} & \req{FR.G.4.4} & \req{FR.S.1.6}, \req{FR.S.1.20} & \req{FR.S.1.13}, \req{FR.S.1.22} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{FR.S.1.13} & \req{FR.G.4.4} & \req{FR.S.1.11}, \req{FR.S.1.12} & \req{SR2-1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{FR.S.1.14} & \req{FR.G.4.3} & \req{FR.S.1.9}, \req{FR.S.3.5} & \req{NFR.S.5} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{13}\\
+\req{FR.S.1.15} & \req{FR.G.4.3} & \req{FR.S.2.1} & \req{FR.S.1.5} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.1.16} & \req{FR.G.4.1}, \req{FR.G.4.5} & \req{FR.S.1.7} & \req{FR.S.5.5} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.1.17} & \req{FR.G.4.1} & \req{FR.S.1.20} & \req{NFR.S.12}, \req{SR5-1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.1.18} & \req{FR.G.4.1} & \req{FR.S.5.2} & \req{FR.S.1.8}, \req{NFR.S.12}, \req{SR5-1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.1.19} & \req{FR.G.4.2} & \req{FR.S.1.6} & \req{FR.S.1.1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.1.20} & \req{FR.G.4.1} & -- & \req{FR.S.1.12}, \req{FR.S.1.17}, \req{FR.S.1.21}, \req{FR.S.5.7}, \req{NFR.S.11}, \req{NFR.S.12}, \req{SR5-1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.1.21} & \req{FR.G.4.1} & \req{FR.S.1.20} & \req{NFR.S.12}, \req{SR5-1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.1.22} & \req{FR.G.4.4} & \req{FR.S.1.11}, \req{FR.S.1.12} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{FR.S.1.23} & \req{FR.G.4.5} & \req{FR.S.1.2}, \req{FR.S.1.3} & \req{FR.S.1.7}, \req{NFR.S.11}, \req{SR0-1} & H0-1*, H0-2* & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.1.24} & -- & \req{FR.S.1.7} & \req{FR.S.1.25}, \req{SR4-1}, \req{SR4-2} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{FR.S.1.25} & -- & \req{FR.S.1.24} & \req{SR4-2} & H4-2*, H4-1* & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{FR.S.2.1} & \req{FR.G.4.2} & \req{FR.S.1.8} & \req{FR.S.1.6}, \req{FR.S.1.15}, \req{FR.S.2.2}, \req{NFR.S.4}, \req{SR1-3} & H1-3 & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{FR.S.2.2} & \req{FR.G.4.2}, \req{FR.G.4.4} & \req{FR.S.2.1} & \req{FR.S.5.4}, \req{SR1-3} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{FR.S.2.3} & \req{FR.G.4.2}, \req{NFR.G.4.3} & \req{FR.S.5.3} & \req{NFR.S.6} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.2.4} & \req{FR.G.4.2} & \req{FR.S.1.8} & \req{NFR.S.4} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{FR.S.3.1} & \req{FR.G.4.2} & \req{FR.S.1.1} & \req{FR.S.3.2} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.3.2} & \req{FR.G.4.3} & \req{FR.S.3.1}, \req{FR.S.4.3} & \req{FR.S.3.3}, \req{FR.S.3.4} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.3.3} & \req{FR.G.4.3} & \req{FR.S.3.2} & \req{FR.S.4.4} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.3.4} & \req{FR.G.4.5} & \req{FR.S.3.2} & \req{FR.S.1.2} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.3.5} & \req{FR.G.4.3} & \req{FR.S.4.6} & \req{FR.S.1.14}, \req{NFR.S.5} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{13}\\
+\req{FR.S.4.1} & \req{FR.G.4.3} & \req{FR.S.1.5} & \req{FR.S.4.3}, \req{FR.S.4.4}, \req{FR.S.4.5} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.4.2} & -- & \req{FR.S.4.5} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{14}\\
+\req{FR.S.4.3} & \req{FR.G.4.3} & \req{FR.S.4.1} & \req{FR.S.3.2}, \req{SR3-1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.4.4} & \req{FR.G.4.3} & \req{FR.S.3.3}, \req{FR.S.4.1} & \req{FR.S.4.6} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{FR.S.4.5} & \req{FR.G.4.5} & \req{FR.S.4.1} & \req{FR.S.1.3}, \req{FR.S.4.2}, \req{SR4-3} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.4.6} & \req{FR.G.4.3} & \req{FR.S.4.4} & \req{FR.S.3.5}, \req{NFR.S.5} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{13}\\
+\req{FR.S.5.1} & \req{FR.G.4.1} & \req{FR.S.1.4} & \req{FR.S.5.2}, \req{NFR.S.2}, \req{NFR.S.11} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.5.2} & \req{FR.G.4.1} & \req{FR.S.5.1} & \req{FR.S.1.18}, \req{NFR.S.2} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.5.3} & \req{FR.G.4.2} & -- & \req{FR.S.2.3}, \req{NFR.S.2} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{FR.S.5.4} & \req{FR.G.4.4} & \req{FR.S.2.2} & \req{NFR.S.1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{FR.S.5.5} & \req{FR.G.4.5} & \req{FR.S.1.16} & \req{FR.S.5.6}, \req{NFR.S.1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{FR.S.5.6} & \req{FR.G.4.5} & \req{FR.S.5.5} & \req{NFR.S.1} & H4-3 & \hyperref[subsec:verification-and-acceptance-criteria]{10}\\
+\req{FR.S.5.7} & \req{FR.G.4.1} & \req{FR.S.1.20} & \req{NFR.S.12} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\midrule
+\req{NFR.S.1} & \req{FR.G.4.5} & \req{FR.S.5.4}, \req{FR.S.5.5}, \req{FR.S.5.6} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{10}\\
+\req{NFR.S.2} & -- & \req{FR.S.5.1}, \req{FR.S.5.2}, \req{FR.S.5.3} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{10}\\
+\req{NFR.S.3} & \req{NFR.G.4.2}, \req{NFR.G.4.5} & -- & \req{NFR.E.1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{10}\\
+\req{NFR.S.4} & \req{FR.G.4.2} & \req{FR.S.2.1}, \req{FR.S.2.4} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{3}\\
+\req{NFR.S.5} & \req{FR.G.4.3}, \req{NFR.G.4.6} & \req{FR.S.1.14}, \req{FR.S.3.5}, \req{FR.S.4.6} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{13}\\
+\req{NFR.S.6} & \req{NFR.G.4.3} & \req{FR.S.2.3} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{2}\\
+\req{NFR.S.7} & -- & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{11}\\
+\req{NFR.S.8} & -- & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{7}\\
+\req{NFR.S.9} & -- & -- & \req{SR3-1} & H3-1* & \hyperref[subsec:verification-and-acceptance-criteria]{7}\\
+\req{NFR.S.10} & \req{NFR.G.4.1} & -- & \req{SR5-2} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{8}\\
+\req{NFR.S.11} & \req{NFR.G.4.1} & \req{FR.S.1.4}, \req{FR.S.1.20}, \req{FR.S.1.23}, \req{FR.S.5.1} & \req{NFR.E.5} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{8}\\
+\req{NFR.S.12} & \req{FR.G.4.1}, \req{NFR.G.4.1} & \req{FR.S.1.17}, \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{FR.S.5.7} & \req{SR5-1} & H5-1 & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{NFR.S.13} & \req{NFR.G.4.2} & -- & \req{NFR.E.1} & -- & \hyperref[subsec:verification-and-acceptance-criteria]{12}\\
+\req{NFR.S.14} & \req{NFR.G.4.2} & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{12}\\
+\req{NFR.S.15} & \req{NFR.G.4.2} & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{12}\\
+\midrule
+\req{NFR.E.1} & \req{NFR.G.4.2}, \req{NFR.G.4.5} & \req{NFR.S.3}, \req{NFR.S.13} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{12}\\
+\req{NFR.E.2} & \req{FR.G.4.2} & \req{SR1-1}, \req{SR1-2} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{NFR.E.3} & \req{FR.G.4.6} & \req{FR.S.1.9} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{9}\\
+\req{NFR.E.4} & \req{NFR.G.4.3} & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{NFR.E.5} & \req{NFR.G.4.1} & \req{NFR.S.11} & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{8}\\
+\req{NFR.E.6} & -- & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{15}\\
+\req{NFR.E.7} & \req{NFR.G.4.4} & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{15}\\
+\req{NFR.E.8} & \req{NFR.G.4.4} & -- & -- & -- & \hyperref[subsec:verification-and-acceptance-criteria]{15}\\
+\midrule
+\req{SR0-1} & -- & \req{FR.S.1.2}, \req{FR.S.1.7}, \req{FR.S.1.23} & -- & H0-1 & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{SR0-2} & -- & \req{FR.S.1.1}, \req{FR.S.1.6} & -- & H0-2 & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{SR1-1} & -- & -- & \req{NFR.E.2} & H1-1 & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{SR1-2} & -- & -- & \req{NFR.E.2} & H1-2 & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{SR1-3} & -- & \req{FR.S.2.1}, \req{FR.S.2.2} & -- & H1-3 & \hyperref[subsec:verification-and-acceptance-criteria]{1}\\
+\req{SR2-1} & -- & \req{FR.S.1.10}, \req{FR.S.1.11}, \req{FR.S.1.13} & -- & H2-1 & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{SR3-1} & -- & \req{FR.S.4.3}, \req{NFR.S.9} & -- & H3-1 & \hyperref[subsec:verification-and-acceptance-criteria]{7}\\
+\req{SR3-2} & -- & \req{SR5-2} & -- & H3-2 & \hyperref[subsec:verification-and-acceptance-criteria]{7}\\
+\req{SR4-1} & -- & \req{FR.S.1.10}, \req{FR.S.1.24} & -- & H4-1 & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{SR4-2} & -- & \req{FR.S.1.24}, \req{FR.S.1.25} & -- & H4-2 & \hyperref[subsec:verification-and-acceptance-criteria]{6}\\
+\req{SR4-3} & -- & \req{FR.S.1.3}, \req{FR.S.4.5} & -- & H4-3 & \hyperref[subsec:verification-and-acceptance-criteria]{5}\\
+\req{SR5-1} & -- & \req{FR.S.1.17}, \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{NFR.S.12} & -- & H5-1 & \hyperref[subsec:verification-and-acceptance-criteria]{4}\\
+\req{SR5-2} & -- & \req{NFR.S.10} & \req{SR3-2} & H5-2 & \hyperref[subsec:verification-and-acceptance-criteria]{8}\\
+\end{longtable}
+}

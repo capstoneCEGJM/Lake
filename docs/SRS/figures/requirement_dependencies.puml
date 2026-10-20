@@ -1,0 +1,255 @@
+' Requirement dependency diagram for the SRS. Keep in step with the
+' "Depends on" and "Related to" links in ../SRS.tex.
+@startuml requirement_dependencies
+skinparam dpi 150
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 15
+skinparam nodesep 14
+skinparam ranksep 34
+skinparam TitleFontSize 20
+skinparam ArrowColor #333333
+skinparam ArrowThickness 0.8
+skinparam rectangle {
+  RoundCorner 2
+  BorderColor #555555
+  StereotypeFontSize 13
+  StereotypeFontStyle italic
+  BackgroundColor<<FR>> #ADD8E6
+  BackgroundColor<<NFR>> #FFFFE0
+  BackgroundColor<<SR>> #F2D4E6
+}
+title Requirement Dependency Diagram
+
+rectangle "gap" as grid_gap
+hide grid_gap
+together {
+  rectangle "NFR.S.7" <<NFR>> as NFR_S_7
+  rectangle "NFR.S.8" <<NFR>> as NFR_S_8
+  rectangle "NFR.S.14" <<NFR>> as NFR_S_14
+  rectangle "NFR.S.15" <<NFR>> as NFR_S_15
+  rectangle "NFR.E.4" <<NFR>> as NFR_E_4
+  rectangle "NFR.E.6" <<NFR>> as NFR_E_6
+  rectangle "NFR.E.7" <<NFR>> as NFR_E_7
+  rectangle "NFR.E.8" <<NFR>> as NFR_E_8
+}
+together {
+  rectangle "FR.S.1.1" <<FR>> as FR_S_1_1
+  rectangle "FR.S.1.19" <<FR>> as FR_S_1_19
+}
+together {
+  rectangle "FR.S.1.2" <<FR>> as FR_S_1_2
+  rectangle "FR.S.3.4" <<FR>> as FR_S_3_4
+}
+rectangle "FR.S.1.3" <<FR>> as FR_S_1_3
+together {
+  rectangle "FR.S.1.4" <<FR>> as FR_S_1_4
+  rectangle "FR.S.5.1" <<FR>> as FR_S_5_1
+}
+together {
+  rectangle "FR.S.1.5" <<FR>> as FR_S_1_5
+  rectangle "FR.S.1.15" <<FR>> as FR_S_1_15
+  rectangle "FR.S.4.1" <<FR>> as FR_S_4_1
+}
+rectangle "FR.S.1.6" <<FR>> as FR_S_1_6
+together {
+  rectangle "FR.S.1.7" <<FR>> as FR_S_1_7
+  rectangle "FR.S.1.23" <<FR>> as FR_S_1_23
+}
+together {
+  rectangle "FR.S.1.8" <<FR>> as FR_S_1_8
+  rectangle "FR.S.2.1" <<FR>> as FR_S_2_1
+}
+rectangle "FR.S.1.9" <<FR>> as FR_S_1_9
+rectangle "FR.S.1.10" <<FR>> as FR_S_1_10
+rectangle "FR.S.1.11" <<FR>> as FR_S_1_11
+rectangle "FR.S.1.12" <<FR>> as FR_S_1_12
+rectangle "FR.S.1.13" <<FR>> as FR_S_1_13
+rectangle "FR.S.1.14" <<FR>> as FR_S_1_14
+rectangle "FR.S.1.16" <<FR>> as FR_S_1_16
+rectangle "FR.S.1.17" <<FR>> as FR_S_1_17
+together {
+  rectangle "FR.S.1.18" <<FR>> as FR_S_1_18
+  rectangle "FR.S.5.2" <<FR>> as FR_S_5_2
+}
+rectangle "FR.S.1.20" <<FR>> as FR_S_1_20
+rectangle "FR.S.1.21" <<FR>> as FR_S_1_21
+rectangle "FR.S.1.22" <<FR>> as FR_S_1_22
+rectangle "FR.S.1.24" <<FR>> as FR_S_1_24
+rectangle "FR.S.1.25" <<FR>> as FR_S_1_25
+rectangle "FR.S.2.2" <<FR>> as FR_S_2_2
+rectangle "FR.S.2.3" <<FR>> as FR_S_2_3
+rectangle "FR.S.2.4" <<FR>> as FR_S_2_4
+together {
+  rectangle "FR.S.3.1" <<FR>> as FR_S_3_1
+  rectangle "FR.S.3.2" <<FR>> as FR_S_3_2
+}
+rectangle "FR.S.3.3" <<FR>> as FR_S_3_3
+rectangle "FR.S.3.5" <<FR>> as FR_S_3_5
+rectangle "FR.S.4.2" <<FR>> as FR_S_4_2
+rectangle "FR.S.4.3" <<FR>> as FR_S_4_3
+together {
+  rectangle "FR.S.4.4" <<FR>> as FR_S_4_4
+  rectangle "FR.S.4.6" <<FR>> as FR_S_4_6
+}
+rectangle "FR.S.4.5" <<FR>> as FR_S_4_5
+rectangle "FR.S.5.3" <<FR>> as FR_S_5_3
+rectangle "FR.S.5.4" <<FR>> as FR_S_5_4
+rectangle "FR.S.5.5" <<FR>> as FR_S_5_5
+rectangle "FR.S.5.6" <<FR>> as FR_S_5_6
+rectangle "FR.S.5.7" <<FR>> as FR_S_5_7
+rectangle "NFR.S.1" <<NFR>> as NFR_S_1
+rectangle "NFR.S.2" <<NFR>> as NFR_S_2
+rectangle "NFR.S.3" <<NFR>> as NFR_S_3
+rectangle "NFR.S.4" <<NFR>> as NFR_S_4
+rectangle "NFR.S.5" <<NFR>> as NFR_S_5
+rectangle "NFR.S.6" <<NFR>> as NFR_S_6
+rectangle "NFR.S.9" <<NFR>> as NFR_S_9
+rectangle "NFR.S.10" <<NFR>> as NFR_S_10
+rectangle "NFR.S.11" <<NFR>> as NFR_S_11
+rectangle "NFR.S.12" <<NFR>> as NFR_S_12
+rectangle "NFR.S.13" <<NFR>> as NFR_S_13
+rectangle "NFR.E.1" <<NFR>> as NFR_E_1
+rectangle "NFR.E.2" <<NFR>> as NFR_E_2
+rectangle "NFR.E.3" <<NFR>> as NFR_E_3
+rectangle "NFR.E.5" <<NFR>> as NFR_E_5
+rectangle "SR0-1" <<SR>> as SR0_1
+rectangle "SR0-2" <<SR>> as SR0_2
+rectangle "SR1-1" <<SR>> as SR1_1
+rectangle "SR1-2" <<SR>> as SR1_2
+rectangle "SR1-3" <<SR>> as SR1_3
+rectangle "SR2-1" <<SR>> as SR2_1
+rectangle "SR3-1" <<SR>> as SR3_1
+rectangle "SR3-2" <<SR>> as SR3_2
+rectangle "SR4-1" <<SR>> as SR4_1
+rectangle "SR4-2" <<SR>> as SR4_2
+rectangle "SR4-3" <<SR>> as SR4_3
+rectangle "SR5-1" <<SR>> as SR5_1
+rectangle "SR5-2" <<SR>> as SR5_2
+
+' requirements with no links, laid out as a grid
+NFR_S_7 -[hidden]down-> NFR_E_4
+NFR_S_8 -[hidden]down-> NFR_E_6
+NFR_S_14 -[hidden]down-> NFR_E_7
+NFR_S_15 -[hidden]down-> NFR_E_8
+NFR_S_7 -[hidden]right-> grid_gap
+grid_gap -[hidden]right-> NFR_S_1
+
+' solid: depends on; dashed: satisfied by or related to
+FR_S_1_1 -> FR_S_1_19
+FR_S_1_2 -> FR_S_3_4
+FR_S_1_3 --> FR_S_4_5
+FR_S_1_5 -> FR_S_1_15
+FR_S_1_6 --> FR_S_2_1
+FR_S_1_7 -> FR_S_1_23
+FR_S_1_8 --> FR_S_1_18
+FR_S_1_10 --> FR_S_1_7
+FR_S_1_11 --> FR_S_1_6
+FR_S_1_11 --> FR_S_1_10
+FR_S_1_12 --> FR_S_1_6
+FR_S_1_12 --> FR_S_1_20
+FR_S_1_13 --> FR_S_1_11
+FR_S_1_13 --> FR_S_1_12
+FR_S_1_14 --> FR_S_1_9
+FR_S_1_14 --> FR_S_3_5
+NFR_S_5 -[dashed]-> FR_S_1_14
+FR_S_1_15 --> FR_S_2_1
+FR_S_1_16 --> FR_S_1_7
+FR_S_1_17 --> FR_S_1_20
+NFR_S_12 -[dashed]-> FR_S_1_17
+FR_S_1_18 -> FR_S_5_2
+NFR_S_12 -[dashed]-> FR_S_1_18
+FR_S_1_19 --> FR_S_1_6
+NFR_S_12 -[dashed]-> FR_S_1_20
+FR_S_1_21 --> FR_S_1_20
+NFR_S_12 -[dashed]-> FR_S_1_21
+FR_S_1_22 --> FR_S_1_11
+FR_S_1_22 --> FR_S_1_12
+FR_S_1_23 --> FR_S_1_2
+FR_S_1_23 --> FR_S_1_3
+FR_S_1_24 --> FR_S_1_7
+FR_S_1_25 --> FR_S_1_24
+FR_S_2_1 -> FR_S_1_8
+NFR_S_4 -[dashed]-> FR_S_2_1
+FR_S_2_2 --> FR_S_2_1
+FR_S_2_3 --> FR_S_5_3
+NFR_S_6 -[dashed]-> FR_S_2_3
+FR_S_2_4 --> FR_S_1_8
+NFR_S_4 -[dashed]-> FR_S_2_4
+FR_S_3_1 --> FR_S_1_1
+FR_S_3_2 -> FR_S_3_1
+FR_S_3_2 --> FR_S_4_3
+FR_S_3_3 --> FR_S_3_2
+FR_S_3_4 --> FR_S_3_2
+FR_S_3_5 --> FR_S_4_6
+NFR_S_5 -[dashed]-> FR_S_3_5
+FR_S_4_1 -> FR_S_1_5
+FR_S_4_2 --> FR_S_4_5
+FR_S_4_3 --> FR_S_4_1
+FR_S_4_4 --> FR_S_3_3
+FR_S_4_4 --> FR_S_4_1
+FR_S_4_5 --> FR_S_4_1
+FR_S_4_6 -> FR_S_4_4
+NFR_S_5 -[dashed]-> FR_S_4_6
+FR_S_5_1 -> FR_S_1_4
+NFR_S_2 -[dashed]-> FR_S_5_1
+FR_S_5_2 --> FR_S_5_1
+NFR_S_2 -[dashed]-> FR_S_5_2
+NFR_S_2 -[dashed]-> FR_S_5_3
+FR_S_5_4 --> FR_S_2_2
+NFR_S_1 -[dashed]-> FR_S_5_4
+FR_S_5_5 --> FR_S_1_16
+NFR_S_1 -[dashed]-> FR_S_5_5
+FR_S_5_6 --> FR_S_5_5
+NFR_S_1 -[dashed]-> FR_S_5_6
+FR_S_5_7 --> FR_S_1_20
+NFR_S_12 -[dashed]-> FR_S_5_7
+NFR_S_11 -[dashed]-> FR_S_1_4
+NFR_S_11 -[dashed]-> FR_S_1_20
+NFR_S_11 -[dashed]-> FR_S_1_23
+NFR_S_11 -[dashed]-> FR_S_5_1
+NFR_E_1 -[dashed]-> NFR_S_3
+NFR_E_1 -[dashed]-> NFR_S_13
+NFR_E_2 -[dashed]-> SR1_1
+NFR_E_2 -[dashed]-> SR1_2
+NFR_E_3 -[dashed]-> FR_S_1_9
+NFR_E_5 -[dashed]-> NFR_S_11
+SR0_1 -[dashed]-> FR_S_1_2
+SR0_1 -[dashed]-> FR_S_1_7
+SR0_1 -[dashed]-> FR_S_1_23
+SR0_2 -[dashed]-> FR_S_1_1
+SR0_2 -[dashed]-> FR_S_1_6
+SR1_3 -[dashed]-> FR_S_2_1
+SR1_3 -[dashed]-> FR_S_2_2
+SR2_1 -[dashed]-> FR_S_1_10
+SR2_1 -[dashed]-> FR_S_1_11
+SR2_1 -[dashed]-> FR_S_1_13
+SR3_1 -[dashed]-> FR_S_4_3
+SR3_1 -[dashed]-> NFR_S_9
+SR3_2 -[dashed]-> SR5_2
+SR4_1 -[dashed]-> FR_S_1_10
+SR4_1 -[dashed]-> FR_S_1_24
+SR4_2 -[dashed]-> FR_S_1_24
+SR4_2 -[dashed]-> FR_S_1_25
+SR4_3 -[dashed]-> FR_S_1_3
+SR4_3 -[dashed]-> FR_S_4_5
+SR5_1 -[dashed]-> FR_S_1_17
+SR5_1 -[dashed]-> FR_S_1_18
+SR5_1 -[dashed]-> FR_S_1_20
+SR5_1 -[dashed]-> FR_S_1_21
+SR5_1 -[dashed]-> NFR_S_12
+SR5_2 -[dashed]-> NFR_S_10
+
+skinparam legendBackgroundColor #FFFFFF
+skinparam legendBorderColor #555555
+skinparam legendFontSize 15
+legend bottom left
+  <b>Key</b>
+  ─────▶  depends on
+  ─ ─ ─▶  is satisfied by, or is related to
+  <back:#ADD8E6>  FR  </back>  functional requirement
+  <back:#FFFFE0>  NFR  </back>  non-functional or environmental requirement
+  <back:#F2D4E6>  SR  </back>  safety and security requirement
+endlegend
+
+@enduml

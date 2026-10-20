@@ -1230,64 +1230,86 @@ Template).
 \begin{itemize}
 	\item \reqlabel{FR.S.1.1}\textbf{FR.S.1.1} The system shall provide the local Inference Engine with the model partition
 		assigned to the local device.
+		Depends on \req{FR.S.1.19}.
 	\item \reqlabel{FR.S.1.2}\textbf{FR.S.1.2} The system shall collect device health/performance
 		information\footnote{e.g. \gl[throughput]{token throughput}, end-to-end partition \gl{latency}, \gl{backpressure}.}
 		from the local Inference Engine on a \textit{HEALTH\_INTERVAL} second interval.
 		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+		Depends on \req{FR.S.3.4}.
 	\item \reqlabel{FR.S.1.3}\textbf{FR.S.1.3} The system shall collect the network health/performance
 		information\footnote{e.g. \gl[rtt]{RTT}, throughput, backpressure.}
 		for established connections from the Tensor I/O component on a \textit{HEALTH\_INTERVAL} second interval.
 		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+		Depends on \req{FR.S.4.5}.
 	\item \reqlabel{FR.S.1.4}\textbf{FR.S.1.4} The system shall continuously scan for all other devices on the same network
 		running Lake.
 	\item \reqlabel{FR.S.1.5}\textbf{FR.S.1.5} The system shall provide the upstream and downstream node info to the
 		local Tensor I/O.
+		Depends on \req{FR.S.1.15}.
 	\item \textbf{When running on a leader node:}
 		\begin{itemize}
 			\item \reqlabel{FR.S.1.6}\textbf{FR.S.1.6} The system shall send model partitions to other Coordinators on their
 				respective devices as determined by the Model Partitioner.
 				Partially satisfies hazard H0-2 from the Hazard Analysis.
+				Depends on \req{FR.S.2.1}.
 			\item \reqlabel{FR.S.1.7}\textbf{FR.S.1.7} The system shall monitor cluster performance by gathering performance
 				data from each follower node's Coordinator.
 				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+				Depends on \req{FR.S.1.23}.
 			\item \reqlabel{FR.S.1.8}\textbf{FR.S.1.8} The system shall provide the Model Partitioner with the available nodes,
 				and gathered node performance data, to help inform optimal model cut points.
+				Depends on \req{FR.S.1.18}.
 			\item \reqlabel{FR.S.1.9}\textbf{FR.S.1.9} The system shall provide an \gl[http]{HTTP} \gl[api]{API} matching OpenAI's API.
 			\item \reqlabel{FR.S.1.10}\textbf{FR.S.1.10} The system shall detect failing follower
 				nodes\footnote{A "failing" device is defined as severely degraded (\textit{FAIL\_THRESHOLD} of historical)
 				token throughput, whether it be due to network or device resource instability.}.
 				Partially satisfies hazards H2-1, H4-2 and H4-1 from the Hazard Analysis.
+				Depends on \req{FR.S.1.7}.
 			\item \reqlabel{FR.S.1.11}\textbf{FR.S.1.11} The system shall rebuild the cluster on a node failing or leaving.
 				Partially satisfies hazards H2-1, H4-2 and H4-1 from the Hazard Analysis.
+				Depends on \req{FR.S.1.6} and \req{FR.S.1.10}.
 			\item \reqlabel{FR.S.1.12}\textbf{FR.S.1.12} The system shall rebuild the cluster on a node joining.
+				Depends on \req{FR.S.1.6} and \req{FR.S.1.20}.
 			\item \reqlabel{FR.S.1.13}\textbf{FR.S.1.13} The system shall retry in-progress requests after a cluster rebuild.
+				Depends on \req{FR.S.1.11} and \req{FR.S.1.12}.
 			\item \reqlabel{FR.S.1.14}\textbf{FR.S.1.14} The system shall accept multiple concurrent requests through the HTTP API.
 				Related to \hyperref[NFR.S.5]{NFR.S.5}.
+				Depends on \req{FR.S.1.9} and \req{FR.S.3.5}.
 			\item \reqlabel{FR.S.1.15}\textbf{FR.S.1.15} The system shall communicate the cluster graph structure to each follower.
+				Depends on \req{FR.S.2.1}.
 			\item \reqlabel{FR.S.1.16}\textbf{FR.S.1.16} The system shall provide the Web UI with cluster information, and
 				accept cluster configuration instructions from the Web UI.
+				Depends on \req{FR.S.1.7}.
 			\item \reqlabel{FR.S.1.17}\textbf{FR.S.1.17} The system shall not begin inference until all selected followers have
 				confirmed participation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+				Depends on \req{FR.S.1.20}.
 			\item \reqlabel{FR.S.1.18}\textbf{FR.S.1.18} The system shall only include selected followers in a new cluster.
 				Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+				Depends on \req{FR.S.5.2}.
 		\end{itemize}
 	\item \textbf{When running on a follower node:}
 		\begin{itemize}
 			\item \reqlabel{FR.S.1.19}\textbf{FR.S.1.19} The system shall accept model partition assignments from the
 				leader node Coordinator.
+				Depends on \req{FR.S.1.6}.
 			\item \reqlabel{FR.S.1.20}\textbf{FR.S.1.20} The system shall, upon receiving an invite to join a cluster,
 				request that the user confirm or decline participation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
 			\item \reqlabel{FR.S.1.21}\textbf{FR.S.1.21} The system shall not partake in a cluster without user confirmation.
 				Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+				Depends on \req{FR.S.1.20}.
 			\item \reqlabel{FR.S.1.22}\textbf{FR.S.1.22} The system shall not require confirmation to re-join a rebuilding cluster
 				led by the same device, so long as the local device was already participating in the original cluster.
+				Depends on \req{FR.S.1.11} and \req{FR.S.1.12}.
 			\item \reqlabel{FR.S.1.23}\textbf{FR.S.1.23} The system shall report collected health/performance data to the
 				leader node Coordinator on a \textit{HEALTH\_INTERVAL} second interval.
 				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
+				Depends on \req{FR.S.1.2} and \req{FR.S.1.3}.
 			\item \reqlabel{FR.S.1.24}\textbf{FR.S.1.24} The system shall assume the leader node has failed if there has been
 				no health query from the leader node for more than \textit{LEADER\_TIMEOUT} consecutive seconds.
+				Depends on \req{FR.S.1.7}.
 			\item \reqlabel{FR.S.1.25}\textbf{FR.S.1.25} The system shall initiate the shutdown of the local node, if the leader
 				node is assumed to have failed. Partially satisfies hazards H4-2 and H4-1 from the Hazard Analysis.
+				Depends on \req{FR.S.1.24}.
 				\begin{quote}
 					\textbf{Rationale:} The Leader node is the device the user is physically using to interact with the cluster,
 					so failure of that device will remove the user's ability to use the cluster, whether or not the cluster survives.
@@ -1302,14 +1324,18 @@ Template).
 	\item \reqlabel{FR.S.2.1}\textbf{FR.S.2.1} The system shall assign all devices a partition smaller than their available
 		\gl[gpu]{GPU}-accessible memory, with additional \textit{MEMORY\_MARGIN} left for runtime overhead. Related to \hyperref[NFR.S.4]{NFR.S.4}.
 		Satisfies hazard H1-3 from the Hazard Analysis.
+		Depends on \req{FR.S.1.8}.
 	\item \reqlabel{FR.S.2.2}\textbf{FR.S.2.2} The system shall report failure in the case that no valid partition across
 		the cluster exists (e.g. not enough GPU-accessible memory).
+		Depends on \req{FR.S.2.1}.
 	\item \reqlabel{FR.S.2.3}\textbf{FR.S.2.3} The system shall produce partitions that when assembled, are equivalent
 		to the original model. Satisfies \hyperref[NFR.S.6]{NFR.S.6}.
+		Depends on \req{FR.S.5.3}.
 	\item \reqlabel{FR.S.2.4}\textbf{FR.S.2.4} The system shall assign larger partitions to more capable
 		devices\footnote{The "capabilities" of any given devices are defined via a combination of network throughput,
 		GPU \gl[flops]{TFLOPs}/TOPs, GPU-accessible memory size, and GPU-accessible memory bandwidth (GB/s).}.
 		Related to \hyperref[NFR.S.4]{NFR.S.4}.
+		Depends on \req{FR.S.1.8}.
 \end{itemize}
 
 \subsubsection{Inference Engine}
@@ -1317,32 +1343,43 @@ Template).
 \begin{itemize}
 	\item \reqlabel{FR.S.3.1}\textbf{FR.S.3.1} The system shall load the model partition given by the local Coordinator into
 		GPU-accessible memory.
+		Depends on \req{FR.S.1.1}.
 	\item \reqlabel{FR.S.3.2}\textbf{FR.S.3.2} The system shall accept incoming tensors from Tensor I/O, and run them
 		through the loaded partition.
+		Depends on \req{FR.S.3.1} and \req{FR.S.4.3}.
 	\item \reqlabel{FR.S.3.3}\textbf{FR.S.3.3} The system shall send output tensors to Tensor I/O.
+		Depends on \req{FR.S.3.2}.
 	\item \reqlabel{FR.S.3.4}\textbf{FR.S.3.4} The system shall measure partition performance
 		metrics\footnote{e.g. token throughput, end-to-end partition latency, backpressure.} and provide them to the local
 		Coordinator on a \textit{HEALTH\_INTERVAL} second interval.
+		Depends on \req{FR.S.3.2}.
 	\item \reqlabel{FR.S.3.5}\textbf{FR.S.3.5} The system shall support processing tensors from multiple different
 		requests concurrently. Related to \hyperref[NFR.S.5]{NFR.S.5}.
+		Depends on \req{FR.S.4.6}.
 \end{itemize}
 
 \subsubsection{Tensor I/O}
 \textbf{Functional Requirements}
 \begin{itemize}
 	\item \reqlabel{FR.S.4.1}\textbf{FR.S.4.1} The system shall establish connections with neighbouring nodes' Tensor I/O components.
+		Depends on \req{FR.S.1.5}.
 	\item \reqlabel{FR.S.4.2}\textbf{FR.S.4.2} The system shall dynamically choose the compression level of
 		outgoing tensors to maximise throughput based on available \gl[cpu]{CPU}-time and network throughput.
+		Depends on \req{FR.S.4.5}.
 	\item \reqlabel{FR.S.4.3}\textbf{FR.S.4.3} The system shall accept input tensors from the upstream node, decompress them,
 		and provide them to the Inference Engine.
+		Depends on \req{FR.S.4.1}.
 	\item \reqlabel{FR.S.4.4}\textbf{FR.S.4.4} The system shall accept output tensors from the Inference Engine, compress
 		them, and send them to the downstream node's Tensor I/O.
+		Depends on \req{FR.S.3.3} and \req{FR.S.4.1}.
 	\item \reqlabel{FR.S.4.5}\textbf{FR.S.4.5} The system shall measure network performance
 		data\footnote{e.g. RTT, throughput, backpressure.}, for established connections, and provide
 		that data to the local Coordinator on a \textit{HEALTH\_INTERVAL} second interval.
+		Depends on \req{FR.S.4.1}.
 	\item \reqlabel{FR.S.4.6}\textbf{FR.S.4.6} The system shall maintain request association when sending
 		tensors\footnote{This is to allow tensors from different concurrent requests to be differentiated.}.
 		Related to \hyperref[NFR.S.5]{NFR.S.5}.
+		Depends on \req{FR.S.4.4}.
 \end{itemize}
 
 \subsubsection{Web UI}
@@ -1350,19 +1387,25 @@ Template).
 \begin{itemize}
 	\item \reqlabel{FR.S.5.1}\textbf{FR.S.5.1} The system shall allow a user to scan for other connected devices
 		running Lake. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
+		Depends on \req{FR.S.1.4}.
 	\item \reqlabel{FR.S.5.2}\textbf{FR.S.5.2} The system shall allow a user to select connected devices to create
 		a cluster. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
+		Depends on \req{FR.S.5.1}.
 	\item \reqlabel{FR.S.5.3}\textbf{FR.S.5.3} The system shall allow a user to select an input
 		\gl[gguf]{GGUF} file \citep{GGUF}.
 		Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 	\item \reqlabel{FR.S.5.4}\textbf{FR.S.5.4} The system shall display an error to the user if partitioning the selected
 		input file is infeasible given the selected devices. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
+		Depends on \req{FR.S.2.2}.
 	\item \reqlabel{FR.S.5.5}\textbf{FR.S.5.5} The system shall display the performance metrics of the cluster as a whole,
 		as well as for each individual node and connection. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
+		Depends on \req{FR.S.1.16}.
 	\item \reqlabel{FR.S.5.6}\textbf{FR.S.5.6} The system shall highlight nodes or network connections causing \gl[bottleneck]{bottlenecks}
 		in the cluster. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}. Satisfies hazard H4-3 from the Hazard Analysis.
+		Depends on \req{FR.S.5.5}.
 	\item \reqlabel{FR.S.5.7}\textbf{FR.S.5.7} The system shall, upon receiving an invite to join a cluster, display a prompt
 		for the user to either confirm or decline the invitation. Satisfies \hyperref[NFR.S.12]{NFR.S.12}.
+		Depends on \req{FR.S.1.20}.
 \end{itemize}
 
 \subsubsection{Non-Functional Requirements}
@@ -2917,35 +2960,41 @@ documentation on March 31, 2027.
 
 \subsection*{Functional Safety Requirements}
 \begin{itemize}
-    \item \reqlabel{SR0-1}\textbf{SR0-1} -- The system shall identify and discard stale device health data from determining device availability by configuring a time-to-live for valid data. 
-    \item \reqlabel{SR0-2}\textbf{SR0-2} -- The system shall only route inference requests to nodes that currently have a confirmed model layer partition.
+    \item \reqlabel{SR0-1}\textbf{SR0-1} -- The system shall identify and discard stale device health data from determining device availability by configuring a time-to-live for valid data. Related SRS requirements: \req{FR.S.1.2}, \req{FR.S.1.7}, \req{FR.S.1.23}.
+    \item \reqlabel{SR0-2}\textbf{SR0-2} -- The system shall only route inference requests to nodes that currently have a confirmed model layer partition. Related SRS requirements: \req{FR.S.1.1}, \req{FR.S.1.6}.
     \item \reqlabel{SR1-1}\textbf{SR1-1} -- The system shall assign at least two nodes for model layer partitioning during distributed inference.
     \item \reqlabel{SR1-2}\textbf{SR1-2} -- The system shall ensure all model layers are assigned to a node, and that each device configured to run model layers receives a non-zero model layer partition assignment.
     \item \reqlabel{SR1-3}\textbf{SR1-3} -- The system shall reject models and layer allocations that are estimated to exceed the memory capacities of the Lake network or individual nodes, including a configured safety margin. Related SRS requirements: \req{FR.S.2.1}, \req{FR.S.2.2}.
     \item \reqlabel{SR2-1}\textbf{SR2-1} -- The system shall attempt an automatic bounded recovery and retry on inference requests if a follower node fails during inference. If the follower node is unable to be recovered within the configured recovery limits, the system must report to the API that the request has failed. Related SRS requirements: \req{FR.S.1.10}, \req{FR.S.1.11}, \req{FR.S.1.13}.
-    \item \reqlabel{SR3-1}\textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests.
+    \item \reqlabel{SR3-1}\textbf{SR3-1} -- The system shall identify corrupted and incomplete tensors throughout the distributed inference with integrity checks and communication timeouts to discard affected data and retry requests. Related SRS requirements: \req{FR.S.4.3}, \req{NFR.S.9}.
     \item \reqlabel{SR3-2}\textbf{SR3-2} -- The system shall log failed tensor decoding metadata and report a failure to the coordinator so the inference request can recover, subject to \req{SR5-2}.
-    \item \reqlabel{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy.
+    \item \reqlabel{SR4-1}\textbf{SR4-1} -- The system shall configure a timeout for communication between nodes, and handle exceeded timeouts according to the appropriate recovery or failure policy. Related SRS requirements: \req{FR.S.1.10}, \req{FR.S.1.24}.
     \item \reqlabel{SR4-2}\textbf{SR4-2} -- The system shall mark a node as unavailable for inference or model layer partitioning when the node health criteria are not met, and require a successful health check before marking the same node as available. During a leader node failure, follower nodes shall detect and initiate a shutdown. Related SRS requirements: \req{FR.S.1.24} and \req{FR.S.1.25}.
-    \item \reqlabel{SR4-3}\textbf{SR4-3} -- The system shall utilise configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance.
+    \item \reqlabel{SR4-3}\textbf{SR4-3} -- The system shall utilise configured values or historical data to determine a baseline inter-node communication latency and notify the coordinator when that baseline is exceeded by a specified tolerance. Related SRS requirements: \req{FR.S.1.3}, \req{FR.S.4.5}.
     \item \reqlabel{SR5-1}\textbf{SR5-1} -- The system shall require user approval on the leader node to authorise a follower node, and user confirmation on the follower node to confirm the authorisation before it can participate in the Lake network. Related SRS requirements: \req{FR.S.1.17}, \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{NFR.S.12}.
     \item \reqlabel{SR5-2}\textbf{SR5-2} -- The system shall not record prompts, responses, tensor data, and KV cache content in diagnostic logs. Related SRS requirements: \req{NFR.S.10}.
 \end{itemize}
 
 % ===========================================================================
 \newpage
+\begin{landscape}
 \tocsection{Requirement Dependencies}
 \label{sec:requirement-dependencies}
 
-\plt{A traceability diagram or matrix showing which requirements depend on
-which. Use the landscape environment below for a wide figure.}
+Figure~\ref{fig:requirement-dependencies} shows the links between the detailed
+requirements, and Table~\ref{tab:requirement-dependencies} lists them both ways.
 
-% \begin{landscape}
-%     \centering
-%     \includegraphics[width=1.5\textheight]{requirement_dependency_diagram.png}
-%     \captionof{figure}{Requirement dependency diagram.}
-%     \label{fig:requirement-dependencies}
-% \end{landscape}
+\vspace{0.4em}
+\centering
+\makebox[\linewidth][c]{\includegraphics[width=1.08\linewidth,height=0.74\textheight,keepaspectratio]{requirement_dependencies.png}}
+\captionof{figure}{Dependencies between the detailed requirements. The key
+in the corner explains the arrows and box colours.}
+\label{fig:requirement-dependencies}
+\end{landscape}
+
+\begin{landscape}
+\input{requirement_dependencies_table}
+\end{landscape}
 
 % ===========================================================================
 \newpage
