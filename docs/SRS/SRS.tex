@@ -126,7 +126,7 @@ October 19, 2026 & All team members & Initial revision\\
 \label{sec:changes}
 
 This document follows the requirements template in Meyer's
-\emph{Handbook of Requirements and Business Analysis} ,
+\emph{Handbook of Requirements and Business Analysis} \citep{Meyer2022},
 which organises a specification into four chapters: Goals (G), Environment
 (E), System (S), and Project (P). Meyer's template is a book chapter rather
 than a course template, so we have adapted it. Table~\ref{ChangesFromTemplate}
@@ -418,14 +418,14 @@ control over how their data is handled. For a clinic or a law office this is
 often not acceptable at all.
 
 The second is local inference with a tool such as llama.cpp
-. The model runs in one process on
+\citep{LlamaCpp} or Ollama \citep{Ollama}. The model runs in one process on
 one machine, so the largest model a user can run is set by the memory of their
 single best device. A laptop that runs a small model well may run a mid-sized
 one slowly and a large one not at all, even when three other computers sit on
 the same desk.
 
 A few projects already spread a model over several machines: exo
-, and the remote procedure call
+\citep{Exo}, prima.cpp \citep{PrimaCpp2025}, and the remote procedure call
 (\gl[rpc]{RPC}) backend of llama.cpp. They assign layers to devices once, when
 the model loads, and the assignment stays fixed for the \gl{session}. If a
 device drops off the network the session fails, and a device added later goes
@@ -434,8 +434,8 @@ assignment something the system can change while it is running.
 Table~\ref{tab:alternatives} summarises how Lake compares. Mixed operating
 systems are marked ``partly'' for the existing tools because exo runs on
 Apple silicon through MLX and only on the \gl[cpu]{CPU} on Linux, with no
-Windows build , and prima.cpp supports Linux and macOS
-; only the llama.cpp RPC backend runs on all three.
+Windows build \citep{Exo}, and prima.cpp supports Linux and macOS
+\citep{PrimaCpp2025}; only the llama.cpp RPC backend runs on all three.
 
 \begin{table}[H]
 \centering
@@ -561,7 +561,7 @@ that realise it, so a change in either place can be traced to the other.
     \req{FR.S.1.18}, \req{FR.S.1.20}, \req{FR.S.1.21}, \req{FR.S.5.7}, and
     \req{NFR.S.12}.
     \item \reqlabel{FR.G.4.2}\textbf{FR.G.4.2 Load and partition a model.}
-    The operator picks a model in \gl[gguf]{GGUF} format , the file
+    The operator picks a model in \gl[gguf]{GGUF} format \citep{GGUF}, the file
     format used by llama.cpp. Lake measures each node's memory, compute, and
     network performance, decides which range of layers each node will hold, and
     has each node load only that range. \emph{Realised by} \req{FR.S.5.3},
@@ -597,7 +597,7 @@ that realise it, so a change in either place can be traced to the other.
     \req{NFR.S.1}.
     \item \reqlabel{FR.G.4.6}\textbf{FR.G.4.6 Serve prompts through a standard
     API.} The leader node exposes an \gl[http]{HTTP} API in the OpenAI format
-    ,
+    \citep{OpenAIAPI}, including streaming and \gl[toolcalling]{tool calling},
     so any client that can talk to a hosted provider can talk to Lake.
     \emph{Realised by} \req{FR.S.1.9} and \req{NFR.E.3}.
 \end{itemize}
@@ -829,7 +829,7 @@ the System chapter record which of these may change.
 
 \begin{itemize}
     \item \emph{No training or fine-tuning.} Lake runs pre-trained
-    \gl{transformer} models that ggml  supports. Lake does not
+    \gl{transformer} models that ggml \citep{Ggml} supports. Lake does not
     train, fine-tune, \gl[quantization]{quantise}, or otherwise modify a model,
     and does not change the quality of its output.
     \item \emph{Trusted network and devices.} In the first release, traffic
@@ -964,13 +964,13 @@ second persona and the device-owner stakeholder.
 
 \paragraph{Regulation and guidance.} No law requires an organisation to run
 its models locally, but several make it the simplest way to comply. Canada's
-private-sector privacy law, \gl[pipeda]{PIPEDA} , keeps an
+private-sector privacy law, \gl[pipeda]{PIPEDA} \citep{PIPEDA}, keeps an
 organisation accountable for personal information it passes to a third party.
 Export control regimes such as Canada's Controlled Goods Program under the
-Defence Production Act  restrict who may examine or
+Defence Production Act \citep{DPA1985, CGR2001} restrict who may examine or
 possess controlled technical data, which includes software and documentation,
 and this is the kind of rule that keeps the interviewee's firm off hosted
-services. \gl[nist]{NIST}'s generative AI profile  lists data
+services. \gl[nist]{NIST}'s generative AI profile \citep{NIST2024} lists data
 privacy, information integrity, and information security among the risks an
 operator of a generative model is expected to manage. These documents are the
 background for \hyperref[NFR.G.4.1]{NFR.G.4.1} and the no-telemetry
@@ -982,19 +982,19 @@ Lake itself are in Section~\ref{subsec:standards}.
 locally is the source of the first persona and of the use cases in
 Section~\ref{subsec:high-level-usage-scenarios}.
 
-\paragraph{Existing distributed inference tools.} exo , prima.cpp
- were
+\paragraph{Existing distributed inference tools.} exo \citep{Exo}, prima.cpp
+\citep{PrimaCpp2025}, and the RPC backend of llama.cpp \citep{LlamaCpp} were
 studied to learn what current systems do and where they fall short. The gap
 they share, a split that is fixed when the model loads, is the origin of the
 \gl[dynamicallocation]{dynamic allocation} goal.
 
 \paragraph{Libraries and formats.} The ggml and llama.cpp documentation and
-source  define which models and hardware can be
+source \citep{Ggml, LlamaCpp, GGUF} define which models and hardware can be
 supported and how a model can be split. The OpenAI API reference
- defines the request and response format Lake's API follows.
+\citep{OpenAIAPI} defines the request and response format Lake's API follows.
 
 \paragraph{Course material and the template.} The course templates, rubrics,
-and lectures, and Meyer's handbook , which this document's
+and lectures, and Meyer's handbook \citep{Meyer2022}, which this document's
 structure follows.
 
 \subsection{User Profiles}\label{subsec:user-profiles}
@@ -1088,7 +1088,7 @@ Template).
     \item \textbf{Device hardware} -- Each node should have a sufficient \gl[cpu]{CPU}, \gl[gpu]{GPU}, memory, and storage such that its assigned model \gl[layer]{layers}, \gl[kvcache]{KV cache}, and other Lake software components can fit and run within the device, such that distributed inference has both a higher \gl[throughput]{token throughput} and lower \gl{latency} than an equivalent single-device inference.
     \item \textbf{Network communication} -- Network communication, whether wired or wireless, should have a sufficiently high bandwidth and low latency. Inter-node communication overhead may make distributed inference slower than single-device inference.
     \item \textbf{Platform compatibility} -- Nodes within the Lake network must operate on Windows, macOS, and Linux (as well as Android and iOS as stretch goals) as hardware acceleration and inference platforms are limited by the available drivers on these operating systems.
-    \item \textbf{API compatibility} -- Lake must implement a standardised \gl[openaiapi]{OpenAI API} spec such that existing external clients can easily utilise Lake, , as specified in Section S.3.
+    \item \textbf{API compatibility} -- Lake must implement a standardised \gl[openaiapi]{OpenAI API} spec such that existing external clients can easily utilise Lake, \citep{OpenAIAPI}, as specified in Section S.3.
     \item \textbf{Model architecture} -- Only supported \gl[llm]{LLM} architectures that Lake's model layer partitioning supports can be used.
 \end{itemize}
 
@@ -1383,7 +1383,7 @@ Template).
 		a Lake network. Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 		Depends on \req{FR.S.5.1}.
 	\item \reqlabel{FR.S.5.3}\textbf{FR.S.5.3} The system shall allow a user to select an input
-		\gl[gguf]{GGUF} file .
+		\gl[gguf]{GGUF} file \citep{GGUF}.
 		Partially satisfies \hyperref[NFR.S.2]{NFR.S.2}.
 	\item \reqlabel{FR.S.5.4}\textbf{FR.S.5.4} The system shall display an error to the user if partitioning the selected
 		input file is infeasible given the selected devices. Partially satisfies \hyperref[NFR.S.1]{NFR.S.1}.
@@ -1429,8 +1429,8 @@ Template).
 	\item \reqlabel{NFR.S.6}\textbf{NFR.S.6} \textbf{Intelligence:} The partitioned model must score at least \textit{BENCH\_RATIO} as well
 		as the same model running on one machine using relevant
 		benchmarks\footnote{Relevant benchmarks are entirely dependent on what types of model are being tested.
-		Example benchmarks: SWE-bench  and
-		FrontierMath .
+		Example benchmarks: SWE-bench \citep{SWEbench} and
+		FrontierMath \citep{FrontierMath}.}. Satisfied by \hyperref[FR.S.2.3]{FR.S.2.3}.
 \end{itemize}
 
 \paragraph{Look and Feel}
@@ -1442,7 +1442,7 @@ Template).
 \paragraph{Fault-Tolerance}
 \begin{itemize}
 	\item \reqlabel{NFR.S.8}\textbf{NFR.S.8} The system shall reject invalid or corrupted
-		GGUF files , and notify the user of the
+		GGUF files \citep{GGUF}, and notify the user of the
 		issue.
 	\item \reqlabel{NFR.S.9}\textbf{NFR.S.9} The system shall produce correct results in the face of network packet
 		corruption and dropping up to \textit{MAX\_LOSS} packet loss. Partially satisfies hazard H3-1 from the Hazard Analysis.
@@ -1481,12 +1481,12 @@ Lake requires the following interfaces:
 \begin{itemize}
     \item \textbf{\gl[openaiapi]{OpenAI compatible API}} -- An HTTP server, following the OpenAI API structure.
 		This will be the API used to interact with the user, via third-party tools of the user's
-		choice that accept the OpenAI API, such as OpenCode .
+		choice that accept the OpenAI API, such as OpenCode \citep{OpenCode}.
 	\item \textbf{GGUF input model} -- An input file using the
-		GGUF file format . This contains
+		GGUF file format \citep{GGUF}. This contains
 		the model Lake will partition and run.
 	\item \textbf{Rust-to-C \gl[ffi]{FFI}} -- The Rust-to-C foreign function interface will be used to call
-		ggml  from the Inference Engine.
+		ggml \citep{Ggml} from the Inference Engine.
 	\item \textbf{gRPC between nodes} -- A gRPC-based API used to communicate between nodes.
 	\item \textbf{\gl[rest]{REST} API between Coordinator and Lake Client} -- A REST API for communication between the
 		Coordinator and the Lake Client on the same node.
@@ -1496,7 +1496,7 @@ Lake requires the following interfaces:
 \begin{enumerate}
 	\item User starts the \gl[lakeclient]{Lake Client} on all participating machines.
     \item User creates a Lake network using the \gl[ui]{UI} on one of the devices, and provides a
-		GGUF file . This
+		GGUF file \citep{GGUF}. This
 		device becomes the leader node.
 	\item Leader node checks connectivity with follower nodes, and collects performance
 		metrics for each node.
@@ -2736,7 +2736,7 @@ $\mathit{dev}(P)$.
 \subsection{Imposed Technical Choices}\label{subsec:technical-choices}
 
 \begin{itemize}
-    \item \textbf{API specification} -- Lake will follow the \gl[openaiapi]{OpenAI API} specification for its request and response formats  specification and the flexibility it provides when connecting to existing external clients.
+    \item \textbf{API specification} -- Lake will follow the \gl[openaiapi]{OpenAI API} specification for its request and response formats \citep{OpenAIAPI}. This is chosen due to the widespread adoption of this \gl[api]{API} specification and the flexibility it provides when connecting to existing external clients.
     \item \textbf{Supported platforms} -- Windows, macOS, and Linux will be supported platforms for \gl[node]{nodes} within the \gl[lakenetwork]{Lake network}. Android and iOS support is a stretch goal. These are chosen due to the availability of \gl[inferenceengine]{inference engine} support and hardware acceleration support for these operating systems.
 \end{itemize}
 
