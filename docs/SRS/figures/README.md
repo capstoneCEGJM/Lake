@@ -19,6 +19,6 @@ soft-goal shape, since Graphviz has no cloud shape.
 and NFR.E, pink SR). A solid arrow goes from a requirement to one it "Depends on" in
 `SRS.tex`; a dashed arrow means "is satisfied by" or "is related to". When a requirement
 or one of its links changes, update the diagram source and the dependency table
-(`../requirement_dependencies_table.tex`) to match.
+in the Requirement Dependencies section of `../SRS.tex` to match.
 
 Graphviz and PlantUML are installed with `brew install graphviz plantuml`.
