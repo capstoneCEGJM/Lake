@@ -214,8 +214,7 @@ Every issue from the Workflow Plan gets a card on the board, and cards move
 through Backlog, Ready, In Progress, In Review and Done columns. An issue only
 moves to Ready once it has a description, a work estimate and at least
 one assignee. Cards are also tagged with the part of the system they touch,
-such as the coordinator, a node agent, networking, the dashboard or
-documentation.
+such as the Coordinator, the Lake Client, networking or documentation.
 
 Each deliverable in Table~\ref{TblSchedule} gets its own GitHub milestone,
 with the due date set to the internal deadline rather than the course
@@ -279,7 +278,9 @@ PoC Demonstration and interviews & 5\% & Nov 23 to Dec 3 & $^{\dagger}$\\
 \midrule
 \multicolumn{4}{l}{\textit{Winter term, 2027}}\\
 Design Document (Rev~0) & 4\% & Jan 18 & Jan 16\\
-Revision 0 Demonstration and interviews & 10\% & Feb 1 to 11 &
+Peer review of Design Document (Rev~0): implement one of another team's
+  modules & -- & Jan 21 & Jan 19\\
+Rev~0 Demonstration and interviews & 10\% & Feb 1 to 11 &
   $^{\dagger}$\\
 V\&V Report (Rev~0) and Performance Report (CD-Winter) & 4\% & Mar 8 &
   Mar 6\\
@@ -316,11 +317,13 @@ Setup & Sept 28 to Oct 16 & Get ggml and llama.cpp building on every team
   member's machine and record single-device baselines\\
 Proof of concept & Oct 19 to the PoC slot & The two-device split described in
   Section~\ref{SecPoC}\\
-Core system & December to the Rev~0 slot & Any number of devices, profiling,
-  the partitioner, node agents joining and leaving, the dashboard, and
-  re-splitting the model between requests\\
-Dynamic allocation & Feb 12 to Mar 5 & Re-splitting during a session,
-  benchmarks for the Performance Report, and the wireless stretch goal\\
+Core system & December & Any number of devices, profiling, the Model
+  Partitioner, Lake Clients joining and leaving, and re-splitting the model
+  between requests\\
+Dynamic allocation & January to the Rev~0 slot & Re-splitting during a
+  session, and the Lake Client\\
+Performance & Feb 12 to Mar 5 & Benchmarks for the Performance Report, and
+  the wireless stretch goal\\
 Refinement & Mar 8 to Apr 6 & Feedback from Rev~0, final documentation and
   EXPO preparation\\
 \bottomrule
@@ -367,8 +370,8 @@ much overhead the split adds.
 \subsection{Demonstration}
 
 The demonstration uses a model (which is to be determined) to be split by hand down the middle. Initially, a model will be split up and run on two separate processes on one system to prove feasibility, and it will be further iterated on if feasible. A bare-bones
-command-line coordinator hands out the layer ranges. The partitioner, profiler
-and dashboard are not part of the PoC.
+command-line Coordinator hands out the partitions. The Model Partitioner, profiler
+and Lake Client are not part of the PoC.
 
 The demonstration builds up in three steps, with each step adding one more
 thing that can go wrong:
@@ -378,7 +381,7 @@ thing that can go wrong:
     the split by itself, without a real network or different platforms.
   \item Two laptops of the same type connected by a Thunderbolt cable, which
     adds real transfer latency. Wired Ethernet is a target for larger
-    clusters.
+    Lake networks.
   \item Two laptops with different operating systems and processor
     architectures, for example an Apple Silicon MacBook and an x86 Windows or
     Linux machine.
@@ -425,15 +428,15 @@ for day-to-day communication.
 
 \subsection{Languages and Frameworks}
 
-The coordinator will be written in Python. Its job is handing out layer
+The Coordinator will be written in Python. Its job is handing out layer
 assignments and collecting measurements, so it is not on the per-token path
 and Python's speed is not a concern there. Go and Rust were discussed, but the
 extra speed would not help in that part of the system, and the whole team is
 already comfortable with Python. The client-facing application programming
-interface (API) will use FastAPI, and the dashboard will be built with React
+interface (API) will use FastAPI, and the Lake Client will be built with React
 and TypeScript.
 
-The inference engine on each device is expected to be written in Rust. The
+The Inference Engine on each device is expected to be written in Rust. The
 ggml library is written in C, and splitting the model means building ggml's
 compute graph directly. Rust matches C++ in speed and calls C functions
 directly, so there is no extra layer on every token. Rust also enforces memory
@@ -441,11 +444,11 @@ safety and resource cleanup at compile time, where C++ leaves both to the
 programmer, which makes it easier to learn for a team that has mostly not
 worked in C++. The calls into ggml still need unsafe Rust, so that code is kept
 in one small module. C++ was the other option considered, since llama.cpp is
-written in it. If Android support happens, the node agent there would be
+written in it. If Android support happens, the Lake Client there would be
 written in Kotlin and call the same Rust code through the Java Native
 Interface (JNI).
 
-Devices talk to each other and to the coordinator using gRPC with Protocol
+Devices talk to each other and to the Coordinator using gRPC with Protocol
 Buffers. From one message definition, matching Python and Rust code is
 generated, using the Tonic library on the Rust side, and gRPC's streaming calls
 fit the token-by-token handoff. The downside is
@@ -482,13 +485,13 @@ own license and are not committed to the repository.
 
 Existing projects such as exo, prima.cpp and llama.cpp's RPC backend can
 already split models across machines, and they will serve as references. Lake
-still needs its own coordinator, partitioner and transport between devices. In
+still needs its own Coordinator, Model Partitioner and transport between devices. In
 exo, layers are assigned once at the start of a session, and llama.cpp's RPC
 backend fixes the split when the model loads. Changing the split during a
 session, which is Lake's dynamic allocation goal, needs control over layer
 assignment and the KV cache that these tools do not offer.
 
-The partitioner will profile each device's per-layer speed, free memory and
+The Model Partitioner will profile each device's per-layer speed, free memory and
 network latency, then pick the split points that give the lowest time per
 token. A simple greedy approach comes first, with dynamic programming
 replacing it once that works.
@@ -532,7 +535,7 @@ machines before each demo.
 
 Most performance data will come from Lake's own per-token profiler, which
 records compute time on each device and transfer time between devices. The
-same data feeds the partitioner and the dashboard. For comparison,
+same data feeds the Model Partitioner and the Lake Client. For comparison,
 llama-bench and llama-perplexity from llama.cpp give single-device numbers for
 speed and output quality. The unsafe code that calls into ggml will also be tested under
 AddressSanitizer in CI to catch memory bugs early.
@@ -612,7 +615,7 @@ Proposed changes in the document are reviewed through pull requests, and the bra
     \item What disagreements did your group have in this deliverable, if any,
     and how did you resolve them?
 
-    Disagreements occurred in the underlying technologies and frameworks to utilise for the proof of concept, such as whether to use C++ or Rust for the inference engine. C++ was the initial choice due to being the language used in \verb|llamma.cpp|, but Rust was suggested after it was determined that it can call \verb|ggml|'s C interface, as well as provide other benefits, such as stronger memory checks, and better team familiarity. It was agreed to revise the plan to use Rust as the initial choice, while leaving final decisions open to change during implementation of the proof of concept.
+    Disagreements occurred in the underlying technologies and frameworks to utilise for the proof of concept, such as whether to use C++ or Rust for the Inference Engine. C++ was the initial choice due to being the language used in \verb|llamma.cpp|, but Rust was suggested after it was determined that it can call \verb|ggml|'s C interface, as well as provide other benefits, such as stronger memory checks, and better team familiarity. It was agreed to revise the plan to use Rust as the initial choice, while leaving final decisions open to change during implementation of the proof of concept.
 
 \end{enumerate}
 

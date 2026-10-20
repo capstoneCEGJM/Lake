@@ -15,8 +15,8 @@ digraph context {
     style="rounded,filled";
     fillcolor="#eef3f8";
     color="#2b5f8c";
-    leader   [label="Leader node\nCoordinator (leader), Model Partitioner,\nWeb UI, OpenAI-compatible API,\nInference Engine, Tensor I/O", fillcolor="#dbe8f4"];
-    follower [label="Follower nodes\nCoordinator (follower),\nInference Engine, Tensor I/O", fillcolor="#dbe8f4"];
+    leader   [label="Leader node\nCoordinator (leader), Model Partitioner,\nLake Client, OpenAI-compatible API,\nInference Engine, Tensor I/O", fillcolor="#dbe8f4"];
+    follower [label="Follower nodes\nCoordinator (follower), Lake Client,\nInference Engine, Tensor I/O", fillcolor="#dbe8f4"];
     { rank=same; leader; follower; }
   }
 
@@ -26,7 +26,7 @@ digraph context {
   devices [label="Device OS, GPU and memory\nWindows, macOS, Linux"];
   network [label="Local network\n(wired)"];
 
-  user  -> leader   [label="create cluster, pick model,\nview performance"];
+  user  -> leader   [label="form Lake network, pick model,\nview performance"];
   user  -> follower [label="confirm joining\n(on each device)"];
   tools -> leader   [label="prompts / streamed responses", dir=both];
   leader   -> network  [label="partition assignments,\nhealth data, activations", dir=both];

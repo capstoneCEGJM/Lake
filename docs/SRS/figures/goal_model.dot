@@ -21,7 +21,7 @@ digraph goals {
   g_xp   [label="Cross-platform\noperation (PS 2.3)", pos="4.35,4.0!", fontsize=10];
   g_perf [label="Improved local\nperformance (PS 2.1)", pos="6.15,4.0!", fontsize=10];
   g_conc [label="Concurrent\ninference (PS 2.5)", pos="7.95,4.0!", fontsize=10];
-  g_priv [label="Request data stays\nin the cluster",               pos="9.75,4.0!", fontsize=10];
+  g_priv [label="Request data stays\nin the Lake network",               pos="9.75,4.0!", fontsize=10];
   u_goal [label="Run a model larger than\nmy best machine allows",  pos="1.7,8.62!"];
   o_goal [label="Use an LLM on\nsensitive records",                 pos="4.8,8.58!"];
   r_goal [label="Run large models on\nthe lab's machines",          pos="7.9,8.62!"];

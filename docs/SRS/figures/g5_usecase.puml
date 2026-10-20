@@ -17,10 +17,10 @@ actor "Device owner" as Owner
 actor "Inference user" as User
 
 rectangle "Lake" as System {
-  usecase "UC1 Form a cluster" as UC1
+  usecase "UC1 Form a Lake network" as UC1
   usecase "UC6 Add a device\nduring a session" as UC6
   usecase "UC2 Confirm a device joining" as UC2
-  usecase "UC3 Run a model\nacross the cluster" as UC3
+  usecase "UC3 Run a model\nacross the Lake network" as UC3
   usecase "UC5 Keep working when\na device leaves" as UC5
   usecase "UC4 Use Lake from\nan existing tool" as UC4
   usecase "UC7 Find the bottleneck" as UC7
