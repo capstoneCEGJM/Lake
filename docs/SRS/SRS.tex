@@ -1211,7 +1211,7 @@ Template).
 	\item \textbf{\gl[inferenceengine]{Inference Engine}} --
 		This component is the high-performance \gl{inference} engine running on each device. It will handle
 		execution of the given model partition for each device. It will call into
-		ggml \citep{Ggml} using the Rust-to-C FFI to control the execution of a
+		ggml \citep{Ggml} using the Rust-to-C \gl[ffi]{FFI} to control the execution of a
 		device's model partition.
 
 	\item \textbf{\gl[tensorio]{Tensor I/O}} --
@@ -1232,11 +1232,11 @@ Template).
 		assigned to the local device.
 	\item \reqlabel{FR.S.1.2}\textbf{FR.S.1.2} The system shall collect device health/performance
 		information\footnote{e.g. \gl[throughput]{token throughput}, end-to-end partition \gl{latency}, \gl{backpressure}.}
-		from the local Inference Engine on a 5 second interval.
+		from the local Inference Engine on a \textit{HEALTH\_INTERVAL} second interval.
 		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 	\item \reqlabel{FR.S.1.3}\textbf{FR.S.1.3} The system shall collect the network health/performance
 		information\footnote{e.g. \gl[rtt]{RTT}, throughput, backpressure.}
-		for established connections from the Tensor I/O component on a 5 second interval.
+		for established connections from the Tensor I/O component on a \textit{HEALTH\_INTERVAL} second interval.
 		Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 	\item \reqlabel{FR.S.1.4}\textbf{FR.S.1.4} The system shall continuously scan for all other devices on the same network
 		running Lake.
@@ -1254,7 +1254,7 @@ Template).
 				and gathered node performance data, to help inform optimal model cut points.
 			\item \reqlabel{FR.S.1.9}\textbf{FR.S.1.9} The system shall provide an \gl[http]{HTTP} \gl[api]{API} matching OpenAI's API.
 			\item \reqlabel{FR.S.1.10}\textbf{FR.S.1.10} The system shall detect failing follower
-				nodes\footnote{A "failing" device is defined as severely degraded ($<50\%$ of historical)
+				nodes\footnote{A "failing" device is defined as severely degraded (\textit{FAIL\_THRESHOLD} of historical)
 				token throughput, whether it be due to network or device resource instability.}.
 				Partially satisfies hazards H2-1, H4-2 and H4-1 from the Hazard Analysis.
 			\item \reqlabel{FR.S.1.11}\textbf{FR.S.1.11} The system shall rebuild the cluster on a node failing or leaving.
@@ -1282,10 +1282,10 @@ Template).
 			\item \reqlabel{FR.S.1.22}\textbf{FR.S.1.22} The system shall not require confirmation to re-join a rebuilding cluster
 				led by the same device, so long as the local device was already participating in the original cluster.
 			\item \reqlabel{FR.S.1.23}\textbf{FR.S.1.23} The system shall report collected health/performance data to the
-				leader node Coordinator on a 5 second interval.
+				leader node Coordinator on a \textit{HEALTH\_INTERVAL} second interval.
 				Partially satisfies hazards H0-1 and H0-2 from the Hazard Analysis.
 			\item \reqlabel{FR.S.1.24}\textbf{FR.S.1.24} The system shall assume the leader node has failed if there has been
-				no health query from the leader node for more than 60 consecutive seconds.
+				no health query from the leader node for more than \textit{LEADER\_TIMEOUT} consecutive seconds.
 			\item \reqlabel{FR.S.1.25}\textbf{FR.S.1.25} The system shall initiate the shutdown of the local node, if the leader
 				node is assumed to have failed. Partially satisfies hazards H4-2 and H4-1 from the Hazard Analysis.
 				\begin{quote}
@@ -1300,7 +1300,7 @@ Template).
 \textbf{Functional Requirements}
 \begin{itemize}
 	\item \reqlabel{FR.S.2.1}\textbf{FR.S.2.1} The system shall assign all devices a partition smaller than their available
-		\gl[gpu]{GPU}-accessible memory, with additional room left for runtime overhead. Related to \hyperref[NFR.S.4]{NFR.S.4}.
+		\gl[gpu]{GPU}-accessible memory, with additional \textit{MEMORY\_MARGIN} left for runtime overhead. Related to \hyperref[NFR.S.4]{NFR.S.4}.
 		Satisfies hazard H1-3 from the Hazard Analysis.
 	\item \reqlabel{FR.S.2.2}\textbf{FR.S.2.2} The system shall report failure in the case that no valid partition across
 		the cluster exists (e.g. not enough GPU-accessible memory).
@@ -1322,7 +1322,7 @@ Template).
 	\item \reqlabel{FR.S.3.3}\textbf{FR.S.3.3} The system shall send output tensors to Tensor I/O.
 	\item \reqlabel{FR.S.3.4}\textbf{FR.S.3.4} The system shall measure partition performance
 		metrics\footnote{e.g. token throughput, end-to-end partition latency, backpressure.} and provide them to the local
-		Coordinator on a 5 second interval.
+		Coordinator on a \textit{HEALTH\_INTERVAL} second interval.
 	\item \reqlabel{FR.S.3.5}\textbf{FR.S.3.5} The system shall support processing tensors from multiple different
 		requests concurrently. Related to \hyperref[NFR.S.5]{NFR.S.5}.
 \end{itemize}
@@ -1339,7 +1339,7 @@ Template).
 		them, and send them to the downstream node's Tensor I/O.
 	\item \reqlabel{FR.S.4.5}\textbf{FR.S.4.5} The system shall measure network performance
 		data\footnote{e.g. RTT, throughput, backpressure.}, for established connections, and provide
-		that data to the local Coordinator on a 5 second interval.
+		that data to the local Coordinator on a \textit{HEALTH\_INTERVAL} second interval.
 	\item \reqlabel{FR.S.4.6}\textbf{FR.S.4.6} The system shall maintain request association when sending
 		tensors\footnote{This is to allow tensors from different concurrent requests to be differentiated.}.
 		Related to \hyperref[NFR.S.5]{NFR.S.5}.
@@ -1371,15 +1371,15 @@ Template).
     \item \reqlabel{NFR.S.1}\textbf{NFR.S.1} \textbf{Understandability:} The user must be able to easily understand
 		cluster information.
 		A new user must be able to describe which devices are participating, the token throughput of the system,
-		and which devices/connections are bottlenecks within 2 minutes of seeing the interface.
+		and which devices/connections are bottlenecks within \textit{UI\_TASK\_TIME} of seeing the interface.
 		Partially satisfied by \hyperref[FR.S.5.4]{FR.S.5.4}, \hyperref[FR.S.5.5]{FR.S.5.5}, and \hyperref[FR.S.5.6]{FR.S.5.6}.
 	\item \reqlabel{NFR.S.2}\textbf{NFR.S.2} \textbf{Controllability:} The user must be able to easily control
-		cluster configuration. A new user must be able to create a new cluster within 2 minutes of seeing the interface.
+		cluster configuration. A new user must be able to create a new cluster within \textit{UI\_TASK\_TIME} of seeing the interface.
 		Partially satisfied by \hyperref[FR.S.5.1]{FR.S.5.1}, \hyperref[FR.S.5.2]{FR.S.5.2},
 		and \hyperref[FR.S.5.3]{FR.S.5.3}.
 	\item \reqlabel{NFR.S.3}\textbf{NFR.S.3} \textbf{Installability:} The user must be able to easily install Lake
 		natively on Windows, macOS, and Linux. On Windows and macOS, the installation process should be automated
-		and should require at most 10 clicks after downloading the installer. On Linux, the installation process
+		and should require at most \textit{INSTALL\_CLICKS} clicks after downloading the installer. On Linux, the installation process
 		should only require a single package manager command.
 \end{itemize}
 
@@ -1389,10 +1389,10 @@ Template).
 		parameters, higher precision, or larger \gl[contextwindow]{context window} than would be able to run individually on the
 		node with the most memory. Related to \hyperref[FR.S.2.1]{FR.S.2.1}, and
 		\hyperref[FR.S.2.4]{FR.S.2.4}.
-	\item \reqlabel{NFR.S.5}\textbf{NFR.S.5} \textbf{Scalability:} The number of concurrent requests with < 20\%
+	\item \reqlabel{NFR.S.5}\textbf{NFR.S.5} \textbf{Scalability:} The number of concurrent requests with $<$ \textit{MAX\_DEGRADATION}
 		individual request performance degradation shall scale linearly with the number of participating devices.
 		Related to \hyperref[FR.S.1.14]{FR.S.1.14}, \hyperref[FR.S.3.5]{FR.S.3.5}, and \hyperref[FR.S.4.6]{FR.S.4.6}.
-	\item \reqlabel{NFR.S.6}\textbf{NFR.S.6} \textbf{Intelligence:} The partitioned model must score at least 95\% as well
+	\item \reqlabel{NFR.S.6}\textbf{NFR.S.6} \textbf{Intelligence:} The partitioned model must score at least \textit{BENCH\_RATIO} as well
 		as the same model running on one machine using relevant
 		benchmarks\footnote{Relevant benchmarks are entirely dependent on what types of model are being tested.
 		Example benchmarks: SWE-bench \citep{SWEbench} and
@@ -1411,7 +1411,7 @@ Template).
 		GGUF files \citep{GGUF}, and notify the user of the
 		issue.
 	\item \reqlabel{NFR.S.9}\textbf{NFR.S.9} The system shall produce correct results in the face of network packet
-		corruption and dropping up to 10\% packet loss. Partially satisfies hazard H3-1 from the Hazard Analysis.
+		corruption and dropping up to \textit{MAX\_LOSS} packet loss. Partially satisfies hazard H3-1 from the Hazard Analysis.
 \end{itemize}
 
 \paragraph{Privacy}
