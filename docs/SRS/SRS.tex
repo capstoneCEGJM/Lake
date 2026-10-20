@@ -3141,4 +3141,68 @@ appropriateness of this document, whether a person or an AI tool wrote it.
 
 \input{../SRS_Reflection.text}
 
+\noindent\rule{\linewidth}{0.4pt}
+
+\begin{enumerate}
+    \item Reviewing went well. Every section had its own pull request with two
+    approvals, and we read the rendered PDF instead of the diff. Writing the
+    Hazard Analysis at the same time also helped, as creating the FMEA helped
+    with writing our safety requirements.
+
+    \item Our biggest pain point was switching SRS templates. After a meeting
+    with our TA on October 9th, we switched from the Volere template to the
+    Meyer template, requiring us to re-do significant administrative work. Five
+    people contributing to the same file also brought with it some merging
+    headaches. In particular, moving the glossary and adding to the template
+    changes list caused some annoying merge conflicts.
+
+    \item We got outside input from three places. Team~07 peer reviewed our
+    Problem Statement, we met with our TA, and we did one written user interview
+    on October 16th. Of our detailed requirements, only five came directly from
+    the peer review or the interview. Team~07 asked what dynamic allocation
+    means in measurable terms, which became \req{FR.S.1.10} to \req{FR.S.1.13},
+    and the interview made no telemetry a hard requirement in \req{NFR.S.11}.
+    Most of the rest came from our own use of llama.cpp and Ollama as well as
+    from the Hazard Analysis. One interview is likely not enough, so we plan to
+    talk to more local AI users.
+
+    \item We've all taken the core Software Engineering courses. SFWRENG 3RA3
+    taught us goal models and the Meyer template, and 3SH3 covers the memory and
+    IPC ideas behind the node daemon. This term the team is also taking 4AL3.
+    Being our first machine learning course, it will be integral to helping us
+    build a model partitioning algorithm.
+
+    \item The core learning that will need to be made among the team is
+    surrounding inference engines. Since the team has minimal experience with
+    inference engines, this will require up-front knowledge and research to
+    become familiar with the tools. Jinwoo and Colin, the machine learning
+    leads, will need to learn the fundamentals of ggml and the GGUF format.
+    Gary, the IPC lead, will need to build up a solid foundation of knowledge on
+    gRPC as well as conceptual knowledge for how the system will handle device
+    health checks and failure accommodation. Matt, the performance lead, will
+    need more learning related to benchmarks and GPU profiling to ensure we can
+    competently benchmark our system and identify areas for improvement.
+    Finally, Ethan, the architecture lead, will need to learn from other
+    distributed inference systems to find the benefits and pitfalls of previous
+    approaches and what will apply to Lake.
+
+    \item Jinwoo and Colin: Read the ggml source first or build a quick proof of
+    concept that splits one model across two processes. These members will
+    pursue the proof of concept first to become more familiar with ggml, as well
+    as the fact that the project POC will require ggml related code. Gary's
+    options include working through the gRPC tutorials, or directly moving to
+    prototyping inter-device health checks, referencing documentation as needed.
+    The prototype is Gary's choice in this case, since it will once again be
+    helpful for the project as a whole and will give him the relevant knowledge
+    more quickly. Matt has the option to study profiler documentation or build a
+    small benchmark harness locally to test his skills and identify knowledge
+    gaps. He has decided to move forward with building the benchmark harness to
+    compare against a single-device llama.cpp baseline. Lastly, Ethan is faced
+    with the choice to either read papers on distributed inference and general
+    strategy, or look to existing providers such as Exo to see how they
+    coordinate their systems. He will also opt for option 2, since this allows
+    the team to avoid pitfalls that Exo fell in to, while also identifying key
+    areas that Lake may differentiate itself from existing providers.
+\end{enumerate}
+
 \end{document}
