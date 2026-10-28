@@ -295,11 +295,10 @@ How test will be performed:
 This section gives the system tests for the nonfunctional requirements in SRS
 S.2 (NFR.S.1 to NFR.S.15) and the Environmental Requirements (NFR.E.1 to
 NFR.E.8). The tests follow the verification groups in SRS S.8, and they are
-grouped by the same categories the SRS uses. Three requirements are verified
-by functional tests in Section~\ref{sec:fr-tests} instead of being repeated
-here: NFR.S.12 (no untrusted devices) by the Lake network formation tests,
-NFR.E.2 (model layer partitioning) by the partitioning tests, and NFR.E.3
-(OpenAI API specification) by the API tests.
+grouped by the same categories the SRS uses. NFR.S.12, NFR.E.2 and NFR.E.3
+share their behaviour with functional requirements, so their tests reuse the
+setup of the functional tests in Section~\ref{sec:fr-tests} and check only the
+nonfunctional property.
 
 Each test uses one of the three test models below. All three use the Llama
 architecture, so the same code path is tested from the smallest model to the
@@ -552,7 +551,8 @@ on a Linux runner.
 \subsubsection{Privacy}
 
 These tests cover NFR.S.10 (no stored request data), NFR.S.11 (no data sent
-outside the Lake network) and NFR.E.5 (no requests to third-party services).
+outside the Lake network), NFR.S.12 (no untrusted devices) and NFR.E.5 (no
+requests to third-party services).
 
 \begin{enumerate}
 
@@ -593,6 +593,28 @@ including no name lookups for outside hosts.
 How test will be performed: A team member captures traffic with
 \texttt{tcpdump} on Linux and macOS or Wireshark on Windows, filters it to the
 \progname{} processes, and lists every destination address and port.
+
+\item{T-NFR-PRIV-3\\}
+\label{T-NFR-PRIV-3}
+
+Type: Dynamic, manual
+
+Initial State: The Lake network formation setup from
+Section~\ref{sec:fr-tests}: one leader and three other devices running
+\progname{} on one local network, with packet capture running on each.
+
+Input/Condition: The leader selects two of the devices and invites them. One
+accepts the invitation and one declines it. The third device is not selected.
+The leader then loads \textit{SMALL\_MODEL} and runs the test prompts.
+
+Output/Result: Only the leader and the device that accepted take part in the
+Lake network. The device that declined and the device that was not selected
+receive no model partition, hidden state or request data, and each of them
+appears in the capture only in discovery and invitation traffic.
+
+How test will be performed: A team member filters the capture on each of the
+two excluded devices to the \progname{} processes and checks every packet
+received against this rule.
 
 \end{enumerate}
 
@@ -664,9 +686,9 @@ demonstration and records the device, backend and result.
 
 \subsubsection{Environment and Licensing}
 
-These tests cover NFR.E.4 (model weights unchanged), NFR.E.6 (formatting and
-linting), NFR.E.7 (GPL compliance) and NFR.E.8 (model licences). NFR.E.2 and
-NFR.E.3 are covered in Section~\ref{sec:fr-tests}.
+These tests cover NFR.E.2 (model layer partitioning), NFR.E.3 (OpenAI API
+specification), NFR.E.4 (model weights unchanged), NFR.E.6 (formatting and
+linting), NFR.E.7 (GPL compliance) and NFR.E.8 (model licences).
 
 \begin{enumerate}
 
@@ -733,6 +755,47 @@ licence name and link are recorded in the test repository.
 How test will be performed: The review is repeated whenever a model is added
 to the list.
 
+\item{T-NFR-ENV-5\\}
+\label{T-NFR-ENV-5}
+
+Type: Dynamic, automated
+
+Initial State: The partitioning setup from Section~\ref{sec:fr-tests}: a
+two-node Lake network on one machine, with \textit{SMALL\_MODEL} available.
+
+Input/Condition: The model is loaded with two different valid partitionings,
+one with the layers split evenly and one with most layers on the first node.
+
+Output/Result: For each partitioning, each node loads only the layers assigned
+to it, and its model memory use is within \textit{MEMORY\_MARGIN} of the size
+of those layers. The split model's tokens for the test prompts match the
+unsplit model's.
+
+How test will be performed: Part of the continuous integration integration
+test. Each node reports the layers it loaded and its model memory use, and the
+test compares them with the partitioning the Coordinator sent.
+
+\item{T-NFR-ENV-6\\}
+\label{T-NFR-ENV-6}
+
+Type: Dynamic, automated
+
+Initial State: The API setup from Section~\ref{sec:fr-tests}: a two-node Lake
+network with \textit{SMALL\_MODEL} loaded.
+
+Input/Condition: The test prompts, sent through the official OpenAI Python
+client library pointed at the Lake API, once without streaming and once with
+streaming.
+
+Output/Result: The client library parses every response and every streamed
+chunk without errors, and the required fields of the OpenAI chat completion
+response (such as \texttt{id}, \texttt{choices}, \texttt{finish\_reason} and
+\texttt{usage}) are present with the expected types.
+
+How test will be performed: Part of the continuous integration integration
+test. A script runs the requests with the client library and checks the
+response objects.
+
 \end{enumerate}
 \endgroup
 
@@ -740,8 +803,7 @@ to the list.
 
 Table~\ref{tab:trace-nfr} lists the system tests that verify each
 nonfunctional requirement. Every nonfunctional requirement has at least one
-test. Tests in Section~\ref{sec:fr-tests} are referred to by their area, and
-some tests also check a functional requirement, such as FR.S.5.6 in
+test. Some of these tests also check a functional requirement, such as FR.S.5.6 in
 \hyperref[T-NFR-USE-1]{T-NFR-USE-1} and FR.S.2.2 in \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1}.
 
 \begin{table}[htbp]
@@ -763,14 +825,14 @@ NFR.S.8 & \hyperref[T-NFR-FT-1]{T-NFR-FT-1} \\
 NFR.S.9 & \hyperref[T-NFR-FT-2]{T-NFR-FT-2} \\
 NFR.S.10 & \hyperref[T-NFR-PRIV-1]{T-NFR-PRIV-1} \\
 NFR.S.11 & \hyperref[T-NFR-PRIV-2]{T-NFR-PRIV-2} \\
-NFR.S.12 & Lake network formation tests (Section~\ref{sec:fr-tests}) \\
+NFR.S.12 & \hyperref[T-NFR-PRIV-3]{T-NFR-PRIV-3} \\
 NFR.S.13 & \hyperref[T-NFR-COMP-1]{T-NFR-COMP-1}, \hyperref[T-NFR-USE-2]{T-NFR-USE-2} \\
 NFR.S.14 & \hyperref[T-NFR-COMP-1]{T-NFR-COMP-1} \\
 NFR.S.15 & \hyperref[T-NFR-COMP-2]{T-NFR-COMP-2} \\
 \midrule
 NFR.E.1 & \hyperref[T-NFR-COMP-1]{T-NFR-COMP-1}, \hyperref[T-NFR-USE-2]{T-NFR-USE-2} \\
-NFR.E.2 & Partitioning tests (Section~\ref{sec:fr-tests}), \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1} \\
-NFR.E.3 & API tests (Section~\ref{sec:fr-tests}), \hyperref[T-NFR-PERF-2]{T-NFR-PERF-2}, \hyperref[T-NFR-PERF-3]{T-NFR-PERF-3} \\
+NFR.E.2 & \hyperref[T-NFR-ENV-5]{T-NFR-ENV-5}, \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1} \\
+NFR.E.3 & \hyperref[T-NFR-ENV-6]{T-NFR-ENV-6}, \hyperref[T-NFR-PERF-2]{T-NFR-PERF-2}, \hyperref[T-NFR-PERF-3]{T-NFR-PERF-3} \\
 NFR.E.4 & \hyperref[T-NFR-ENV-1]{T-NFR-ENV-1} \\
 NFR.E.5 & \hyperref[T-NFR-PRIV-2]{T-NFR-PRIV-2} \\
 NFR.E.6 & \hyperref[T-NFR-ENV-2]{T-NFR-ENV-2} \\
