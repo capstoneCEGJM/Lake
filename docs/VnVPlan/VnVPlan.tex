@@ -231,6 +231,7 @@ as a Rev 0 demo for the supervisor.}
 the contents of the subsections.}
 
 \subsection{Tests for Functional Requirements}
+\label{sec:fr-tests}
 
 \wss{Subsets of the tests may be in related, so this section is divided into
   different areas.  If there are no identifiable subsets for the tests, this
@@ -287,68 +288,497 @@ How test will be performed:
 ...
 
 \subsection{Tests for Nonfunctional Requirements}
+\begingroup
+\raggedright
+\setlength{\parindent}{15pt}
 
-\wss{The nonfunctional requirements for accuracy will likely just reference the
-  appropriate functional tests from above.  The test cases should mention
-  reporting the relative error for these tests.  Not all projects will
-  necessarily have nonfunctional requirements related to accuracy.}
+This section gives the system tests for the nonfunctional requirements in SRS
+S.2 (NFR.S.1 to NFR.S.15) and the Environmental Requirements (NFR.E.1 to
+NFR.E.8). The tests follow the verification groups in SRS S.8, and they are
+grouped by the same categories the SRS uses. Three requirements are verified
+by functional tests in Section~\ref{sec:fr-tests} instead of being repeated
+here: NFR.S.12 (no untrusted devices) by the Lake network formation tests,
+NFR.E.2 (model layer partitioning) by the partitioning tests, and NFR.E.3
+(OpenAI API specification) by the API tests.
 
-\wss{For some nonfunctional tests, you won't be setting a target threshold for
-passing the test, but rather describing the experiment you will do to measure
-the quality for different inputs.  For instance, you could measure speed versus
-the problem size.  The output of the test isn't pass/fail, but rather a summary
-table or graph.}
+Each test uses one of the three test models below. All three use the Llama
+architecture, so the same code path is tested from the smallest model to the
+largest, and all three are released under the Apache 2.0 licence.
 
-\wss{Tests related to usability could include conducting a usability test and
-  survey.  The survey will be in the Appendix.}
+\begin{table}[h]
+\centering
+\caption{Test models}
+\label{tab:test-models}
+\begin{tabularx}{\textwidth}{lXl}
+\toprule
+\textbf{Name} & \textbf{Model and use} & \textbf{Size} \\
+\midrule
+\textit{SMALL\_MODEL} & SmolLM2-135M-Instruct, Q8\_0. Continuous integration
+  and tests where answer quality does not matter. & about 150 MB \\
+\textit{DEMO\_MODEL} & SmolLM2-1.7B-Instruct, Q8\_0. Quality comparisons,
+  compatibility runs and the usability session. & about 1.8 GB \\
+\textit{CAPACITY\_MODEL} & Mistral-7B-Instruct-v0.3, at the precision chosen
+  in test \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1}. & 7.7 to 14.5 GB \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\wss{Static tests, review, inspections, and walkthroughs, will not follow the
-format for the tests given below.}
+Unless a test says otherwise, generation uses greedy decoding, the
+\textit{TEST\_PROMPTS} fixed prompts in the test repository, and
+\textit{GEN\_TOKENS} generated tokens per prompt. Named values in italics are
+defined in Section~\ref{sec:symbolic-parameters}.
 
-\wss{If you introduce static tests in your plan, you need to provide details.
-How will they be done?  In cases like code (or document) walkthroughs, who will
-be involved? Be specific.}
+\subsubsection{Usability}
 
-\subsubsection{Area of Testing1}
-		
-\paragraph{Title for Test}
+These tests cover NFR.S.1 (understandability), NFR.S.2 (controllability) and
+NFR.S.3 (installability). The first is a session with people who have not used
+\progname{}, which is the only way to check how a new user experiences the
+interface. Its tasks and questions are in Section~\ref{sec:usability-survey}.
 
 \begin{enumerate}
 
-\item{test-id1\\}
+\item{T-NFR-USE-1\\}
+\label{T-NFR-USE-1}
 
-Type: Functional, Dynamic, Manual, Static etc.
-					
-Initial State: 
-					
-Input/Condition: 
-					
-Output/Result: 
-					
-How test will be performed: 
-					
-\item{test-id2\\}
+Type: Dynamic, manual
 
-Type: Functional, Dynamic, Manual, Static etc.
-					
-Initial State: 
-					
-Input: 
-					
-Output: 
-					
-How test will be performed: 
+Initial State: Three devices run \progname{} on one local network. One device
+has a background load that cuts its token throughput to about half, so it is
+the bottleneck. \textit{DEMO\_MODEL} is on the device the participant uses.
+
+Input/Condition: At least \textit{TEST\_USERS} participants who have not used
+\progname{}, such as students from other capstone teams, each complete the two
+tasks in Section~\ref{sec:usability-survey}.
+
+Output/Result: Every participant completes task 1 (create a Lake network) and
+task 2 (name the participating devices, the token throughput and the
+bottleneck) within \textit{UI\_TASK\_TIME} each, and the throttled device is
+highlighted as the bottleneck (FR.S.5.6). The answers to the follow-up
+questions are recorded and each problem raised by more than one participant
+becomes a GitHub issue.
+
+How test will be performed: One team member runs the session and reads the
+tasks aloud without giving hints. A second team member times each task from
+the moment the participant first sees the interface and records whether it was
+completed. The participant then answers the questions in
+Section~\ref{sec:usability-survey}.
+
+\item{T-NFR-USE-2\\}
+\label{T-NFR-USE-2}
+
+Type: Dynamic, manual
+
+Initial State: A clean machine for each operating system with no previous
+\progname{} installation, and the release installer or package for that
+system.
+
+Input/Condition: A team member installs \progname{} following only the
+installation instructions.
+
+Output/Result: On Windows and macOS, installation takes at most
+\textit{INSTALL\_CLICKS} clicks after the installer is downloaded. On Linux it
+takes one package manager command. On every system, \progname{} starts after
+installation without further setup.
+
+How test will be performed: The tester counts every click from opening the
+installer to the first launch of \progname{}, and records the count and any
+manual step needed. The test is repeated for each release candidate.
 
 \end{enumerate}
 
-\subsubsection{Area of Testing2}
+\subsubsection{Performance}
 
-...
+These tests cover NFR.S.4 (model size), NFR.S.5 (scalability) and NFR.S.6
+(intelligence). \hyperref[T-NFR-PERF-2]{T-NFR-PERF-2} measures how throughput changes with load, so
+part of its output is a table and a graph rather than a single pass or fail.
+
+\begin{enumerate}
+
+\item{T-NFR-PERF-1\\}
+\label{T-NFR-PERF-1}
+
+Type: Dynamic, manual
+
+Initial State: A Lake network of the team's laptops.
+Let $M_{\max}$ be the largest free GPU-accessible memory of any
+node and $M_{\mathrm{total}}$ the sum over all nodes, each reduced by
+\textit{MEMORY\_MARGIN}. \textit{CAPACITY\_MODEL} is used at the lowest
+precision whose memory need (weights plus the KV cache for
+\textit{CONTEXT\_MAX} tokens) is greater than $M_{\max}$ and at most
+$M_{\mathrm{total}}$.
+
+Input/Condition: First, the model is loaded on the node with the most memory
+alone. Then it is loaded across the whole Lake network and given the test
+prompts.
+
+Output/Result: Loading on one node fails with a partitioning failure
+(FR.S.2.2). Loading across the network succeeds, and the responses meet the
+criteria of the inference correctness tests in Section~\ref{sec:fr-tests}.
+
+How test will be performed: The memory of each node is read from the
+Coordinator's device report, and the precision is chosen from those values and
+recorded with the result. The test is run once per demonstration with the
+devices available at the time.
+
+\item{T-NFR-PERF-2\\}
+\label{T-NFR-PERF-2}
+
+Type: Dynamic, automated
+
+Initial State: Lake networks of $k = 1, 2, \ldots$ nodes, up to the number of
+team devices available, running \textit{DEMO\_MODEL}.
+
+Input/Condition: For each $k$, the number of concurrent requests $c$ is
+increased through $1, 2, 4, 8, \ldots$ while each request generates
+\textit{GEN\_TOKENS} tokens.
+
+Output/Result: For each $k$, the largest $c$, called $c_{\max}(k)$, at which
+the mean per-request token throughput is within \textit{MAX\_DEGRADATION} of the
+single-request throughput. The test passes if $c_{\max}(k) \ge$
+\textit{MIN\_CONCURRENT} for every $k \ge 2$ and $c_{\max}(k) \ge k \cdot
+c_{\max}(1)$. The results are also reported as a table and a graph of
+$c_{\max}$ against $k$.
+
+How test will be performed: A load-test script sends the requests through the
+OpenAI-compatible API and records the tokens per second of each request. The
+results are kept for the Performance Report.
+
+\item{T-NFR-PERF-3\\}
+\label{T-NFR-PERF-3}
+
+Type: Dynamic, automated
+
+Initial State: \textit{DEMO\_MODEL} served two ways: by llama.cpp's
+\texttt{llama-server} on one machine, and by a two-node Lake network.
+
+Input/Condition: The same \textit{BENCH\_QUESTIONS} multiple-choice questions
+from the MMLU benchmark, sent to both through the OpenAI-compatible API with
+greedy decoding.
+
+Output/Result: The Lake network's accuracy is at least \textit{BENCH\_RATIO} of
+the single-machine accuracy. The relative error
+$|a_{\mathrm{single}} - a_{\mathrm{Lake}}| / a_{\mathrm{single}}$ is reported, where
+$a$ is the fraction of questions answered correctly.
+
+How test will be performed: A script sends each question, extracts the answer
+letter from the response, and scores both runs against the answer key. Using
+\texttt{llama-server} as the baseline means both runs use the same API and
+prompts, so only the split differs.
+
+\end{enumerate}
+
+\subsubsection{Look and Feel}
+
+NFR.S.7 (consistency) is checked by inspection, since it concerns how the Lake
+Client's source is written rather than how it behaves.
+
+\begin{enumerate}
+
+\item{T-NFR-LF-1\\}
+\label{T-NFR-LF-1}
+
+Type: Static, inspection
+
+Initial State: The Lake Client source at a release candidate.
+
+Input/Condition: Two team members who did not write the Lake Client code under
+review go through this checklist:
+\begin{enumerate}
+  \item A search of the source for colour values (hexadecimal, \texttt{rgb()}
+    and \texttt{hsl()}) and font names finds them only in the theme file.
+  \item Every component takes its colours and fonts from the theme.
+  \item Every screen of the Lake Client, viewed once, shows no colour or font
+    outside the theme.
+\end{enumerate}
+
+Output/Result: All three items pass. Any failure is filed as a GitHub issue.
+
+How test will be performed: The reviewers record the result of each item and
+the commit reviewed in the pull request for the release candidate.
+
+\end{enumerate}
+
+\subsubsection{Fault Tolerance}
+
+These tests cover NFR.S.8 (rejecting invalid model files) and NFR.S.9 (correct
+results despite packet loss and corruption).
+
+\begin{enumerate}
+
+\item{T-NFR-FT-1\\}
+\label{T-NFR-FT-1}
+
+Type: Dynamic, automated
+
+Initial State: A two-node Lake network on one machine, with no model loaded.
+
+Input/Condition: Four invalid model files, each given to the Lake Client as the
+model to load:
+\begin{enumerate}
+  \item \textit{SMALL\_MODEL} truncated to half its size;
+  \item \textit{SMALL\_MODEL} with its first four bytes (the GGUF magic number)
+    overwritten;
+  \item a plain text file renamed with a \texttt{.gguf} extension;
+  \item a valid GGUF file of a model architecture \progname{} does not support.
+\end{enumerate}
+
+Output/Result: Each file is rejected with an error message that names the
+problem, no partition is sent to any node, and no process crashes.
+
+How test will be performed: A test script loads each file in turn and checks
+the error returned, the nodes' logs, and that every process is still running.
+
+\item{T-NFR-FT-2\\}
+\label{T-NFR-FT-2}
+
+Type: Dynamic, automated
+
+Initial State: A two-node Lake network on one Linux machine running
+\textit{SMALL\_MODEL}, with the nodes connected through the loopback interface.
+
+Input/Condition: The test prompts, run once with no network impairment and
+then once for each packet loss rate and each packet corruption rate in
+\textit{LOSS\_LEVELS}.
+
+Output/Result: The generated tokens under every impairment are identical to the
+tokens with no impairment. The time per token at each level is also recorded.
+
+How test will be performed: The Linux \texttt{tc netem} tool adds the loss or
+corruption to the loopback interface. The test runs in continuous integration
+on a Linux runner.
+
+\end{enumerate}
+
+\subsubsection{Privacy}
+
+These tests cover NFR.S.10 (no stored request data), NFR.S.11 (no data sent
+outside the Lake network) and NFR.E.5 (no requests to third-party services).
+
+\begin{enumerate}
+
+\item{T-NFR-PRIV-1\\}
+\label{T-NFR-PRIV-1}
+
+Type: Dynamic, automated
+
+Initial State: A two-node Lake network with \textit{SMALL\_MODEL} loaded and
+logging at its most detailed level.
+
+Input/Condition: The test prompts, each with a unique random marker string
+added, sent through the API until every request completes.
+
+Output/Result: A search of every file \progname{} wrote on every node, including
+its data directory, logs and temporary files, finds none of the marker strings
+and none of the response text.
+
+How test will be performed: A script records the files \progname{} creates or
+changes during the run and searches them for each marker and response.
+
+\item{T-NFR-PRIV-2\\}
+\label{T-NFR-PRIV-2}
+
+Type: Dynamic, manual
+
+Initial State: A two-node Lake network on a local network, with packet capture
+running on every node.
+
+Input/Condition: A session of \textit{IDLE\_TIME} with no requests, then the
+test prompts, then shutting the Lake network down.
+
+Output/Result: Every captured packet sent by \progname{} goes to another node of
+the Lake network, to a device on the local network being discovered or invited,
+or to the client that sent the request. There are no other destinations,
+including no name lookups for outside hosts.
+
+How test will be performed: A team member captures traffic with
+\texttt{tcpdump} on Linux and macOS or Wireshark on Windows, filters it to the
+\progname{} processes, and lists every destination address and port.
+
+\end{enumerate}
+
+\subsubsection{Compatibility}
+
+These tests cover NFR.S.13 (operating systems), NFR.S.14 (CPU architectures),
+NFR.S.15 (GPUs) and NFR.E.1 (supported platforms). Operating systems and CPU
+architectures are covered by continuous integration. Continuous integration
+runners have no usable GPUs, so each GPU vendor is covered as far as the team's
+hardware allows, as shown in Table~\ref{tab:gpu-coverage}.
+
+\begin{table}[h]
+\centering
+\caption{GPU coverage for T-NFR-COMP-2}
+\label{tab:gpu-coverage}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Vendor} & \textbf{Verification} \\
+\midrule
+NVIDIA & Run on Gary's laptop (GeForce RTX 3050 Laptop GPU, 4 GB) with the CUDA
+  backend. \\
+Apple & Run on Jinwoo's MacBook (64 GB unified memory) with the Metal backend. \\
+AMD & No team member has an AMD GPU. A continuous integration job builds
+  \progname{} with the ROCm backend, and the test is run with the Vulkan
+  backend, which most AMD GPUs use, on the Intel integrated GPU of Gary's
+  laptop. A runtime test on AMD hardware is recorded as a gap in the V\&V
+  Report if no AMD device can be borrowed. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{enumerate}
+
+\item{T-NFR-COMP-1\\}
+\label{T-NFR-COMP-1}
+
+Type: Dynamic, automated
+
+Initial State: The continuous integration workflow, with runners for Windows,
+macOS and Linux on both x86\_64 and ARM where GitHub provides them.
+
+Input/Condition: Every pull request to the main branch.
+
+Output/Result: \progname{} builds, and its unit and integration tests pass with
+the CPU backend, on every runner.
+
+How test will be performed: A GitHub Actions matrix job runs the build and the
+tests on each runner. The branch rules block merging if any runner fails.
+
+\item{T-NFR-COMP-2\\}
+\label{T-NFR-COMP-2}
+
+Type: Dynamic, manual
+
+Initial State: The devices in Table~\ref{tab:gpu-coverage}, each running
+\progname{} with its GPU backend.
+
+Input/Condition: The inference correctness test from
+Section~\ref{sec:fr-tests} with \textit{DEMO\_MODEL}, split across two
+processes on the device.
+
+Output/Result: On each device, the split model produces the same tokens as the
+unsplit model on the same device.
+
+How test will be performed: The device owner runs the test before each
+demonstration and records the device, backend and result.
+
+\end{enumerate}
+
+\subsubsection{Environment and Licensing}
+
+These tests cover NFR.E.4 (model weights unchanged), NFR.E.6 (formatting and
+linting), NFR.E.7 (GPL compliance) and NFR.E.8 (model licences). NFR.E.2 and
+NFR.E.3 are covered in Section~\ref{sec:fr-tests}.
+
+\begin{enumerate}
+
+\item{T-NFR-ENV-1\\}
+\label{T-NFR-ENV-1}
+
+Type: Dynamic, automated
+
+Initial State: \textit{SMALL\_MODEL} on disk, with its SHA-256 checksum
+recorded.
+
+Input/Condition: A Lake network loads the model, partitions it across two nodes
+and runs the test prompts.
+
+Output/Result: The model file's SHA-256 checksum is unchanged.
+
+How test will be performed: Part of the continuous integration integration
+test.
+
+\item{T-NFR-ENV-2\\}
+\label{T-NFR-ENV-2}
+
+Type: Static, automated
+
+Initial State: The continuous integration workflow.
+
+Input/Condition: Every pull request to the main branch.
+
+Output/Result: Ruff and Black pass for Python, rustfmt and Clippy for Rust, and
+ESLint and Prettier for TypeScript, with no errors.
+
+How test will be performed: The linting stage of continuous integration runs
+each tool. The branch rules block merging if it fails.
+
+\item{T-NFR-ENV-3\\}
+\label{T-NFR-ENV-3}
+
+Type: Static, automated
+
+Initial State: The project's dependency lists for Rust, Python and TypeScript.
+
+Input/Condition: Every pull request that changes a dependency.
+
+Output/Result: Every dependency's licence is on the project's list of
+licences compatible with GPL v3.0.
+
+How test will be performed: \texttt{cargo-deny}, \texttt{pip-licenses} and
+\texttt{license-checker} run in continuous integration and fail the build for
+any licence not on the list.
+
+\item{T-NFR-ENV-4\\}
+\label{T-NFR-ENV-4}
+
+Type: Static, inspection
+
+Initial State: The list of models used in testing and demonstrations
+(Table~\ref{tab:test-models}).
+
+Input/Condition: Two team members read the licence of each model.
+
+Output/Result: Each model's licence permits the way \progname{} uses it, and the
+licence name and link are recorded in the test repository.
+
+How test will be performed: The review is repeated whenever a model is added
+to the list.
+
+\end{enumerate}
+\endgroup
 
 \subsection{Traceability Between Test Cases and Requirements}
 
-\wss{Provide a table that shows which test cases are supporting which
-  requirements.}
+Table~\ref{tab:trace-nfr} lists the system tests that verify each
+nonfunctional requirement. Every nonfunctional requirement has at least one
+test. Tests in Section~\ref{sec:fr-tests} are referred to by their area, and
+some tests also check a functional requirement, such as FR.S.5.6 in
+\hyperref[T-NFR-USE-1]{T-NFR-USE-1} and FR.S.2.2 in \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1}.
+
+\begin{table}[htbp]
+\centering
+\caption{Traceability of nonfunctional requirements to system tests}
+\label{tab:trace-nfr}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Requirement} & \textbf{Test cases} \\
+\midrule
+NFR.S.1 & \hyperref[T-NFR-USE-1]{T-NFR-USE-1} \\
+NFR.S.2 & \hyperref[T-NFR-USE-1]{T-NFR-USE-1} \\
+NFR.S.3 & \hyperref[T-NFR-USE-2]{T-NFR-USE-2} \\
+NFR.S.4 & \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1} \\
+NFR.S.5 & \hyperref[T-NFR-PERF-2]{T-NFR-PERF-2} \\
+NFR.S.6 & \hyperref[T-NFR-PERF-3]{T-NFR-PERF-3} \\
+NFR.S.7 & \hyperref[T-NFR-LF-1]{T-NFR-LF-1} \\
+NFR.S.8 & \hyperref[T-NFR-FT-1]{T-NFR-FT-1} \\
+NFR.S.9 & \hyperref[T-NFR-FT-2]{T-NFR-FT-2} \\
+NFR.S.10 & \hyperref[T-NFR-PRIV-1]{T-NFR-PRIV-1} \\
+NFR.S.11 & \hyperref[T-NFR-PRIV-2]{T-NFR-PRIV-2} \\
+NFR.S.12 & Lake network formation tests (Section~\ref{sec:fr-tests}) \\
+NFR.S.13 & \hyperref[T-NFR-COMP-1]{T-NFR-COMP-1}, \hyperref[T-NFR-USE-2]{T-NFR-USE-2} \\
+NFR.S.14 & \hyperref[T-NFR-COMP-1]{T-NFR-COMP-1} \\
+NFR.S.15 & \hyperref[T-NFR-COMP-2]{T-NFR-COMP-2} \\
+\midrule
+NFR.E.1 & \hyperref[T-NFR-COMP-1]{T-NFR-COMP-1}, \hyperref[T-NFR-USE-2]{T-NFR-USE-2} \\
+NFR.E.2 & Partitioning tests (Section~\ref{sec:fr-tests}), \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1} \\
+NFR.E.3 & API tests (Section~\ref{sec:fr-tests}), \hyperref[T-NFR-PERF-2]{T-NFR-PERF-2}, \hyperref[T-NFR-PERF-3]{T-NFR-PERF-3} \\
+NFR.E.4 & \hyperref[T-NFR-ENV-1]{T-NFR-ENV-1} \\
+NFR.E.5 & \hyperref[T-NFR-PRIV-2]{T-NFR-PRIV-2} \\
+NFR.E.6 & \hyperref[T-NFR-ENV-2]{T-NFR-ENV-2} \\
+NFR.E.7 & \hyperref[T-NFR-ENV-3]{T-NFR-ENV-3} \\
+NFR.E.8 & \hyperref[T-NFR-ENV-4]{T-NFR-ENV-4} \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
 \section{Unit Test Description}
 
@@ -486,15 +916,78 @@ How test will be performed:
 This is where you can place additional information.
 
 \subsection{Symbolic Parameters}
+\label{sec:symbolic-parameters}
 
 The definition of the test cases will call for SYMBOLIC\_CONSTANTS.
 Their values are defined in this section for easy maintenance.
 
-\subsection{Usability Survey Questions?}
+Values taken from the SRS Symbolic Constants appendix keep the value given
+there; Table~\ref{tab:vnv-constants} lists them alongside the values that are
+only used in testing. The test models (\textit{SMALL\_MODEL}, \textit{DEMO\_MODEL}
+and \textit{CAPACITY\_MODEL}) are defined in Table~\ref{tab:test-models}.
 
-\wss{This is a section that would be appropriate for some projects.}
+\begin{table}[h]
+\centering
+\small
+\caption{Symbolic parameters used in the nonfunctional tests}
+\label{tab:vnv-constants}
+\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Name} & \textbf{Value} & \textbf{Description} \\
+\midrule
+\multicolumn{3}{l}{\textit{From the SRS}} \\
+\textit{UI\_TASK\_TIME} & 2 min & Time a new user may take for each usability
+  task. \\
+\textit{INSTALL\_CLICKS} & 10 & Maximum clicks to install on Windows or macOS. \\
+\textit{TEST\_USERS} & 3 & Minimum number of usability session participants. \\
+\textit{MAX\_DEGRADATION} & 20\% & Maximum loss of per-request throughput under
+  concurrent load. \\
+\textit{MIN\_CONCURRENT} & 2 & Minimum number of requests served at the same
+  time. \\
+\textit{BENCH\_RATIO} & 95\% & Minimum benchmark accuracy of the split model,
+  relative to one machine. \\
+\textit{MAX\_LOSS} & 10\% & Highest packet loss and corruption rate tested. \\
+\textit{CONTEXT\_MAX} & 4096 tokens & Context length each node reserves KV cache
+  for. \\
+\textit{MEMORY\_MARGIN} & 10\% & Share of each node's memory left free for
+  runtime overhead. \\
+\midrule
+\multicolumn{3}{l}{\textit{Used only in testing}} \\
+\textit{TEST\_PROMPTS} & 20 & Number of fixed prompts used by default. \\
+\textit{GEN\_TOKENS} & 128 & Tokens generated per prompt. \\
+\textit{BENCH\_QUESTIONS} & 500 & MMLU questions in \hyperref[T-NFR-PERF-3]{T-NFR-PERF-3}. \\
+\textit{LOSS\_LEVELS} & 1\%, 5\%, \textit{MAX\_LOSS} & Packet loss and
+  corruption rates in \hyperref[T-NFR-FT-2]{T-NFR-FT-2}. \\
+\textit{IDLE\_TIME} & 10 min & Idle period captured in \hyperref[T-NFR-PRIV-2]{T-NFR-PRIV-2}. \\
+\bottomrule
+\end{tabularx}
+\end{table}
 
-\newpage{}
+\subsection{Usability Survey Questions}
+\label{sec:usability-survey}
+
+This survey is used in test \hyperref[T-NFR-USE-1]{T-NFR-USE-1}. It checks NFR.S.1 and NFR.S.2, and
+the bottleneck highlighting in FR.S.5.6. Each participant has a time limit of
+\textit{UI\_TASK\_TIME} for each task. A team member records the time taken
+and whether the task was completed, and gives no hints during the tasks.
+
+\paragraph{Tasks}
+\begin{enumerate}
+  \item Create a Lake network using the devices listed on the card and the
+    model provided. (NFR.S.2)
+  \item Using the interface, name the devices taking part, the current token
+    throughput, and the slowest device or connection. (NFR.S.1, FR.S.5.6)
+\end{enumerate}
+
+\paragraph{Questions after the tasks}
+\begin{enumerate}
+  \item Was anything confusing while creating the network?
+  \item How did you find the slowest device or connection? Was anything hard
+    to find?
+  \item Did you expect to see or do anything that was not there?
+\end{enumerate}
+
+\clearpage
 
 \section{Appendix --- Generative AI Use Disclosure}
 
@@ -502,9 +995,21 @@ Their values are defined in this section for easy maintenance.
 
 \subsection{AI Tools Used}
 
+\begin{itemize}
+    \item Anthropic Claude Opus 5.5, used through Claude Code.
+\end{itemize}
+
 \wss{Give the name of the AI tool(s) used and the version.}
 
 \subsection{How and Where Used}
+
+\begin{itemize}
+    \item \textbf{4.2 Tests for Nonfunctional Requirements}: Claude drafted
+    the tests from the SRS requirements and the test approach, test IDs and
+    hardware we chose. We reviewed and edited the draft. Claude also drafted
+    the nonfunctional rows of the traceability table in 4.3, the symbolic
+    parameters table in 6.1 and the usability survey in 6.2.
+\end{itemize}
 
 \wss{Explain what the tool(s) were used for.  Examples include: brainstorming,
 explaining a technical concept, reviewing the document, generating or modifying
@@ -517,6 +1022,10 @@ inconsistencies.}
 uses that materially contributed to your work}
 
 \subsection{Verification of AI-Generated Content}
+
+Every requirement ID and symbolic constant in the drafted sections was checked
+against the SRS, and every requirement in 4.2 was checked to have a test in the
+traceability table.
 
 \wss{\begin{itemize}
     \item Describe how the team checked AI-generated or AI-assisted material
