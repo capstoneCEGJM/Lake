@@ -136,7 +136,7 @@ how they relate to your VnV efforts.}
 
 \section{Plan}
 
-The following is a set of verification practices that the \progname{} team will use to ensurer that
+The following is a set of verification practices that the \progname{} team will use to ensure that
 requirements, design, implementation, and testing are each verified throughout the development process.
 
 \hyperref[sec:VnVTeam]{3.1} begins by establishing team roles specifically for project verification. Following this,
@@ -144,7 +144,7 @@ requirements, design, implementation, and testing are each verified throughout t
 various non-code artifacts - the \citet{SRS}, design, and the verification and validation plan (this document).
 
 Finally, \hyperref[sec:ImpVer]{3.5} - Implementation Verification, \hyperref[sec:AutoTestVer]{3.6} - Automated Testing and
-Verification Tools, and \hyperref[sec:SoftVal]{3.7} - Software Validation, provide further specification on how code artifacts
+Verification Tools, and \hyperref[sec:SoftVal]{3.7} - Software Validation provide further specification on how code artifacts
 will be validated and verified.
 
 \subsection{Verification and Validation Team}
@@ -161,14 +161,14 @@ roles and responsibilities.
 \hline
 \textbf{Team Member} & \textbf{Role} & \textbf{Verification and Validation Responsibilities} \\
 \hline
-Gary Qin & Lead & Oversight of the execution of the plan. Responsible for promoting changes brought forth by R\&D, ensuring new tools are implemented, and that the automated
-verification and pipeline are operating as intended. \\
+Gary Qin & Lead & Oversight of the execution of the plan. Responsible for promoting changes brought forth by R\&D, ensuring new tools are implemented, and that automated
+verification and pipeline tools are operating as intended. \\
 \hline
 Jinwoo Hong & Research \& Development & Research of state of the art verification/validation tooling and providing recommendations to the team.
 If required, small-scale integration of new validation tools for demonstration purposes and to prove effectiveness. \\
 \hline
 Matthew Nesbitt & DevOps \& CI-CD & Integration of identified tools and practices into the project's pipeline, ensuring that all code and documentation changes
-are checked automatically for adherence. \\
+are checked automatically for adherence. Repair and fixes to CI-CD as required. \\
 \hline
 Colin Chambachan & Implementation & Working with Coordinator and Research \& Development team members to implement tools and practices in the codebase. This
 applies for document- and code-based verification and validation. \\
@@ -188,14 +188,14 @@ the following verification methods will be used:
 \begin{itemize}
   \item \textbf{External Peer Review}: Since the team aims to validate their project externally and \progname{} has no designated supervisor, the team will seek
   external feedback from a peer who is not a member of the Capstone course. This peer should be familiar with the project and its goals at a high-level, 
-  possess relevant background knowledge and can perform an ad-hoc review. This allows the team to surface new insights and improve the readability and quality of their SRS.
+  possess relevant background knowledge, and can perform an ad-hoc review. This allows the team to surface new insights and improve the readability and quality of their SRS.
   \item \textbf{Internal Peer Review}: As with each document in the Capstone project, there is a review process performed by another team.
-  This review aims to find consistency and content issues within the document, and will be used to provide the team feedback on documentation 
+  This review aims to find consistency and content issues within the document, and will be used to provide the team additional feedback.
   \item \textbf{GitHub Issue Tracking}: All feedback provided to the team will be noted and converted into issues on GitHub. This allows the team to maintain a backlog
   of SRS-related issues and fix identified problems.
   \item \textbf{Internal Team Verification} (Once per deliverable): As the team progresses through the term, they will review their
   progress to ensure it aligns with what was set out in the SRS document. In the case new code or documentation does not align
-  with the SRS, the team will discuss the necessary fix. This will result in either the SRS to be amended to reflect the project more accurately,
+  with the SRS, the team will discuss the necessary fix. This will result in either the SRS being amended to reflect the project more accurately,
   or the deliverable will be changed. The goal of this process is to guarantee consistency: what is stated in any code or documentation after the SRS
   should logically follow from what was prescribed in it.
   \item \textbf{SRS Checklist}: In order to complete internal team verification, the lead for verification and validation (as set out in \hyperref[sec:VnVTeam]{3.1}) will
@@ -207,7 +207,7 @@ the following verification methods will be used:
 \subsection{Design Verification}
 \label{sec:DesignVer}
 
-Design verification of Lake will begin after November 16, when the first design document will be complete. In order to verify the design of Lake, the following methods will be used.
+Design verification of Lake will begin after November 16, when the first design document will be complete. In order to verify the design of Lake, the following methods will be used:
 
 \begin{itemize}
   \item \textbf{Peer Review}: Similar to verification of the SRS that was detailed in \hyperref[sec:SRSVer]{3.2}, peer review will be used to verify the design documentation.
@@ -230,9 +230,9 @@ Design verification of Lake will begin after November 16, when the first design 
 In order to verify the quality of the team's verification and validation plan, the team will employ the following methods:
 
 \begin{itemize}
-  \item \textbf{Internal Review}: Throughout the preparation of the document, the team will review individual document contributions and their connections to guarantee quality.
+  \item \textbf{Internal Review}: Throughout the preparation of the document, the team will review individual document sections and how they connect to guarantee quality and consistency.
   \item \textbf{Peer Review}: The team will use the peer review process to catch additional issues or inconsistencies. This will be used to complement the completed internal review.
-  \item \textbf{Ad-Hoc Team Meeting}: The team will schedule a one-time meeting after the delivery of the VnV plan to assess the feasibility as well as individual responsibilities and requirements.
+  \item \textbf{Ad-Hoc Team Meeting}: The team will schedule a one-time meeting after the delivery of the VnV plan to assess its feasibility, as well as assigned responsibilities to each member.
   This meeting will aim to assess the effectiveness and practicality of the current plan, and make changes if required.
 \end{itemize}
 
