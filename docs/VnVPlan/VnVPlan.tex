@@ -294,8 +294,9 @@ How test will be performed:
 
 This section gives the system tests for the nonfunctional requirements in SRS
 S.2 (NFR.S.1 to NFR.S.15) and the Environmental Requirements (NFR.E.1 to
-NFR.E.8). The tests follow the verification groups in SRS S.8, and they are
-grouped by the same categories the SRS uses. NFR.S.12, NFR.E.2 and NFR.E.3
+NFR.E.8), and for the safety requirements from the Hazard Analysis (SR0-1 to
+SR5-2). The tests follow the verification groups in SRS S.8, and they are
+grouped by the same categories the SRS uses, with a final group for safety. NFR.S.12, NFR.E.2 and NFR.E.3
 share their behaviour with functional requirements, so their tests reuse the
 setup of the functional tests in Section~\ref{sec:fr-tests} and check only the
 nonfunctional property.
@@ -398,8 +399,10 @@ part of its output is a table and a graph rather than a single pass or fail.
 
 Type: Dynamic, manual
 
-Initial State: A Lake network of the team's laptops.
-Let $M_{\max}$ be the largest free GPU-accessible memory of any
+Initial State: A Lake network of the team devices that cannot hold
+\textit{CAPACITY\_MODEL} alone: Gary's and Colin's NVIDIA laptops, Colin's
+MacBook and Matthew's AMD GPU. Jinwoo's and Ethan's MacBooks can each hold the
+whole model, so they are not used. Let $M_{\max}$ be the largest free GPU-accessible memory of any
 node and $M_{\mathrm{total}}$ the sum over all nodes, each reduced by
 \textit{MEMORY\_MARGIN}. \textit{CAPACITY\_MODEL} is used at the lowest
 precision whose memory need (weights plus the KV cache for
@@ -416,8 +419,9 @@ criteria of the inference correctness tests in Section~\ref{sec:fr-tests}.
 
 How test will be performed: The memory of each node is read from the
 Coordinator's device report, and the precision is chosen from those values and
-recorded with the result. The test is run once per demonstration with the
-devices available at the time.
+recorded with the result. With the devices above, $M_{\max}$ is about 14.4 GB
+(Matthew's GPU), so the rule selects 16-bit precision, which needs about 15 GB.
+The test is run once per demonstration with the devices available at the time.
 
 \item{T-NFR-PERF-2\\}
 \label{T-NFR-PERF-2}
@@ -565,14 +569,20 @@ Initial State: A two-node Lake network with \textit{SMALL\_MODEL} loaded and
 logging at its most detailed level.
 
 Input/Condition: The test prompts, each with a unique random marker string
-added, sent through the API until every request completes.
+added, sent through the API until every request completes. The prompts are
+also sent during the faults of \hyperref[T-NFR-SAFE-3]{T-NFR-SAFE-3} and
+\hyperref[T-NFR-SAFE-4]{T-NFR-SAFE-4}, since error handling is where request
+data is most likely to reach a log.
 
 Output/Result: A search of every file \progname{} wrote on every node, including
-its data directory, logs and temporary files, finds none of the marker strings
-and none of the response text.
+its data directory, diagnostic logs and temporary files, finds none of the
+marker strings, none of the response text, and no tensor or KV cache contents
+(SR5-2).
 
 How test will be performed: A script records the files \progname{} creates or
-changes during the run and searches them for each marker and response.
+changes during the run and searches them for each marker and response. Tensor
+contents are found by searching for the byte patterns of tensors sent during
+the run.
 
 \item{T-NFR-PRIV-2\\}
 \label{T-NFR-PRIV-2}
@@ -600,20 +610,23 @@ How test will be performed: A team member captures traffic with
 Type: Dynamic, manual
 
 Initial State: The Lake network formation setup from
-Section~\ref{sec:fr-tests}: one leader and three other devices running
+Section~\ref{sec:fr-tests}: one leader and four other devices running
 \progname{} on one local network, with packet capture running on each.
 
-Input/Condition: The leader selects two of the devices and invites them. One
-accepts the invitation and one declines it. The third device is not selected.
-The leader then loads \textit{SMALL\_MODEL} and runs the test prompts.
+Input/Condition: The four devices cover every combination of the two approvals
+in SR5-1. The leader selects three of them and invites them: one accepts the
+invitation and one declines it, and the third accepts but the leader then
+withdraws its approval before the network forms. The fourth device is not
+selected. The leader then loads \textit{SMALL\_MODEL} and runs the test
+prompts.
 
-Output/Result: Only the leader and the device that accepted take part in the
-Lake network. The device that declined and the device that was not selected
-receive no model partition, hidden state or request data, and each of them
-appears in the capture only in discovery and invitation traffic.
+Output/Result: Only the leader and the device that both the leader and the
+device approved take part in the Lake network. The other three devices receive
+no model partition, hidden state or request data, and each of them appears in
+the capture only in discovery and invitation traffic.
 
 How test will be performed: A team member filters the capture on each of the
-two excluded devices to the \progname{} processes and checks every packet
+three excluded devices to the \progname{} processes and checks every packet
 received against this rule.
 
 \end{enumerate}
@@ -623,8 +636,8 @@ received against this rule.
 These tests cover NFR.S.13 (operating systems), NFR.S.14 (CPU architectures),
 NFR.S.15 (GPUs) and NFR.E.1 (supported platforms). Operating systems and CPU
 architectures are covered by continuous integration. Continuous integration
-runners have no usable GPUs, so each GPU vendor is covered as far as the team's
-hardware allows, as shown in Table~\ref{tab:gpu-coverage}.
+runners have no usable GPUs, so each GPU vendor is covered on team members'
+devices, as shown in Table~\ref{tab:gpu-coverage}.
 
 \begin{table}[h]
 \centering
@@ -634,14 +647,12 @@ hardware allows, as shown in Table~\ref{tab:gpu-coverage}.
 \toprule
 \textbf{Vendor} & \textbf{Verification} \\
 \midrule
-NVIDIA & Run on Gary's laptop (GeForce RTX 3050 Laptop GPU, 4 GB) with the CUDA
-  backend. \\
-Apple & Run on Jinwoo's MacBook (64 GB unified memory) with the Metal backend. \\
-AMD & No team member has an AMD GPU. A continuous integration job builds
-  \progname{} with the ROCm backend, and the test is run with the Vulkan
-  backend, which most AMD GPUs use, on the Intel integrated GPU of Gary's
-  laptop. A runtime test on AMD hardware is recorded as a gap in the V\&V
-  Report if no AMD device can be borrowed. \\
+NVIDIA & Run with the CUDA backend on Gary's laptop (GeForce RTX 3050 Laptop
+  GPU, 4 GB) and Colin's Windows laptop (8 GB). \\
+Apple & Run with the Metal backend on Jinwoo's MacBook (64 GB unified memory),
+  Ethan's MacBook (32 GB) and Colin's MacBook (16 GB). \\
+AMD & Run on Matthew's AMD GPU (16 GB) with the ROCm backend, or the Vulkan
+  backend if ROCm does not support the card or its operating system. \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -797,12 +808,144 @@ test. A script runs the requests with the client library and checks the
 response objects.
 
 \end{enumerate}
+
+\subsubsection{Safety}
+
+These tests cover the safety requirements from the Hazard Analysis (SR0-1 to
+SR5-2). SR5-1 (two-sided authorisation) and SR5-2 (no request data in
+diagnostic logs) are covered by \hyperref[T-NFR-PRIV-3]{T-NFR-PRIV-3} and
+\hyperref[T-NFR-PRIV-1]{T-NFR-PRIV-1}. Several tests need faults that cannot be
+caused from outside \progname{}, such as a corrupted tensor that still passes
+the TCP checksum. For these, test builds of \progname{} include a
+fault-injection option in Tensor I/O and the Coordinator. It is not compiled
+into release builds.
+
+\begin{enumerate}
+
+\item{T-NFR-SAFE-1\\}
+\label{T-NFR-SAFE-1}
+
+Type: Dynamic, automated
+
+Initial State: The Model Partitioner, given device reports for test Lake
+networks of one to four nodes with different amounts of free memory.
+
+Input/Condition: \textit{SMALL\_MODEL} and \textit{DEMO\_MODEL}, each
+partitioned for every test network, together with three invalid cases: a model
+larger than the whole network's memory after \textit{MEMORY\_MARGIN} is
+removed from each node, a manual allocation that puts more layers on one node
+than its memory allows, and a network of one node.
+
+Output/Result: Every partitioning produced uses at least \textit{MIN\_NODES}
+nodes, assigns every layer of the model to exactly one node, and gives every
+selected node at least one layer. Each invalid case is rejected with a
+partitioning failure (FR.S.2.2) and nothing is sent to any node.
+
+How test will be performed: Part of the continuous integration integration
+test. The test checks each partitioning against the rules above and the
+memory reported for each node.
+
+\item{T-NFR-SAFE-2\\}
+\label{T-NFR-SAFE-2}
+
+Type: Dynamic, automated
+
+Initial State: A three-node Lake network on one machine running
+\textit{SMALL\_MODEL}.
+
+Input/Condition: The test prompts are sent while each of the following happens
+in turn:
+\begin{enumerate}
+  \item one follower's health reports are held back for longer than
+    \textit{HEALTH\_TTL};
+  \item one follower is made to fail its health check, then made to pass it
+    again;
+  \item a fourth node joins and its partition is not yet confirmed;
+  \item the leader process is killed.
+\end{enumerate}
+
+Output/Result: In cases (a) and (b) the follower is marked unavailable and is not
+given new requests or partitions until it passes a health check. In case (c) no
+request is sent to the new node before its partition is confirmed. In case (d)
+every follower detects the leader's failure within \textit{LEADER\_TIMEOUT}
+and shuts down.
+
+How test will be performed: Part of the continuous integration integration
+test. The fault-injection option holds back health reports and fails health
+checks. The Coordinator's routing log records which node each request is sent
+to.
+
+\item{T-NFR-SAFE-3\\}
+\label{T-NFR-SAFE-3}
+
+Type: Dynamic, automated
+
+Initial State: A two-node Lake network on one machine running
+\textit{SMALL\_MODEL}.
+
+Input/Condition: During a request, the follower process is paused. In one run
+it is resumed before \textit{RECOVERY\_LIMIT} attempts are used. In a second
+run it stays paused.
+
+Output/Result: In both runs the Coordinator treats the connection as failed
+after \textit{NODE\_TIMEOUT} without a response. In the first run the request
+is retried and completes with the same tokens as a run with no fault. In the
+second run the request is retried at most \textit{RECOVERY\_LIMIT} times and
+the API then returns an error for that request instead of waiting forever.
+
+How test will be performed: Part of the continuous integration integration
+test. The script pauses and resumes the follower with operating system
+signals and records the time of each retry from the Coordinator's log.
+
+\item{T-NFR-SAFE-4\\}
+\label{T-NFR-SAFE-4}
+
+Type: Dynamic, automated
+
+Initial State: A two-node Lake network on one machine running
+\textit{SMALL\_MODEL}.
+
+Input/Condition: The fault-injection option changes bytes in one tensor
+message and cuts another tensor message short, during different requests.
+
+Output/Result: Each damaged tensor is detected and discarded, a failure is
+reported to the Coordinator, and the request is retried and completes with the
+same tokens as a run with no fault. The log entry for each failure holds the
+tensor's metadata, such as its size and the request and layer it belongs to,
+and none of its contents.
+
+How test will be performed: Part of the continuous integration integration
+test. \hyperref[T-NFR-FT-2]{T-NFR-FT-2} cannot cover this, because TCP
+discards most packets that \texttt{tc netem} corrupts before \progname{} reads
+them.
+
+\item{T-NFR-SAFE-5\\}
+\label{T-NFR-SAFE-5}
+
+Type: Dynamic, automated
+
+Initial State: A two-node Lake network on one Linux machine running
+\textit{SMALL\_MODEL}, with the nodes connected through the loopback interface
+and a baseline latency recorded for the connection.
+
+Input/Condition: The test prompts, run with \texttt{tc netem} adding a delay of
+half of \textit{LATENCY\_TOL} above the baseline, then twice
+\textit{LATENCY\_TOL} above it.
+
+Output/Result: The Coordinator is notified of high latency during the second
+run and not during the first.
+
+How test will be performed: Part of the continuous integration integration
+test on a Linux runner. The test checks the Coordinator's log for the latency
+notice.
+
+\end{enumerate}
 \endgroup
 
 \subsection{Traceability Between Test Cases and Requirements}
 
-Table~\ref{tab:trace-nfr} lists the system tests that verify each
-nonfunctional requirement. Every nonfunctional requirement has at least one
+Tables~\ref{tab:trace-nfr} and~\ref{tab:trace-sr} list the system tests that
+verify each nonfunctional and safety requirement. Every one of them has at least one
 test. Some of these tests also check a functional requirement, such as FR.S.5.6 in
 \hyperref[T-NFR-USE-1]{T-NFR-USE-1} and FR.S.2.2 in \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1}.
 
@@ -838,6 +981,31 @@ NFR.E.5 & \hyperref[T-NFR-PRIV-2]{T-NFR-PRIV-2} \\
 NFR.E.6 & \hyperref[T-NFR-ENV-2]{T-NFR-ENV-2} \\
 NFR.E.7 & \hyperref[T-NFR-ENV-3]{T-NFR-ENV-3} \\
 NFR.E.8 & \hyperref[T-NFR-ENV-4]{T-NFR-ENV-4} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\caption{Traceability of safety requirements to system tests}
+\label{tab:trace-sr}
+\begin{tabularx}{\textwidth}{lX}
+\toprule
+\textbf{Requirement} & \textbf{Test cases} \\
+\midrule
+SR0-1 & \hyperref[T-NFR-SAFE-2]{T-NFR-SAFE-2} \\
+SR0-2 & \hyperref[T-NFR-SAFE-2]{T-NFR-SAFE-2} \\
+SR1-1 & \hyperref[T-NFR-SAFE-1]{T-NFR-SAFE-1} \\
+SR1-2 & \hyperref[T-NFR-SAFE-1]{T-NFR-SAFE-1}, \hyperref[T-NFR-ENV-5]{T-NFR-ENV-5} \\
+SR1-3 & \hyperref[T-NFR-SAFE-1]{T-NFR-SAFE-1}, \hyperref[T-NFR-PERF-1]{T-NFR-PERF-1} \\
+SR2-1 & \hyperref[T-NFR-SAFE-3]{T-NFR-SAFE-3} \\
+SR3-1 & \hyperref[T-NFR-SAFE-4]{T-NFR-SAFE-4}, \hyperref[T-NFR-FT-2]{T-NFR-FT-2} \\
+SR3-2 & \hyperref[T-NFR-SAFE-4]{T-NFR-SAFE-4} \\
+SR4-1 & \hyperref[T-NFR-SAFE-3]{T-NFR-SAFE-3} \\
+SR4-2 & \hyperref[T-NFR-SAFE-2]{T-NFR-SAFE-2} \\
+SR4-3 & \hyperref[T-NFR-SAFE-5]{T-NFR-SAFE-5} \\
+SR5-1 & \hyperref[T-NFR-PRIV-3]{T-NFR-PRIV-3} \\
+SR5-2 & \hyperref[T-NFR-PRIV-1]{T-NFR-PRIV-1}, \hyperref[T-NFR-SAFE-4]{T-NFR-SAFE-4} \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -984,20 +1152,19 @@ The definition of the test cases will call for SYMBOLIC\_CONSTANTS.
 Their values are defined in this section for easy maintenance.
 
 Values taken from the SRS Symbolic Constants appendix keep the value given
-there; Table~\ref{tab:vnv-constants} lists them alongside the values that are
-only used in testing. The test models (\textit{SMALL\_MODEL}, \textit{DEMO\_MODEL}
+there and are listed in Table~\ref{tab:vnv-constants}. Values only used in
+testing are listed in Table~\ref{tab:vnv-test-constants}. The test models (\textit{SMALL\_MODEL}, \textit{DEMO\_MODEL}
 and \textit{CAPACITY\_MODEL}) are defined in Table~\ref{tab:test-models}.
 
 \begin{table}[h]
 \centering
 \small
-\caption{Symbolic parameters used in the nonfunctional tests}
+\caption{Symbolic parameters from the SRS}
 \label{tab:vnv-constants}
 \begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Name} & \textbf{Value} & \textbf{Description} \\
 \midrule
-\multicolumn{3}{l}{\textit{From the SRS}} \\
 \textit{UI\_TASK\_TIME} & 2 min & Time a new user may take for each usability
   task. \\
 \textit{INSTALL\_CLICKS} & 10 & Maximum clicks to install on Windows or macOS. \\
@@ -1013,8 +1180,29 @@ and \textit{CAPACITY\_MODEL}) are defined in Table~\ref{tab:test-models}.
   for. \\
 \textit{MEMORY\_MARGIN} & 10\% & Share of each node's memory left free for
   runtime overhead. \\
+\textit{MIN\_NODES} & 2 & Minimum number of nodes a model is partitioned
+  across. \\
+\textit{HEALTH\_TTL} & 15 s & Age after which health data is stale. \\
+\textit{NODE\_TIMEOUT} & 10 s & Time without a response after which a
+  connection is treated as failed. \\
+\textit{RECOVERY\_LIMIT} & 3 & Maximum recovery attempts for one request. \\
+\textit{LEADER\_TIMEOUT} & 30 s & Time without a health query after which a
+  follower assumes the leader has failed. \\
+\textit{LATENCY\_TOL} & 50\% & Increase over baseline latency that is reported
+  to the Coordinator. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\begin{table}[h]
+\centering
+\small
+\caption{Symbolic parameters used only in testing}
+\label{tab:vnv-test-constants}
+\begin{tabularx}{\textwidth}{l>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Name} & \textbf{Value} & \textbf{Description} \\
 \midrule
-\multicolumn{3}{l}{\textit{Used only in testing}} \\
 \textit{TEST\_PROMPTS} & 20 & Number of fixed prompts used by default. \\
 \textit{GEN\_TOKENS} & 128 & Tokens generated per prompt. \\
 \textit{BENCH\_QUESTIONS} & 500 & MMLU questions in \hyperref[T-NFR-PERF-3]{T-NFR-PERF-3}. \\
