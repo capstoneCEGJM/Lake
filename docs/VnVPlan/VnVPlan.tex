@@ -66,11 +66,11 @@ in.}
 \section{Symbols, Abbreviations, and Acronyms}
 
 \renewcommand{\arraystretch}{1.2}
-\begin{tabular}{l l} 
+\begin{tabular}{l p{10cm}} 
   \toprule		
-  \textbf{symbol} & \textbf{description}\\
+  \textbf{Symbol/Acronym} & \textbf{Description}\\
   \midrule 
-  T & Test\\
+  SOLID\label{SOLID} & Acronym for specifying design principles. Stands for Single Responsibility, Open/Closed, Liskov Substitution, Interface Segregation, and Dependency Inversion. \\
   \bottomrule
 \end{tabular}\\
 
@@ -182,7 +182,7 @@ Additionally, tracking updates to plan and updating documentation to reflect wha
 \subsection{SRS Verification}
 \label{sec:SRSVer}
 
-In order to ensure the project meets what was originally set out in the SRS (Software Requirements Specification),
+In order to ensure that the SRS meets expectations, and that the project meets what was originally set out in the SRS,
 the following verification methods will be used:
 
 \begin{itemize}
@@ -207,21 +207,34 @@ the following verification methods will be used:
 \subsection{Design Verification}
 \label{sec:DesignVer}
 
-\wss{Plans for design verification}
+Design verification of Lake will begin after November 16, when the first design document will be complete. In order to verify the design of Lake, the following methods will be used.
 
-\wss{The review will include reviews by your classmates}
+\begin{itemize}
+  \item \textbf{Peer Review}: Similar to verification of the SRS that was detailed in \hyperref[sec:SRSVer]{3.2}, peer review will be used to verify the design documentation.
+  This will involve the traditional peer review process from another Capstone team, along with external review. External review will be used as a method to challenge the team's assumptions
+  and point out potential design flaws.
+  \item \textbf{Inspection of Module Guide and Module Interface Specification}: After the document has been completed, the team will perform a review of the design documentation.
+  This will be used to identify inconsistencies, gaps between design and requirements, and flag areas of concern. Any areas of concern should be noted as GitHub issues and resolved prior to further design work.
+  \item \textbf{Checklist-based Verification}: The team will combine results of the peer review along with an existing checklist to complete the design verification process. The checklist will focus on the following:
+    \begin{itemize}
+      \item Adherence to general software design principles and practices (e.g., \hyperref[SOLID]{SOLID})
+      \item Adherence to modular design principles (minimal effort to build additional features)
+      \item Consideration for design scaling and performance-oriented non-functional requirements (ability to scale and expand the design to accommodate additional requests, devices, and traffic).
+    \end{itemize}
+\end{itemize}
 
-\wss{Create a checklists?}
 
 \subsection{Verification and Validation Plan Verification}
 \label{sec:VnVVer}
 
-\wss{The verification and validation plan is an artifact that should also be
-verified.  Techniques for this include review and mutation testing.}
+In order to verify the quality of the team's verification and validation plan, the team will employ the following methods:
 
-\wss{The review will include reviews by your classmates}
-
-\wss{Create a checklists?}
+\begin{itemize}
+  \item \textbf{Internal Review}: Throughout the preparation of the document, the team will review individual document contributions and their connections to guarantee quality.
+  \item \textbf{Peer Review}: The team will use the peer review process to catch additional issues or inconsistencies. This will be used to complement the completed internal review.
+  \item \textbf{Ad-Hoc Team Meeting}: The team will schedule a one-time meeting after the delivery of the VnV plan to assess the feasibility as well as individual responsibilities and requirements.
+  This meeting will aim to assess the effectiveness and practicality of the current plan, and make changes if required.
+\end{itemize}
 
 \subsection{Implementation Verification}
 \label{sec:ImpVer}
