@@ -248,7 +248,7 @@ Component
   & Single device node is allocated 100\% of the model.
   & Fails the core purpose of Lake and overworks single device by avoiding parallelisation.
   & Improper boundaries on model partition algorithm.
-  & Boundaries to ensure each device is allocated $>$0\% of the model, and re-balancing checks made throughout a session to verify boundary is not violated.
+  & Boundaries to ensure the model is split across at least two nodes, each allocated $>$0\% of the model, and re-balancing checks made throughout a session to verify boundary is not violated.
   & SR1-1
   & H1-1 \\ \cline{2-7}
   & The model is insufficiently partitioned and cannot be split up amongst the
