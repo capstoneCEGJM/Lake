@@ -62,9 +62,28 @@ Date 2 & 1.1 & Notes\\
 
 \section{Symbols, Abbreviations and Acronyms}
 
-See SRS Documentation at \wss{give url}
+See the SRS at
+\url{https://github.com/capstoneCEGJM/Lake/blob/main/pdfs/SRS/SRS.pdf} for the
+full list. The abbreviations and acronyms used in this document are:
 
-\wss{Also add any additional symbols, abbreviations or acronyms}
+\begin{center}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{l p{11cm}}
+\toprule
+\textbf{Symbol} & \textbf{Description} \\
+\midrule
+API & Application programming interface \\
+GGML & The tensor library \progname{} uses to run model layers \\
+GGUF & The file format that stores a model's weights, tokeniser and metadata \\
+GPU & Graphics processing unit \\
+I/O & Input/output \\
+ID & Identifier \\
+MG & Module Guide \\
+MIS & Module Interface Specification \\
+SRS & Software Requirements Specification \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \newpage
 
@@ -77,16 +96,16 @@ See SRS Documentation at \wss{give url}
 \section{Introduction}
 
 The following document details the Module Interface Specifications for
-\wss{Fill in your project name and description}
+\progname{}, a system that runs one large language model across several
+devices on a local network. Each device holds a consecutive range of the
+model's layers, and the devices pass hidden states to one another to generate
+each token.
 
 Complementary documents include the System Requirement Specifications
 and Module Guide.  The full documentation and implementation can be
-found at \url{...}.  \wss{provide the url for your repo}
+found at \url{https://github.com/capstoneCEGJM/Lake}.
 
 \section{Notation}
-
-\wss{You should describe your notation.  You can use what is below as
-  a starting point.}
 
 The structure of the MIS for modules comes from \citet{HoffmanAndStrooper1995},
 with the addition that template modules have been adapted from
@@ -104,21 +123,41 @@ The following table summarizes the primitive data types used by \progname.
 \toprule 
 \textbf{Data Type} & \textbf{Notation} & \textbf{Description}\\ 
 \midrule
+Boolean & $\mathbb{B}$ & \textit{true} or \textit{false}\\
 character & char & a single symbol or digit\\
 integer & $\mathbb{Z}$ & a number without a fractional component in (-$\infty$, $\infty$) \\
-natural number & $\mathbb{N}$ & a number without a fractional component in [1, $\infty$) \\
+natural number & $\mathbb{N}$ & a number without a fractional component in [0, $\infty$) \\
 real & $\mathbb{R}$ & any number in (-$\infty$, $\infty$)\\
 \bottomrule
-\end{tabular} 
+\end{tabular}
 \end{center}
 
 \noindent
-The specification of \progname \ uses some derived data types: sequences, strings, and
-tuples. Sequences are lists filled with elements of the same data type. Strings
-are sequences of characters. Tuples contain a list of values, potentially of
-different types. In addition, \progname \ uses functions, which
-are defined by the data types of their inputs and outputs. Local functions are
-described by giving their type signature followed by their specification.
+The specification of \progname \ uses some derived data types:
+\begin{itemize}
+  \item \textbf{Strings} are sequences of characters, written string.
+  \item \textbf{Sequences} hold elements of one type in order, written
+    ``seq of $T$''. $\langle\rangle$ is the empty sequence and $|s|$ is the
+    length of $s$.
+  \item \textbf{Sets} hold elements of one type with no order or repeats,
+    written ``set of $T$''. $\{\}$ is the empty set.
+  \item \textbf{Tuples} hold named fields of possibly different types, written
+    $(f_1: T_1, \dots, f_n: T_n)$. Field $f$ of tuple $r$ is $r.f$.
+  \item \textbf{Maps} $A \to B$ are finite functions from keys of type $A$ to
+    values of type $B$. $\mathrm{dom}(f)$ is the set of keys of $f$,
+    $\{a \mapsto b\}$ is the map with one entry, and $f(a) := b$ changes or adds
+    the entry for $a$.
+  \item \textbf{Enumerated types} are written as the set of their values in
+    sans-serif type, such as $\{\mathsf{idle}, \mathsf{member}\}$.
+\end{itemize}
+
+\noindent
+Symbols taken from the SRS keep their meaning there. In particular,
+partitioning schemes, the allocation states $\mathsf{U}$, $\mathsf{A}$,
+$\mathsf{I}$, $\mathsf{G}$, $\mathsf{R}$ and $\mathsf{X}$, and the unit
+memories $m_\ell$ come from SRS S.9. Symbolic constants in italics, such as
+\textit{HEALTH\_INTERVAL}, have the values given in the SRS Symbolic Constants
+appendix. Times are in seconds and memory sizes are in bytes.
 
 \section{Module Decomposition}
 
@@ -131,21 +170,17 @@ The following table is taken directly from the Module Guide document for this pr
 \textbf{Level 1} & \textbf{Level 2}\\
 \midrule
 
-{Hardware-Hiding} & ~ \\
+{Hardware-Hiding} & GGML\\
 \midrule
 
-\multirow{7}{0.3\textwidth}{Behaviour-Hiding} & Input Parameters\\
-& Output Format\\
-& Output Verification\\
-& Temperature ODEs\\
-& Energy Equations\\ 
-& Control Module\\
-& Specification Parameters Module\\
+\multirow{4}{0.3\textwidth}{Behaviour-Hiding} & Coordinator\\
+& Core\\
+& Inference Engine\\
+& Lake Client\\
 \midrule
 
-\multirow{3}{0.3\textwidth}{Software Decision} & {Sequence Data Structure}\\
-& ODE Solver\\
-& Plotting\\
+\multirow{2}{0.3\textwidth}{Software Decision} & Partition\\
+& Tensor I/O\\
 \bottomrule
 
 \end{tabular}
@@ -155,6 +190,203 @@ The following table is taken directly from the Module Guide document for this pr
 
 \newpage
 ~\newpage
+
+\section{MIS of Coordinator} \label{mis:coordinator}
+
+\subsection{Module}
+
+Coordinator
+
+\subsection{Syntax}
+
+\subsubsection{Exported Types}
+
+\begin{itemize}
+  \item $\mathit{DeviceID}$ and $\mathit{Report}$, as in the Core module
+    (Section~\ref{mis:core}).
+  \item $\mathit{DevState} = \{\mathsf{discovered}, \mathsf{invited},
+    \mathsf{declined}, \mathsf{confirmed}, \mathsf{failed}\}$
+  \item $\mathit{NetState} = \{\mathsf{U}, \mathsf{A}, \mathsf{I}, \mathsf{G},
+    \mathsf{R}, \mathsf{X}\}$, the states of the allocation state machine in SRS
+    S.9.3.
+  \item $\mathit{Scheme} = \text{seq of } (\mathit{node}: \mathit{DeviceID},
+    \mathit{first}: \mathbb{N}, \mathit{last}: \mathbb{N})$: a split of a model
+    across nodes. Each entry gives a node and the first and last layers it
+    holds, in the order the layers run.
+  \item $\mathit{Request} = (\mathit{messages}: \text{seq of string},
+    \mathit{maxTokens}: \mathbb{N}, \mathit{temperature}: \mathbb{R})$: a chat
+    request from an application: the conversation so far,
+    the most tokens to generate, and how random the sampling is, where 0 always
+    picks the most likely token.
+  \item $\mathit{Status} = (q: \mathit{NetState},$
+    $\mathit{nodes}: \text{seq of } (\mathit{id}: \mathit{DeviceID},$
+    $\mathit{state}: \mathit{DevState}, \mathit{report}: \mathit{Report}),$
+    $P: \mathit{Scheme})$: a snapshot of a
+    Lake network: its state, each known device with its progress and latest
+    report, and the split in use.
+\end{itemize}
+
+\subsubsection{Exported Access Programs}
+
+\begin{center}
+\begin{tabular}{p{3.3cm} p{3.6cm} p{2.9cm} p{3.6cm}}
+\toprule
+\textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
+\midrule
+init & $\mathit{self}: \mathit{DeviceID}$ & -- & -- \\
+inviteDevices & $S$: set of $\mathit{DeviceID}$ & -- & UnknownDevice \\
+loadModel & $\mathit{file}$: string & -- & Unconfirmed, NoValidScheme \\
+monitorNetwork & -- & -- & NotInitialised \\
+serveRequest & $x: \mathit{Request}$ & seq of string & NotLoaded, RequestFailed \\
+unloadModel & -- & -- & NotInitialised \\
+getStatus & -- & $\mathit{Status}$ & NotInitialised \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+{\raggedright \noindent inviteDevices, loadModel, unloadModel and getStatus
+are called by the Lake Client. serveRequest is called once for each request
+that an application sends to the OpenAI-compatible API.\par}
+
+\subsection{Semantics}
+
+\subsubsection{State Variables}
+
+\begin{itemize}
+  \item $\mathit{initialised}: \mathbb{B}$
+  \item $\mathit{self}: \mathit{DeviceID}$, the leader node
+  \item $\mathit{dev}: \mathit{DeviceID} \to \mathit{DevState}$
+  \item $\mathit{rep}: \mathit{DeviceID} \to \mathit{Report}$, the latest
+    report from each node
+  \item $\mathit{lastSeen}: \mathit{DeviceID} \to \mathbb{R}$, the time on the
+    leader's clock at which the latest report from each node arrived
+  \item $\mathit{file}$: string, the GGUF file of the loaded model
+  \item $P: \mathit{Scheme}$, the scheme the model is loaded on
+  \item $P': \mathit{Scheme}$, the scheme being loaded
+  \item $q: \mathit{NetState}$
+  \item $\mathit{active}: \mathbb{N}$, the number of requests in progress
+\end{itemize}
+
+\subsubsection{Environment Variables}
+
+\begin{itemize}
+  \item $t: \mathbb{R}$, the current time in seconds.
+  \item The local network, through which the Coordinator reaches the Core
+    module on every node.
+\end{itemize}
+
+\subsubsection{Exceptions}
+
+\begin{itemize}
+  \item NotInitialised: any access program other than init is called before
+    init. Every access program other than init can raise it.
+  \item UnknownDevice: inviteDevices names a device that has not been discovered.
+  \item Unconfirmed: loadModel is called while an invited device has not answered.
+  \item NoValidScheme: no valid partitioning scheme exists for the Lake network.
+  \item NotLoaded: serveRequest is called when no model is loaded.
+  \item RequestFailed: a request still fails after \textit{RECOVERY\_LIMIT}
+    retries.
+\end{itemize}
+
+\newpage
+
+\section{MIS of Core} \label{mis:core}
+
+\subsection{Module}
+
+Core
+
+\subsection{Syntax}
+
+\subsubsection{Exported Types}
+
+\begin{itemize}
+  \item $\mathit{DeviceID}$: string. An identifier that is unique to each device
+    on the local network.
+  \item $\mathit{Report} = (\mathit{mem}: \mathbb{N}, \mathit{rate}:
+    \mathbb{R})$: free GPU-accessible memory in bytes and token throughput in
+    tokens per second.
+  \item $\mathit{MemberState} = \{\mathsf{idle}, \mathsf{invited},
+    \mathsf{member}, \mathsf{loaded}\}$: whether the node has no Lake network,
+    has an invitation waiting for its owner's answer, has joined a Lake network,
+    or holds a partition.
+  \item $\mathit{CoreStatus} = (s: \mathit{MemberState}, \mathit{leader}:
+    \mathit{DeviceID}, a: \mathbb{N}, b: \mathbb{N})$: the node's membership,
+    its leader, and the first and last partition units it holds.
+\end{itemize}
+
+\subsubsection{Exported Access Programs}
+
+\begin{center}
+\begin{tabular}{p{3.3cm} p{4.3cm} p{2.0cm} p{3.8cm}}
+\toprule
+\textbf{Name} & \textbf{In} & \textbf{Out} & \textbf{Exceptions} \\
+\midrule
+init & $\mathit{self}: \mathit{DeviceID}$ & -- & -- \\
+answerScan & $\mathit{from}: \mathit{DeviceID}$ & $\mathit{DeviceID}$ & NotInitialised \\
+receiveInvite & $\mathit{from}: \mathit{DeviceID}$ & -- & Busy \\
+answerInvite & $\mathit{ok}: \mathbb{B}$ & -- & NoInvitation \\
+loadPartition & $\mathit{file}$: string, $a: \mathbb{N}$, $b: \mathbb{N}$,
+  $\mathit{prev}: \mathit{DeviceID}$, $\mathit{next}: \mathit{DeviceID}$
+  & -- & NotLeader, LoadFailed \\
+releasePartition & -- & -- & NotLeader \\
+reportHealth & -- & $\mathit{Report}$ & NotLeader \\
+checkLeader & -- & -- & NotInitialised \\
+getStatus & -- & $\mathit{CoreStatus}$ & NotInitialised \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent answerScan, receiveInvite, loadPartition, releasePartition and
+reportHealth are called by the leader's Coordinator. answerScan answers a
+discovery scan from device $\mathit{from}$, and loadPartition returns once the partition is
+loaded. answerInvite is called by the Lake Client with the device owner's
+choice. checkLeader is called periodically to detect a leader that has
+not queried the node for \textit{LEADER\_TIMEOUT}. The leader node
+runs Core like every other node.
+
+\subsection{Semantics}
+
+\subsubsection{State Variables}
+
+\begin{itemize}
+  \item $\mathit{initialised}: \mathbb{B}$
+  \item $\mathit{self}: \mathit{DeviceID}$, this node
+  \item $s: \mathit{MemberState}$
+  \item $\mathit{leader}: \mathit{DeviceID}$, the leader that invited this node
+  \item $\mathit{file}$: string, the GGUF file the node reads its partition
+    from
+  \item $a, b: \mathbb{N}$, the first and last partition units the node holds
+  \item $\mathit{prev}, \mathit{next}: \mathit{DeviceID}$, the nodes that send
+    to and receive from this node
+  \item $\mathit{lastQuery}: \mathbb{R}$, the time of the leader's last query
+\end{itemize}
+
+\subsubsection{Environment Variables}
+
+\begin{itemize}
+  \item $t: \mathbb{R}$, the current time in seconds.
+  \item The local network, through which the Core module answers the leader's
+    Coordinator.
+  \item The device's GPU-accessible memory, whose free size is reported to the
+    leader.
+\end{itemize}
+
+\subsubsection{Exceptions}
+
+\begin{itemize}
+  \item NotInitialised: any access program other than init is called before
+    init. Every access program other than init can raise it.
+  \item Busy: receiveInvite is called while the node is a member of a Lake network led
+    by another device.
+  \item NoInvitation: answerInvite is called when no invitation is waiting.
+  \item NotLeader: loadPartition, releasePartition or reportHealth is called by from a device other than the
+    node's leader, or before the node has joined.
+  \item LoadFailed: the assigned partition cannot be loaded into the node's
+    GPU-accessible memory.
+\end{itemize}
+
+\newpage
 
 \section{MIS of \wss{Module Name}} \label{Module} \wss{Use labels for
   cross-referencing}
@@ -242,9 +474,23 @@ The following table is taken directly from the Module Guide document for this pr
 
 \subsection{AI Tools Used}
 
+\begin{itemize}
+    \item Anthropic Claude Opus 5.5, used through Claude Code.
+\end{itemize}
+
 \wss{Give the name of the AI tool(s) used and the version.}
 
 \subsection{How and Where Used}
+
+\begin{itemize}
+    \item \textbf{MIS of Coordinator and MIS of Core}: Claude drafted the
+    exported types, access programs, state variables, environment variables
+    and exceptions from the SRS, the team's design decisions and the module
+    split we chose. We reviewed the draft and directed changes to the names,
+    types and access programs. Claude also drafted the Introduction, the
+    Notation section, the Module Decomposition table and the Symbols,
+    Abbreviations and Acronyms table.
+\end{itemize}
 
 \wss{Explain what the tool(s) were used for.  Examples include: brainstorming,
 explaining a technical concept, reviewing the document, generating or modifying
@@ -257,6 +503,11 @@ inconsistencies.}
 uses that materially contributed to your work}
 
 \subsection{Verification of AI-Generated Content}
+
+The access programs of the Coordinator and Core were checked against each other
+so that every call the Coordinator makes on Core exists in Core's
+specification, and every type used is defined. The symbolic constants and
+state names were checked against the SRS.
 
 \wss{\begin{itemize}
     \item Describe how the team checked AI-generated or AI-assisted material

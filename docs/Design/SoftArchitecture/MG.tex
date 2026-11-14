@@ -29,7 +29,11 @@
 
 \newcounter{mnum}
 \newcommand{\mthemnum}{M\themnum}
-\newcommand{\mref}[1]{M\ref{#1}}
+% Module numbers. \mitem{key} numbers a module in the hierarchy table and
+% links the number to the module's entry, labelled sec:key, in the Module
+% Decomposition section. \mref{key} prints the number with the same link.
+\newcommand{\mref}[1]{\hyperref[sec:#1]{M\ref*{#1}}}
+\newcommand{\mitem}[1]{\refstepcounter{mnum}\label{#1}\mref{#1}}
 
 \begin{document}
 
@@ -191,10 +195,14 @@ below, which are leaves in the hierarchy tree, are the modules that will
 actually be implemented.
 
 \begin{description}
-\item [\refstepcounter{mnum} \mthemnum \label{mHH}:] Hardware-Hiding Module
-\item ...
+\item [\mitem{mGGML}:] GGML Module
+\item [\mitem{mCoordinator}:] Coordinator Module
+\item [\mitem{mCore}:] Core Module
+\item [\mitem{mIE}:] Inference Engine Module
+\item [\mitem{mLC}:] Lake Client Module
+\item [\mitem{mPartition}:] Partition Module
+\item [\mitem{mTIO}:] Tensor I/O Module
 \end{description}
-
 
 \begin{table}[h!]
 \centering
@@ -203,22 +211,17 @@ actually be implemented.
 \textbf{Level 1} & \textbf{Level 2}\\
 \midrule
 
-{Hardware-Hiding Module} & ~ \\
+{Hardware-Hiding Module} & \mref{mGGML}: GGML Module\\
 \midrule
 
-\multirow{7}{0.3\textwidth}{Behaviour-Hiding Module} & ?\\
-& ?\\
-& ?\\
-& ?\\
-& ?\\
-& ?\\
-& ?\\ 
-& ?\\
+\multirow{4}{0.3\textwidth}{Behaviour-Hiding Module} & \mref{mCoordinator}: Coordinator Module\\
+& \mref{mCore}: Core Module\\
+& \mref{mIE}: Inference Engine Module\\
+& \mref{mLC}: Lake Client Module\\
 \midrule
 
-\multirow{3}{0.3\textwidth}{Software Decision Module} & {?}\\
-& ?\\
-& ?\\
+\multirow{2}{0.3\textwidth}{Software Decision Module} & \mref{mPartition}: Partition Module\\
+& \mref{mTIO}: Tensor I/O Module\\
 \bottomrule
 
 \end{tabular}
@@ -232,12 +235,6 @@ The design of the system is intended to satisfy the requirements developed in
 the SRS. In this stage, the system is decomposed into modules. The connection
 between requirements and modules is listed in Table~\ref{TblRT}.
 
-\wss{The intention of this section is to document decisions that are made
-  ``between'' the requirements and the design.  To satisfy some requirements,
-  design decisions need to be made.  Rather than make these decisions implicit,
-  they are explicitly recorded here.  For instance, if a program has security
-  requirements, a specific design decision may be made to satisfy those
-  requirements with a password.}
 
 \section{Module Decomposition} \label{SecMD}
 
@@ -276,6 +273,20 @@ to be implemented.
   hardware-hiding module and the software decision module. The programs in this
   module will need to change if there are changes in the SRS.
 \item[Implemented By:] --
+\end{description}
+
+\subsubsection{Coordinator Module (\mref{mCoordinator})} \label{sec:mCoordinator}
+
+\begin{description}
+\item[Secrets:] How the Lake network is formed, monitored and rebuilt, and how
+  inference requests enter and leave it.
+\end{description}
+
+\subsubsection{Core Module (\mref{mCore})} \label{sec:mCore}
+
+\begin{description}
+\item[Secrets:] How a node joins a Lake network, holds its partition and
+  reports its health.
 \end{description}
 
 \subsubsection{Input Format Module (\mref{mInput})}
